@@ -1,0 +1,95 @@
+package com.pedigreeimport.backend;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.generationcp.middleware.exceptions.MiddlewareQueryException;
+import org.generationcp.middleware.manager.DatabaseConnectionParameters;
+import org.generationcp.middleware.manager.ManagerFactory;
+import org.generationcp.middleware.manager.api.GermplasmDataManager;
+import org.generationcp.middleware.pojos.Germplasm;
+import org.generationcp.middleware.pojos.Name;
+
+/**
+ *
+ * @author NCarumba
+ */
+public class Tokenize {
+
+	List<String> listGID = new ArrayList<String>();
+
+	/**
+	 *
+	 * @param line 
+	 * @return  String tokens[] resulting from the split line
+	 */
+	public String[] tokenize(String line) {
+		String tokens[] = line.split("-");
+		return tokens;
+	}
+
+	/**
+	 *
+	 * @param tokens 
+	 * @throws MiddlewareQueryException 
+	 * @throws IOException 
+	 */
+	public String stringTokens(String tokens[]) throws MiddlewareQueryException, IOException {
+		//FileWriter writer = new FileWriter("c:\\createdGID.csv");
+		String s = "", st = "",f1="";
+		s = "";
+		for (int i = 0; i < tokens.length;) {
+			if (i == 0) {
+				s = s + tokens[i];
+				f1=s;	//f1 generation
+				//createGID(s);
+			} else {
+				s = s + "-" + tokens[i];
+				//int gid=createGID(s);
+				//writer.append(""+gid+", \n");
+			}
+			i++;
+
+			//Germplasm germplasm = manager.getGermplasmByGID(new Integer(50533));
+			//System.out.println(germplasm);
+			if(i==(tokens.length)){
+				st = st + s;
+			}else{
+				st = st + s + "#";
+			}
+		}
+		//writer.flush();
+		//writer.close();
+		//System.out.println(st);
+		return st;
+
+	}
+	public void tokens(String tokens[]) throws MiddlewareQueryException, IOException {
+		FileWriter writer = new FileWriter("c:\\createdGID.csv");
+		String s = "", st = "",f1="";
+		s = "";
+		for (int i = 0; i < tokens.length;) {
+			if (i == 0) {
+				s = s + tokens[i];
+				f1=s;	//f1 generation
+				//createGID(s);
+			} else {
+				s = s + "-" + tokens[i];
+				//int gid=createGID(s);
+				//writer.append(""+gid+", \n");
+			}
+			i++;
+
+			//Germplasm germplasm = manager.getGermplasmByGID(new Integer(50533));
+			//System.out.println(germplasm);
+			st = st + s + "\n";
+		}
+		writer.flush();
+		writer.close();
+		//System.out.println(st);
+
+	}
+
+}
