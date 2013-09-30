@@ -49,12 +49,13 @@ public class Model {
 	@Produces("application/json")
 	public Response parsePedigree() throws JSONException,
 			FileNotFoundException, IOException {
-		String csv = "E:/xampp/htdocs/GMGR/protected/modules/output.csv";
+System.out.println("HREEEEE!!!");
+		String csv = "/var/www/GMGR/protected/modules/output.csv";
 		try {
 			FileWriter fw = new FileWriter(csv);
 			BufferedWriter pw = new BufferedWriter(fw);
-			Object json_obj = JSONValue.parse(new FileReader(
-					"E:/xampp/htdocs/GMGR/protected/modules/docinfo.json"));
+			FileReader docinfo = new FileReader("/var/www/GMGR/protected/modules/docinfo.json");
+			Object json_obj = JSONValue.parse(docinfo);
 			JSONObject json_array = (JSONObject) json_obj;
 			JSONArray gu_obj = (JSONArray) json_array.get("list");
 			int k = 0;
@@ -117,6 +118,8 @@ public class Model {
 			pw.close();
 			// Close the File Writer
 			fw.close();
+			docinfo.close();
+			
 		} catch (Exception e) {
 		}
 		new FileProperties().setFilePermission(csv);
@@ -129,15 +132,14 @@ public class Model {
 	@Produces("application/json")
 	public Response standardizePedigree() throws JSONException,
 			FileNotFoundException, IOException {
-
-		String csv = "E:/xampp/htdocs/GMGR/protected/modules/corrected.csv";
+		System.out.println("corrected.csv performed!!!");
+		String csv = "/var/www/GMGR/protected/modules/corrected.csv";
 
 		try {
 			FileWriter fw = new FileWriter(csv);
 			BufferedWriter pw = new BufferedWriter(fw);
-
-			Object json_obj1 = JSONValue.parse(new FileReader(
-					"E:/xampp/htdocs/GMGR/protected/modules/docinfo.json"));
+			FileReader docinfo = new FileReader("/var/www/GMGR/protected/modules/docinfo.json");
+			Object json_obj1 = JSONValue.parse(docinfo);
 			JSONObject json_array1 = (JSONObject) json_obj1;
 			JSONArray obj_terms = (JSONArray) json_array1.get("list");
 			int k = 0;
@@ -200,6 +202,8 @@ public class Model {
 			pw.close();
 			// Close the File Writer
 			fw.close();
+			docinfo.close();
+		
 		} catch (Exception e) {
 		}
 		new FileProperties().setFilePermission(csv);
@@ -212,17 +216,17 @@ public class Model {
 	@Produces("application/json")
 	public Response checkPedigree() throws JSONException,
 			FileNotFoundException, IOException, MiddlewareQueryException {
-
-		String csv = "E:/xampp/htdocs/GMGR/protected/modules/newString.csv";
+		System.out.println("newString.csv performed!!!");
+		String csv = "/var/www/GMGR/protected/modules/newString.csv";
 		FileWriter fw = new FileWriter(csv);
 		BufferedWriter pw = new BufferedWriter(fw);
-		Object json_obj = JSONValue.parse(new FileReader(
-				"E:/xampp/htdocs/GMGR/protected/modules/docinfo.json"));
+		FileReader docinfo = new FileReader("/var/www/GMGR/protected/modules/docinfo.json");
+		Object json_obj = JSONValue.parse(docinfo);
 
 		JSONObject json_array = (JSONObject) json_obj;
 		String newString = (String) json_array.get("new");
-		// System.out.println(newString);
-
+		 System.out.println(newString);
+		 
 		// System.out.println(gu_obj.get(0));
 		String error, gid;
 		pw.write("N/A,");
@@ -248,6 +252,8 @@ public class Model {
 		pw.close();
 		// Close the File Writer
 		fw.close();
+		docinfo.close();
+		
 		new FileProperties().setFilePermission(csv);
 		return Response.status(200).entity("OK!").build();
 	}
@@ -260,7 +266,7 @@ public class Model {
 			MiddlewareQueryException, ParseException {
 		
 		new AssignGID().createGID();
-		print_checkedBox();
+	new AssignGID().print_checkedBox();
 		
 		return Response.status(200).entity("OK!").build();
 	}
@@ -273,7 +279,6 @@ public class Model {
 			MiddlewareQueryException, ParseException {
 		new AssignGID().chooseGID();
 		return Response.status(200).entity("OK!").build();
-		
 	}
 
 	@Path("/fetchLocation")
@@ -287,7 +292,7 @@ public class Model {
 		GermplasmDataManager manager = factory.getGermplasmDataManager();
 		
 		Writer out = new BufferedWriter(new OutputStreamWriter(
-			    new FileOutputStream("E:/xampp/htdocs/GMGR/protected/modules/location.csv"), "UTF-8"));
+			    new FileOutputStream("/var/www/GMGR/protected/modules/location.csv"), "UTF-8"));
 		long count=manager.countAllLocations();
 		List<Location> location=manager.getAllLocations(0,(int) count);
 		for(int i=0; i< location.size(); i++){
@@ -300,37 +305,4 @@ public class Model {
 		
 		return Response.status(200).entity("OK!").build();
 	}
-	
-	public void print_checkedBox() throws IOException, ParseException{
-		String csv = "E:/xampp/htdocs/GMGR/protected/modules/checked.csv";
-		FileWriter fw = new FileWriter(csv,true);
-		FileReader json= new FileReader(
-		"E:/xampp/htdocs/GMGR/protected/modules/checked.json");
-		Object json_obj = JSONValue.parse(json);
-		JSONObject json_array = (JSONObject) json_obj;
-		JSONArray gu_obj = (JSONArray) json_array.get("checked");
-		for (int i = 0; i < gu_obj.size(); i++) {
-			System.out.println(""+gu_obj.get(i)+",");
-			fw.append(""+gu_obj.get(i)+",");
-		}
-		new FileProperties().setFilePermission(csv);
-		fw.close();
-		json.close();
-	
-		
-	}
-	@Path("/updateMethod")
-	@GET
-	@Consumes()
-	@Produces("application/json")
-	public Response changeMethod() throws JSONException, FileNotFoundException,
-			IOException, MiddlewareQueryException, ParseException {
-		ManagerFactory factory = new Config().configDB();
-		GermplasmDataManager manager = factory.getGermplasmDataManager();
-		new AssignGID().updateMethod(manager);
-		factory.close();
-		
-		return Response.status(200).entity("OK!").build();
-	}
-	
-	}
+}
