@@ -179,7 +179,7 @@ public class test {
 			}
 			
 			//print to file
-			printToFile(pedigree, parent,id, germplasm.get(0),manager);
+			printSuccess(pedigree, parent,id, germplasm.get(0),manager);
 			
 			if(pedigreeList.size()>1){
 				
