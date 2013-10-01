@@ -211,23 +211,38 @@ public class test {
 	}
 	
 	public static void single_Hit(GermplasmDataManager manager,String id, String parent, int gpid1, int gpid2, ArrayList<String> pedigreeList) throws MiddlewareQueryException, IOException{
+		Boolean error=false;
+		
 		for(int i=0; i<pedigreeList.size(); i++){
 			String pedigree=pedigreeList.get(i);
+			System.out.print(">> "+ pedigree + "\t");
+			Germplasm germplasm= new Germplasm();
+			if(error){	//if the precedent pedigree does not exist
+				
+				List<Germplasm> germplasmList = new ArrayList<Germplasm>();
+				
+				int count_LOCAL = countGermplasmByName(manager,pedigree, Database.LOCAL);
+				int count_CENTRAL= countGermplasmByName(manager,pedigree,Database.CENTRAL);
+				germplasmList=getGermplasmList( manager,pedigree, count_LOCAL, count_CENTRAL); //gets lists of germplasm with that name
+				germplasm= getGermplasmByGpid(manager, gpid1, germplasmList);	// get the germplasm of the same gpid1, for derivative line, or gid equals to the gpid1
+			}else{
+				germplasm=manager.getGermplasmByGID(gpid2);
+			}
 			
-			Germplasm germplasm=manager.getGermplasmByGID(gpid1);
-			
-			if(germplasm.getGpid1()==null){ // this is an ERROR trapping, the gid should exist
-				//search sa file
-				//if does not exist, create GID
+			if(germplasm==null){ // this is an ERROR, the gid should exist
+				error=true;
+				printError(pedigree, parent, id); //prints ERROR to file
+				
 			}else{
 				gpid2=germplasm.getGpid2();
 				gpid1=germplasm.getGpid1();
+				error=false; //set the flag to false
+				
+				printSuccess(pedigree, parent ,id, germplasm,manager);	//print to file
 			}
 			
-			//print to file
-			printToFile(pedigree, parent ,id, germplasm,manager);
 			
-			
+
 		}
 	}
 	
@@ -235,11 +250,9 @@ public class test {
 		
 	}	
 	
-	public static Germplasm getGermplasmByGpid(GermplasmDataManager manager, int gpid1,int gpid2, List<Germplasm> germplasmList){
+	public static Germplasm getGermplasmByGpid(GermplasmDataManager manager, int gpid1, List<Germplasm> germplasmList){
 		for(int i=0; i< germplasmList.size();i++){
-			if(germplasmList.get(i).getGpid1()==gpid1 || germplasmList.get(i).getGid()==gpid1 ||
-					germplasmList.get(i).getGid()==gpid2
-			){
+			if(germplasmList.get(i).getGpid1()==gpid1 || germplasmList.get(i).getGid()==gpid1 ){
 				return germplasmList.get(i);
 			}
 		}
@@ -259,7 +272,7 @@ public class test {
 		return germplasm;
 	}
 	
-	public List<Germplasm> getGermplasmList(GermplasmDataManager manager,
+	public static List<Germplasm> getGermplasmList(GermplasmDataManager manager,
 			String pedigree, int count_LOCAL, int count_CENTRAL) throws MiddlewareQueryException,
 			IOException {
 
@@ -314,7 +327,7 @@ public class test {
 		return Integer.valueOf((String) jsonObject.get("locationID"));
 	}
 	
-	public static void printToFile(String pedigree, String parent, String id, Germplasm germplasm, GermplasmDataManager manager) throws IOException, MiddlewareQueryException{
+	public static void printSuccess(String pedigree, String parent, String id, Germplasm germplasm, GermplasmDataManager manager) throws IOException, MiddlewareQueryException{
 		
 		String csv = "E:/xampp/htdocs/GMGR/protected/modules/createdGID.csv";
 
@@ -323,7 +336,7 @@ public class test {
 		pw.write(parent + ","); // parent
 		pw.write(pedigree + ","); // pedigree
 		
-		System.out.println("methodID: " + germplasm.getMethodId());
+		System.out.println("gid: " + germplasm.getGid());
 
 		Location location = manager.getLocationByID(germplasm.getLocationId());
 		Method method = manager.getMethodByID(germplasm.getMethodId());
@@ -333,6 +346,27 @@ public class test {
 		pw.write(germplasm.getLocationId() + "," + location.getLname() + ","); // location
 		pw.write(germplasm.getGpid1() + ","); // gpid1
 		pw.write(germplasm.getGpid2() + ",\n"); // gpid2
+		
+		pw.close();
+		new FileProperties().setFilePermission(csv);
+	}
+	
+public static void printError(String pedigree, String parent, String id) throws IOException, MiddlewareQueryException{
+		
+		String csv = "E:/xampp/htdocs/GMGR/protected/modules/createdGID.csv";
+
+		Writer pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csv, true), "UTF-8"));
+		pw.write(id + ",");
+		pw.write(parent + ","); // parent
+		pw.write(pedigree + ","); // pedigree
+		
+		System.out.println("ERROR" );
+
+		pw.write("ERROR" + ","); // gid
+		pw.write("N/A" + "," + "N/A" + ","); // method
+		pw.write("N/A" + "," + "N/A" + ","); // location
+		pw.write("N/A" + ","); // gpid1
+		pw.write("N/A" + ",\n"); // gpid2
 		
 		pw.close();
 		new FileProperties().setFilePermission(csv);
