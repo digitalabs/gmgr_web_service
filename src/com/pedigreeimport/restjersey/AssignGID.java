@@ -814,7 +814,12 @@ public class AssignGID {
 			ArrayList<Integer> list= new ArrayList<Integer>();
 			for (int i = x; i <pedigreeList.size(); i++) {
 				System.out.println("**["+i+"]: "+pedigreeList.get(i));
-				int gid=createGID(manager, pedigreeList.get(i), gpid1, gpid2, getLocation_json());
+				
+				List<Name> name=manager.getNamesByGID(gpid1,0 , GermplasmNameType.DERIVATIVE_NAME);
+				List<Name> name1=manager.getNamesByGID(gpid2,0 , GermplasmNameType.DERIVATIVE_NAME);
+				int methodID=selectMethodType(manager,gpid1,gpid2,name.get(0).getNval(),name1.get(0).getNval());
+				
+				int gid=createGID(manager, pedigreeList.get(i), gpid1, gpid2, getLocation_json(), methodID);
 				list.add(gid);
 
 				gpid2=gid;
@@ -894,7 +899,10 @@ public class AssignGID {
 						assignGID_fromRoot(pw, manager, pedigreeList, locationID, id, pedigree);
 						break;
 					}else{
-						int gid=createGID(manager, pedigreeList.get(i), gpid2, gpid2, locationID);
+						List<Name> name=manager.getNamesByGID(gpid1,0 , GermplasmNameType.DERIVATIVE_NAME);
+						List<Name> name1=manager.getNamesByGID(gpid2,0 , GermplasmNameType.DERIVATIVE_NAME);
+						int methodID=selectMethodType(manager,gpid1,gpid2,name.get(0).getNval(),name1.get(0).getNval());
+						int gid=createGID(manager, pedigreeList.get(i), gpid2, gpid2, locationID, methodID);
 						Germplasm germplasm = manager.getGermplasmByGID(gid);
 
 						printToFile(manager, pw, germplasm);
@@ -1002,13 +1010,21 @@ public class AssignGID {
 
 		for (int i = 0; i < pedigreeList.size(); i++) {
 
-			gid = (int) createGID(manager, pedigreeList.get(i), gpid1, gpid2,
-					locationID);
+			
 
 			if (i == 0) {
+				
+				gid = (int) createGID(manager, pedigreeList.get(i), gpid1, gpid2,
+						locationID,33);
 				gpid2 = gid;
 				gpid1 = gid;
 			} else {
+				List<Name> name=manager.getNamesByGID(gpid1,0 , GermplasmNameType.DERIVATIVE_NAME);
+				List<Name> name1=manager.getNamesByGID(gpid2,0 , GermplasmNameType.DERIVATIVE_NAME);
+				int methodID=selectMethodType(manager,gpid1,gpid2,name.get(0).getNval(),name1.get(0).getNval());
+				
+				gid = (int) createGID(manager, pedigreeList.get(i), gpid1, gpid2,
+						locationID, methodID);
 				gpid2 = gid;
 			}
 			pedigreeList_GID.add(gid);
@@ -1117,7 +1133,7 @@ public class AssignGID {
 				// create GID for the pedigree with gpid1='gpid1'
 				System.out.println("create GID for " + pedigreeList.get(i));
 				int gid = (int) createGID(manager, pedigreeList.get(i), gpid1,
-						gpid2, locationID);
+						gpid2, locationID, 33);
 				gpid2 = gid;
 				Germplasm germplasm1 = manager.getGermplasmByGID(gid);
 				System.out.print("\t gpid1: " + germplasm1.getGpid1());
