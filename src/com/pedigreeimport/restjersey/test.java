@@ -197,10 +197,17 @@ public class test {
 		}else if(count>1){
 			//multiple_hit
 			System.out.println("Multiple Hit");
-			//print to file "CHOOSE GID"
+			
+			//print to file "CHOOSE GID" for all the pedigree line
+			for(int i=0; i<pedigreeList.size(); i++){
+				
+				pedigree=pedigreeList.get(i);
+				System.out.print(">> "+ pedigree + "\t");
+				printChooseGID(pedigree, parent, id);
+			}
 			
 		}else{// count==0
-			
+			System.out.println("No hit in local and central");
 			
 			//search_file
 			//print N/A
@@ -240,15 +247,8 @@ public class test {
 				
 				printSuccess(pedigree, parent ,id, germplasm,manager);	//print to file
 			}
-			
-			
-
 		}
 	}
-	
-	public void multiple_Hit(){
-		
-	}	
 	
 	public static Germplasm getGermplasmByGpid(GermplasmDataManager manager, int gpid1, List<Germplasm> germplasmList){
 		for(int i=0; i< germplasmList.size();i++){
@@ -371,6 +371,27 @@ public static void printError(String pedigree, String parent, String id) throws 
 		pw.close();
 		new FileProperties().setFilePermission(csv);
 	}
+
+public static void printChooseGID(String pedigree, String parent, String id) throws IOException, MiddlewareQueryException{
+	
+	String csv = "E:/xampp/htdocs/GMGR/protected/modules/createdGID.csv";
+
+	Writer pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csv, true), "UTF-8"));
+	pw.write(id + ",");
+	pw.write(parent + ","); // parent
+	pw.write(pedigree + ","); // pedigree
+	
+	System.out.println("CHOOSE GID" );
+
+	pw.write("CHOOSE GID" + ","); // gid
+	pw.write("N/A" + "," + "N/A" + ","); // method
+	pw.write("N/A" + "," + "N/A" + ","); // location
+	pw.write("N/A" + ","); // gpid1
+	pw.write("N/A" + ",\n"); // gpid2
+	
+	pw.close();
+	new FileProperties().setFilePermission(csv);
+}
 	
 	public int addGID(GermplasmDataManager manager, String pedigree, int gpid1,
 			int gpid2, int location) throws MiddlewareQueryException {
