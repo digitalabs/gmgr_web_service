@@ -16,6 +16,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.generationcp.middleware.exceptions.MiddlewareQueryException;
 import org.generationcp.middleware.manager.Database;
+import org.generationcp.middleware.manager.GermplasmNameType;
 import org.generationcp.middleware.manager.GetGermplasmByNameModes;
 import org.generationcp.middleware.manager.ManagerFactory;
 import org.generationcp.middleware.manager.Operation;
@@ -427,9 +428,12 @@ public class AssignGID {
 		}
 		if (has_GID(parent2ID, parent2) && flag) {
 			if(is_crossExisting(getGID_fromFile(femaleParent, fid), getGID_fromFile(maleParent, mid), getLocation_json(), manager).getGid()==null){
+				
+				int methodID=selectMethodType(manager,getGID_fromFile(femaleParent, fid),getGID_fromFile(maleParent, mid),femaleParent,maleParent);
+				
 				int gid = (int) createGID(manager, cross,
 						getGID_fromFile(femaleParent, fid),
-						getGID_fromFile(maleParent, mid), getLocation_json());
+						getGID_fromFile(maleParent, mid), getLocation_json(), methodID);
 
 				Germplasm germplasm1 = manager.getGermplasmByGID(gid);
 				updateFile_createdGID(germplasm1, fid + "/" + mid, cross, manager);
@@ -502,9 +506,12 @@ public class AssignGID {
 		ArrayList<Integer> pedigreeList_GID = new ArrayList<Integer>();
 
 		for (int i = 0; i < pedigreeList.size(); i++) {
-
+			
+			List<Name> name=manager.getNamesByGID(gpid1,0 , GermplasmNameType.DERIVATIVE_NAME);
+			List<Name> name1=manager.getNamesByGID(gpid2,0 , GermplasmNameType.DERIVATIVE_NAME);
+			int methodID=selectMethodType(manager,gpid1,gpid2,name.get(0).getNval(),name1.get(0).getNval());
 			gid = (int) createGID(manager, pedigreeList.get(i), gpid1, gpid2,
-					locationID);
+					locationID, methodID);
 
 			if (i == 0) {
 				gpid2 = gid;
@@ -642,8 +649,10 @@ public class AssignGID {
 							Germplasm g=is_crossExisting(fgid, mgid, getLocation_json(), manager);
 							if(g.getGid()==null){
 								int gid = 0;
+								
+								int methodID=selectMethodType(manager,fgid,mgid,column[5],column[9]);
 								gid = (int) createGID(manager, column[1], fgid,
-										mgid, getLocation_json());
+										mgid, getLocation_json(), methodID);
 								Germplasm germplasm1 = manager
 								.getGermplasmByGID(gid);
 								printToFile(manager, pw, germplasm1);
@@ -1273,11 +1282,11 @@ public class AssignGID {
 	}
 
 	public int createGID(GermplasmDataManager manager, String term, int gpid1,
-			int gpid2, int location) throws MiddlewareQueryException {
+			int gpid2, int location, int methodID) throws MiddlewareQueryException {
 
 		int gid;
 		Germplasm germplasm1 = new Germplasm();
-		germplasm1.setMethodId(33);
+		germplasm1.setMethodId(methodID);
 		germplasm1.setGnpgs(0);
 		germplasm1.setGpid1(gpid1);
 		// int setGpid2=
@@ -1316,6 +1325,7 @@ public class AssignGID {
 		String methodDesc="";
 		
 		Name name= manager.getNameByGIDAndNval(femaleGID, female_nval,GetGermplasmByNameModes.NORMAL);
+		
 		int ntype=name.getTypeId();
 		if(ntype==4 || ntype==6 || ntype==13 || ntype==20 || ntype==23){
 			female_fixed=true;
