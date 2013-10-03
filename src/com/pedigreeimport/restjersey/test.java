@@ -78,9 +78,68 @@ public class test {
 		String parent1ID = (String) details.get(0);
 		// parent1ID, ID of parent1
 		String gid= (String) details.get(3);
+		String maleParent, femaleParent, fid, mid;
+		boolean male,female;
+		
+		if (!is_female) {
+			fid = parent2ID;
+			mid = parent1ID;
+			femaleParent = parent2;
+			female = has_GID(parent2ID, parent2);
+			maleParent = parent1;
+		} else {
+			fid = parent1ID;
+			mid = parent2ID;
+			femaleParent = parent1;
+			maleParent = parent2;
+			male = has_GID(parent2ID, parent2);
+		}
+		String temp;
+		mid=mid.replaceAll("\"", "");
+		fid=fid.replaceAll("\"", "");
+		if (Integer.valueOf(mid) < Integer.valueOf(fid)) {
+			temp = mid;
+			mid = fid;
+			fid = temp;
+		}
 		
 		updateFile_createdGID(gid, parent1ID, parent1, manager);	//update the createdGID file
 		parse(manager, parent1,gid, parent1ID,gpid1,gpid2);
+		
+		int cross_locationID=getLocationID();
+		int mgid=getGID_fromFile(maleParent, mid);
+		int fgid=getGID_fromFile(femaleParent, fid);
+		
+		Germplasm germplasm=is_crossExisting(fgid, mgid, cross_locationID, manager);
+		
+		if (has_GID(parent2ID, parent2)) {
+			if(germplasm.getGid()==null){
+				
+				int methodID=selectMethodType(manager,fgid,mgid,femaleParent,maleParent);
+				
+				int cross_gid = (int) addGID(manager, cross,fgid,mgid, cross_locationID, methodID);
+
+				Germplasm germplasm1 = manager.getGermplasmByGID(cross_gid);
+				
+				updateFile_createdGID(""+germplasm1.getGid(), fid + "/" + mid, cross, manager);
+				
+				updateFile_corrected(germplasm1, fid, cross, manager);
+				System.out.println("\t id: "+fid + "/" + mid);
+				System.out.println("\t id: "+ cross);
+			}else{
+				
+				//Name name=manager.getGermplasmNameByID(germplasm.getGid());
+				List<Name> name = new ArrayList<Name>();
+					name=manager.getNamesByGID(germplasm.getGid(), 0, null);
+					
+				updateFile_createdGID(""+germplasm.getGid(), fid + "/" + mid, name.get(0).getNval(), manager);
+				updateFile_corrected(germplasm, fid , name.get(0).getNval(), manager);
+				
+			}
+		}
+		
+		
+		
 
 		factory.close();
 
@@ -88,6 +147,7 @@ public class test {
 
 	public static void parse(GermplasmDataManager manager, String parent, String gid, String id, int gpid1, int gpid2) throws MiddlewareQueryException, IOException {
 		Boolean result=false;
+		
 		String[] tokens = new Tokenize().tokenize(parent);
 		ArrayList<String> pedigreeList = new ArrayList<String>();
 
@@ -503,6 +563,102 @@ public class test {
 
 		return count;
 	}
+	public static int addGID(GermplasmDataManager manager, String pedigree, int gpid1,
+			int gpid2, int location, int methodID) throws MiddlewareQueryException {
+
+		int gid;
+		//Germplasm Object
+		Germplasm germplasm1 = new Germplasm();
+		germplasm1.setMethodId(methodID);
+		germplasm1.setGnpgs(0);
+		germplasm1.setGpid1(gpid1);
+		// int setGpid2=
+		germplasm1.setGpid2(gpid2);
+		germplasm1.setUserId(1);
+		germplasm1.setLgid(-1);
+		germplasm1.setLocationId(location);
+		germplasm1.setGdate(0);
+		germplasm1.setGrplce(0);
+		germplasm1.setMgid(0);
+		germplasm1.setReferenceId(1);
+		germplasm1.setPreferredAbbreviation("N/A");
+		germplasm1.setPreferredAbbreviation("N/A");
+
+		//Name object
+		Name name1 = new Name();
+		name1.setNdate(0);
+		name1.setNstat(0);
+		name1.setReferenceId(0);
+		name1.setUserId(0);
+		name1.setLocationId(location);
+		name1.setNval(pedigree);
+		name1.setTypeId(0);
+
+		gid = manager.addGermplasm(germplasm1, name1);
+		System.out.println("Germplasm" + gid);
+
+		return gid;
+	}
+	
+	public static int selectMethodType(GermplasmDataManager manager,int femaleGID, int maleGID, String female_nval, String male_nval)throws MiddlewareQueryException, IOException{
+		System.out.println("****SELECT METHOD TYPE");
+		Germplasm female_germplasm=manager.getGermplasmByGID(femaleGID);
+		Germplasm male_germplasm=manager.getGermplasmByGID(maleGID);
+				
+		Boolean male_fixed,female_fixed=male_fixed=false;
+		int methodType=0;
+		String methodDesc="";
+		
+		Name name= manager.getNameByGIDAndNval(femaleGID, female_nval,GetGermplasmByNameModes.NORMAL);
+		
+		int ntype=name.getTypeId();
+		if(ntype==4 || ntype==6 || ntype==13 || ntype==20 || ntype==23){
+			female_fixed=true;
+		}
+		
+		name= manager.getNameByGIDAndNval(maleGID, male_nval,GetGermplasmByNameModes.NORMAL);
+		ntype=name.getTypeId();
+		if(ntype==4 || ntype==6 || ntype==13 || ntype==20 || ntype==23){
+			male_fixed=true;
+		}else{
+			methodType=205;	//if AXB; single cross
+			methodDesc="Single plant selection";
+		}
+		if(male_fixed && female_fixed){
+
+			if(female_germplasm.getMethodId()==101 && male_germplasm.getMethodId()==101){ 
+				methodType=103;	//if (AXB)X(CXD); double cross
+				methodDesc="";
+			}else if((female_germplasm.getMethodId()==101 && male_germplasm.getMethodId()==103) 
+					|| (female_germplasm.getMethodId()==103 && male_germplasm.getMethodId()==101) ){
+				methodType=102;	//if [(AXB)X(CXD)] X (EXF); 3 way cross
+				methodDesc="Three-way cross";
+			}else if((female_germplasm.getMethodId()==103 && male_germplasm.getMethodId()==103) 
+					|| (female_germplasm.getMethodId()==106 && male_germplasm.getMethodId()==103)
+					|| (female_germplasm.getMethodId()==103 && male_germplasm.getMethodId()==106)
+					|| (female_germplasm.getMethodId()==106 && male_germplasm.getMethodId()==106)){
+				methodType=106; //Cross between two three-way or more complex crosses
+				methodDesc="Complex Cross";
+			}else{
+				methodType=101;	//if AXB; single cross
+				methodDesc="Single cross";
+			}
+		}
+		/*pw.write("N/A" + "," ); // gid
+		pw.write(methodType + "," + methodDesc + ","); // method
+		pw.write("N/A" + "," + "N/A" + ","); // location
+		pw.write("N/A" + ","); // gpid1
+		pw.write("N/A" + "\n"); // gpid2
+		*/
+		System.out.println("****METHOD="+methodType);
+		//List<String> cross_method = new ArrayList<String>();
+		//cross_method.add(methodType);
+		return methodType;
+		
+
+	}
+	
+	/* GET/SEARCH FROM FILE METHODS */
 
 	public static int getLocationID() throws FileNotFoundException, IOException,
 	ParseException {
@@ -512,6 +668,80 @@ public class test {
 		JSONObject jsonObject = (JSONObject) obj;
 		return Integer.valueOf((String) jsonObject.get("locationID"));
 	}
+	
+	public static Germplasm is_crossExisting(int fgid, int mgid, int locationID, GermplasmDataManager manager) throws MiddlewareQueryException{
+		Germplasm g= new Germplasm();
+		Location location = manager.getLocationByID(locationID);
+		
+		long count= manager.countGermplasmByLocationName(location.getLname(), Operation.EQUAL, Database.LOCAL);
+		count+=manager.countGermplasmByLocationName(location.getLname(), Operation.EQUAL, Database.CENTRAL);
+
+		List<Germplasm> germplasm=manager.getGermplasmByLocationName(location.getLname(), 0, (int)count, Operation.EQUAL, Database.LOCAL);
+		List<Germplasm> germplasm2 = new ArrayList<Germplasm>();
+		germplasm2 = manager.getGermplasmByLocationName(location.getLname(), 0, (int)count, Operation.EQUAL, Database.CENTRAL);
+		for(int i=0; i<germplasm2.size();i++){
+			germplasm.add(germplasm2.get(i));
+
+		}
+
+		for(int i=0; i< germplasm.size(); i++){
+			if(germplasm.get(i).getGpid1()==fgid && germplasm.get(i).getGpid2()==mgid){
+				//Name name=manager.getGermplasmNameByID(germplasm.get(i).getGid());
+				//System.out.println(germplasm.get(i).getGid()+" "+ name.getNval());
+				return germplasm.get(i);
+			}
+		}
+		return g;
+	}
+	
+	private static int getGID_fromFile(String pedigree, String id) throws IOException {
+		String csv = "E:/xampp/htdocs/GMGR/protected/modules/createdGID.csv";
+
+		BufferedReader br = null;
+		String line = "";
+
+		br = new BufferedReader(new FileReader(csv));
+		while ((line = br.readLine()) != null) {
+			String[] cells = line.split(",");
+			if (cells[0].equals(id) && cells[2].equals(pedigree)) {
+				br.close();
+				if(cells[3].equals("CHOOSE GID") || cells[3].equals("NOT SET")){
+					return 0;
+				}else{
+					return Integer.valueOf(cells[3]);
+				}
+			}
+		}
+		br.close();
+		int gid = 0;
+
+		return gid;
+	}
+	
+	public static boolean has_GID(String id, String parent) throws IOException {
+
+		String csvFile = "E:/xampp/htdocs/GMGR/protected/modules/createdGID.csv";
+		BufferedReader br = null;
+		String line = "";
+		String cvsSplitBy = ",";
+		br = new BufferedReader(new FileReader(csvFile));
+		while ((line = br.readLine()) != null) {
+			// use comma as separator
+			String[] row = line.split(cvsSplitBy);
+			if (row[0] == id && row[1] == parent) {
+				if (row[3] == "NOT SET" || row[3] == "CHOOSE GID") {
+					br.close();
+					return false;
+				}
+			}
+		}
+		br.close();
+		return true;
+	}
+	
+	/* END GET/SEARCH FROM FILE METHODS */
+	
+	/*UPDATE FILES METHODS*/
 	
 	public static void updateFile_createdGID(String gid, String id,
 			String pedigree, GermplasmDataManager manager) throws IOException,
@@ -566,21 +796,6 @@ public class test {
 		file = new File(original);
 		File file2= new File(temp);
 		file2.renameTo(file);
-		/*bw = new BufferedWriter(new OutputStreamWriter(
-				new FileOutputStream(file), "UTF-8"));
-
-		br = null;
-		line = "";
-
-		br = new BufferedReader(new FileReader(temp));
-		while ((line = br.readLine()) != null) {
-			bw.write(line); // writing to the new file with updated germplasm
-			bw.write("\n");
-		}
-		bw.close();
-		br.close();
-		new FileProperties().setFilePermission(original);
-		*/
 	}
 	
 	private static String[] processLine(String line, String gid, String id,
@@ -632,6 +847,77 @@ public class test {
 				return cells;
 
 	}
+	
+	private static String[] processLine_corrected(String line, Germplasm germplasm, String id,
+			String pedigree, GermplasmDataManager manager)
+	throws MiddlewareQueryException {
+
+		String[] cells = line.split(","); 
+		cells[2] = cells[2].replaceAll("\"", "");
+
+		System.out.println("\t id "+ id+ " cells[2]: "+ cells[2]+ " GID: "+germplasm.getGid().toString());;
+
+		//if (cells[0].equals(id) && cells[2].equals(pedigree)) {
+		if (cells[2].equals(id) ) {
+
+			cells[0] = germplasm.getGid().toString();
+
+			cells[0] = cells[0].replaceAll("\"", "");
+			return cells;
+		}
+		return cells;
+
+	}
+	private static void updateFile_corrected(Germplasm germplasm, String id,
+			String pedigree, GermplasmDataManager manager) throws IOException,
+			MiddlewareQueryException {
+
+		// updated file, file to be written
+		String temp = "E:/xampp/htdocs/GMGR/protected/modules/updatedCorrected.csv";
+
+		// file to be updatedcret, file to be read
+		String original = "E:/xampp/htdocs/GMGR/protected/modules/corrected.csv";
+
+		File file = new File(temp);
+
+		// if file doesnt exists, then create it
+		if (!file.exists()) {
+			file.createNewFile();
+		}
+
+		Writer bw = new BufferedWriter(new OutputStreamWriter(
+				new FileOutputStream(file), "UTF-8"));
+
+		BufferedReader br = null;
+		String line = "";
+
+		br = new BufferedReader(new FileReader(original));
+		while ((line = br.readLine()) != null) {
+			//System.out.println("A: "+StringUtils.join(line, ","));
+			String[] processedLine = processLine_corrected(line, germplasm, id, pedigree,
+					manager);
+			//System.out.println("B: "+StringUtils.join(processedLine, ","));
+			bw.write(StringUtils.join(processedLine, ",")); // writing to the
+			// new file with
+			// updated germplasm
+			bw.write("\n");
+		}
+		bw.close();
+		br.close();
+
+		new FileProperties().setFilePermission(temp);
+		// delete createdGID.csv
+		file = new File(original);
+		file.delete();
+
+		file = new File(original);
+		File file2= new File(temp);
+		file2.renameTo(file);
+	}
+	
+	/*END OF UPDATE FILES METHODS*/
+	
+	/*PRINT To FILE METHODS */
 
 	public static void printSuccess(String pedigree, String parent, String id, Germplasm germplasm, GermplasmDataManager manager, String root, String csv) throws IOException, MiddlewareQueryException{
 
@@ -719,43 +1005,9 @@ public class test {
 		pw.close();
 		new FileProperties().setFilePermission(csv);
 	}
-
-	public int addGID(GermplasmDataManager manager, String pedigree, int gpid1,
-			int gpid2, int location) throws MiddlewareQueryException {
-
-		int gid;
-		//Germplasm Object
-		Germplasm germplasm1 = new Germplasm();
-		germplasm1.setMethodId(33);
-		germplasm1.setGnpgs(0);
-		germplasm1.setGpid1(gpid1);
-		// int setGpid2=
-		germplasm1.setGpid2(gpid2);
-		germplasm1.setUserId(1);
-		germplasm1.setLgid(-1);
-		germplasm1.setLocationId(location);
-		germplasm1.setGdate(0);
-		germplasm1.setGrplce(0);
-		germplasm1.setMgid(0);
-		germplasm1.setReferenceId(1);
-		germplasm1.setPreferredAbbreviation("N/A");
-		germplasm1.setPreferredAbbreviation("N/A");
-
-		//Name object
-		Name name1 = new Name();
-		name1.setNdate(0);
-		name1.setNstat(0);
-		name1.setReferenceId(0);
-		name1.setUserId(0);
-		name1.setLocationId(location);
-		name1.setNval(pedigree);
-		name1.setTypeId(0);
-
-		gid = manager.addGermplasm(germplasm1, name1);
-		System.out.println("Germplasm" + gid);
-
-		return gid;
-	}
+	
+	/* END PRINT To FILE METHODS */
+	
 
 }
 
