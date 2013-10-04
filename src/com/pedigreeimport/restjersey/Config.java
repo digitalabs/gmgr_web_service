@@ -27,6 +27,16 @@ public class Config {
 		return factory;
 	}
 	*/
-	
+	/*
+	public ManagerFactory configDB(){
+		DatabaseConnectionParameters local = new DatabaseConnectionParameters(
+				"127.0.0.1", "5528", "local", "phenibquser", "phenibqpass");
+		DatabaseConnectionParameters central = new DatabaseConnectionParameters(
+				"127.0.0.1", "5528", "iris_myisam_20121002", "phenibquser", "phenibqpass");
+		ManagerFactory factory = new ManagerFactory(local, central);
+		
+		return factory;
+	}
+	*/
 	
 }
