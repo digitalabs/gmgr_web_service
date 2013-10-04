@@ -387,7 +387,7 @@ public class test {
 			System.out.println("Multiple Hit");
 
 			//print to file "CHOOSE GID" for all the pedigree line
-			if(!root_id.equals("")){
+			if(!root_id.equals("")){	// if searching the file
 				Writer pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csv, true), "UTF-8"));
 				pw.write(global_id+",");
 				pw.close();
@@ -399,7 +399,7 @@ public class test {
 
 				pedigree=pedigreeList.get(i);
 				System.out.print(">> "+ pedigree + "\t");
-				if(!root_id.equals("")){
+				if(!root_id.equals("")){	// if searching the file
 					Writer pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csv, true), "UTF-8"));
 					pw.write(global_id+",");
 					pw.close();
@@ -409,7 +409,7 @@ public class test {
 			result=false;	//set flag to false
 
 		}else{// count==0
-			if(root_id.equals("")){
+			if(root_id.equals("")){	//if searching the database
 				global_id=id;
 				System.out.println("GLOBAL ID: "+ global_id);
 			}
@@ -468,7 +468,6 @@ public class test {
 
 				int id_l= Integer.valueOf(id);
 				String id2_l= ""+(id_l+1);
-
 				
 				Boolean event=processParents(manager, female_nval_l, female_id_l, male_nval_l, male_id_l, cross, csv, cross, id);
 				
@@ -791,7 +790,7 @@ public class test {
 		String temp = "E:/xampp/htdocs/GMGR/protected/modules/updatedCreatedGID.csv";
 
 		// file to be updatedcret, file to be read
-		String original = "E:/xampp/htdocs/GMGR/protected/modules/createdGID.csv";
+		String original = "E:/xampp/htdocs/GMGR/protected/modules/createdGID3.csv";
 
 		File file = new File(temp);
 
