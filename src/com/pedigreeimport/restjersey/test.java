@@ -40,12 +40,16 @@ public class test {
 	 * @throws MiddlewareQueryException 
 	 * @throws IOException 
 	 */
+	
+	static int GID;
+	static String global_id;
+	
 	public static void main(String[] args) throws IOException, MiddlewareQueryException, ParseException {
-		//bulk_createdGID();
-		single_createdGID();
+		bulk_createGID();
+		//single_createdGID();
 	}	
 
-	public static void single_createdGID() throws MiddlewareQueryException, IOException, ParseException{
+	public static void single_createGID() throws MiddlewareQueryException, IOException, ParseException{
 		ManagerFactory factory = new Config().configDB();
 		GermplasmDataManager manager = factory.getGermplasmDataManager();
 
@@ -79,21 +83,21 @@ public class test {
 		// parent1ID, ID of parent1
 		String gid= (String) details.get(3);
 		String maleParent, femaleParent, fid, mid;
-		boolean male,female;
+		
 		
 		if (!is_female) {
 			fid = parent2ID;
 			mid = parent1ID;
 			femaleParent = parent2;
-			female = has_GID(parent2ID, parent2);
 			maleParent = parent1;
+			
 		} else {
 			fid = parent1ID;
 			mid = parent2ID;
 			femaleParent = parent1;
 			maleParent = parent2;
-			male = has_GID(parent2ID, parent2);
 		}
+		
 		String temp;
 		mid=mid.replaceAll("\"", "");
 		fid=fid.replaceAll("\"", "");
@@ -104,7 +108,8 @@ public class test {
 		}
 		
 		updateFile_createdGID(gid, parent1ID, parent1, manager);	//update the createdGID file
-		parse(manager, parent1,gid, parent1ID,gpid1,gpid2);
+		
+		parse(manager, parent1,gid, parent1ID,gpid1,gpid2);	//parse the germplasm name of the chosen GID 
 		
 		int cross_locationID=getLocationID();
 		int mgid=getGID_fromFile(maleParent, mid);
@@ -127,8 +132,7 @@ public class test {
 				System.out.println("\t id: "+fid + "/" + mid);
 				System.out.println("\t id: "+ cross);
 			}else{
-				
-				//Name name=manager.getGermplasmNameByID(germplasm.getGid());
+							
 				List<Name> name = new ArrayList<Name>();
 					name=manager.getNamesByGID(germplasm.getGid(), 0, null);
 					
@@ -137,16 +141,11 @@ public class test {
 				
 			}
 		}
-		
-		
-		
-
 		factory.close();
 
 	}
 
 	public static void parse(GermplasmDataManager manager, String parent, String gid, String id, int gpid1, int gpid2) throws MiddlewareQueryException, IOException {
-		Boolean result=false;
 		
 		String[] tokens = new Tokenize().tokenize(parent);
 		ArrayList<String> pedigreeList = new ArrayList<String>();
@@ -158,24 +157,13 @@ public class test {
 
 		System.out.print(">> "+ pedigreeList.get(0) + "\t");
 
-		
-
-		//print to file
-		//printSuccess(pedigree, parent,id, germplasm.get(0),manager, root, csv);
-
 		if(pedigreeList.size()>1){
-
-			//int gpid1= germplasm.get(0).getGpid1();	//get gpid1/root
-			//int gpid2= germplasm.get(0).getGpid2();	//get gpid1/root
 			
 			//call function to assign GID to the pedigree line
 			assignGID(manager, id, parent, gpid1, gpid2, pedigreeList);
 		}else{
 			updateFile_createdGID(gid, id, pedigree, manager);	//update the createdGID file
 		}
-
-		result=true;	//set flag to true
-
 	}
 	
 	public static void assignGID(GermplasmDataManager manager,String id, String parent, int gpid1, int gpid2, ArrayList<String> pedigreeList) throws MiddlewareQueryException, IOException{
@@ -229,8 +217,6 @@ public class test {
 		JSONObject json_array1 = (JSONObject) json_obj1;
 		JSONArray obj_terms = (JSONArray) json_array1.get("checked");
 
-		int fgid = 0, mgid = 0;
-
 		//int locationID= getLocationID(); //get locationID from json file
 
 		for (int i = 0; i < obj_terms.size(); i++) {
@@ -262,9 +248,13 @@ public class test {
 				String male_nval=column[9];
 				//cross name
 				String cross=column[1];
+				
 				if (female_id.equals(obj_terms.get(i)) || male_id.equals(obj_terms.get(i)) ) {
-					if (female_remarks.equals("in standardized format") && female_remarks.equals("in standardized format")) {
-						processParents(manager, female_nval, female_id, male_nval, male_id, "", csv);
+					if (female_remarks.equals("in standardized format") && male_remarks.equals("in standardized format")) {
+						Boolean result=processParents(manager, female_nval, female_id, male_nval, male_id, "", csv, cross,"");
+						if(!result){
+							printNotSet(cross, female_nval+"/"+male_nval, female_nval+"/"+male_nval, female_id + "/" + male_id, csv);
+						}
 					}
 				}
 
@@ -278,68 +268,68 @@ public class test {
 		factory.close();
 
 	}
-	public static boolean processParents(GermplasmDataManager manager, String female_nval, String female_id, String male_nval, String male_id, String root, String csv) throws MiddlewareQueryException, IOException{
+	public static boolean processParents(GermplasmDataManager manager, String female_nval, String female_id, String male_nval, String male_id, String root, String csv, String cross, String id) throws MiddlewareQueryException, IOException, ParseException{
 		boolean female=false, male=false;
+		int fgid = 0, mgid = 0;
+		
 		//System.out.println("\t" + column[5] + " is " + column[3]);
 		if(root.equals("")){
 			System.out.println("\nfemale:");
-			female=parse(manager,female_nval,female_nval, female_id, csv);
+			female=parse(manager,female_nval,female_nval, female_id, csv,"");
+			fgid=GID;
 			System.out.println("\nmale:");
-			male=parse(manager,male_nval,male_nval, male_id, csv);
+			male=parse(manager,male_nval,male_nval, male_id, csv,"");
+			mgid=GID;
+			
+			int cross_locationID=getLocationID();
+			
+			Germplasm germplasm=is_crossExisting(fgid, mgid, cross_locationID, manager);
+			
+			if(male && female){
+				if(germplasm.getGid()==null){
+					
+					int methodID=selectMethodType(manager,fgid,mgid,female_nval,male_nval);
+					
+					int cross_gid = (int) addGID(manager, cross,fgid,mgid, cross_locationID, methodID);
+
+					Germplasm germplasm1 = manager.getGermplasmByGID(cross_gid);
+					
+					printSuccess(cross, "", female_id + "/" + male_id, germplasm1, manager, female_nval + "/" + male_nval, csv);
+					updateFile_createdGID(""+germplasm1.getGid(), female_id + "/" + male_id, cross, manager);
+					
+					updateFile_corrected(germplasm1, female_id, cross, manager);
+					System.out.println("\t id: "+female_id + "/" + male_id);
+					System.out.println("\t id: "+ cross);
+				}else{
+					
+					//Name name=manager.getGermplasmNameByID(germplasm.getGid());
+					List<Name> name = new ArrayList<Name>();
+						name=manager.getNamesByGID(germplasm.getGid(), 0, null);
+						System.out.println("\t ====gid: "+ germplasm.getGid());	
+					updateFile_createdGID(""+germplasm.getGid(), female_id + "/" + male_id, name.get(0).getNval(), manager);
+					updateFile_corrected(germplasm, female_id , name.get(0).getNval(), manager);
+				}
+			}
+			
+			
 		}else{
+			System.out.println("\n*******HERE:");
 			System.out.println("\nfemale:");
-			female=parse(manager,female_nval,root, female_id,csv);
+			female=parse(manager,female_nval,root, female_id,csv,id);
 			System.out.println("\nmale:");
-			male=parse(manager,male_nval,root, male_id,csv);
+			male=parse(manager,male_nval,root, male_id,csv,id);
+			
+			System.out.println("\n******* END");
+			
 		}
 		if(male && female){
 			return true;
 		}else{
 			return false;
 		}
-
-		/*
-				//female
-				tokenize(manager, pw, column[2], column[5]);
-				fgid = gpid2;
-				female = flag;
-
-				//male
-				tokenize(manager, pw, column[6], column[9]);
-				male = flag;
-				mgid = gpid2;
-				pw.write(column[2] + "/" + column[6] + ",");
-				pw.write(column[5] + "/" + column[9] + ",");
-				pw.write(column[1] + ",");
-				System.out.println("female: "+female+ " male: "+male);
-				if (female && male) {
-					Germplasm g=is_crossExisting(fgid, mgid, getLocation_json(), manager);
-					if(g.getGid()==null){
-						int gid = 0;
-						gid = (int) createGID(manager, column[1], fgid,
-								mgid, getLocation_json());
-						Germplasm germplasm1 = manager
-						.getGermplasmByGID(gid);
-						printToFile(manager, pw, germplasm1);
-						//updateFile_createdGID(germplasm1,column[2]+"/"+column[6], column[1], manager);
-						updateFile_corrected(germplasm1,column[2], column[1], manager);
-					}else{
-						Germplasm germplasm=is_crossExisting(fgid, mgid, getLocation_json(), manager);
-						printToFile(manager, pw, germplasm);
-						//updateFile_createdGID(germplasm,column[2]+"/"+column[6], column[1], manager);
-						updateFile_corrected(germplasm,column[2], column[1], manager);
-					}
-
-				} else {
-					pw.append("NOT SET" + ","); // gid
-					writeFile(pw);
-				}
-		 */
-
-
 	}
 
-	private static boolean parse(GermplasmDataManager manager, String parent, String root, String id, String csv) throws MiddlewareQueryException, IOException {
+	private static boolean parse(GermplasmDataManager manager, String parent, String root, String id, String csv, String root_id) throws MiddlewareQueryException, IOException, ParseException {
 
 		Boolean result=false;
 
@@ -369,8 +359,15 @@ public class test {
 				germplasm=getGermplasm(Database.CENTRAL,manager,pedigree, count_CENTRAL);
 			}
 
+			if(!root_id.equals("")){
+				Writer pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csv, true), "UTF-8"));
+				pw.write(global_id+",");
+				pw.close();
+			}
 			//print to file
 			printSuccess(pedigree, parent,id, germplasm.get(0),manager, root, csv);
+			GID=germplasm.get(0).getGid();
+			
 
 			if(pedigreeList.size()>1){
 
@@ -380,7 +377,7 @@ public class test {
 				pedigreeList.remove(0); // remove the pedigree already processed
 
 				//call function to search for the pedigree line
-				single_Hit(manager, id, parent, gpid1, gpid2, pedigreeList,root,csv);
+				single_Hit(manager, id, parent, gpid1, gpid2, pedigreeList,root,csv,root_id);
 			}
 
 			result=true;	//set flag to true
@@ -390,6 +387,11 @@ public class test {
 			System.out.println("Multiple Hit");
 
 			//print to file "CHOOSE GID" for all the pedigree line
+			if(!root_id.equals("")){
+				Writer pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csv, true), "UTF-8"));
+				pw.write(global_id+",");
+				pw.close();
+			}
 			printChooseGID(pedigree, parent,root, id, csv);
 
 			pedigreeList.remove(0);
@@ -397,30 +399,46 @@ public class test {
 
 				pedigree=pedigreeList.get(i);
 				System.out.print(">> "+ pedigree + "\t");
+				if(!root_id.equals("")){
+					Writer pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csv, true), "UTF-8"));
+					pw.write(global_id+",");
+					pw.close();
+				}
 				printNotSet(pedigree, parent,root, id, csv);
 			}
 			result=false;	//set flag to false
 
 		}else{// count==0
+			if(root_id.equals("")){
+				global_id=id;
+				System.out.println("GLOBAL ID: "+ global_id);
+			}
 			System.out.println("No hit in local and central");
+			int event;
 
-			//search_file
-			//print NOT SET
 			System.out.println("Search Input File");
-			result=search_List(manager, id, parent,parent, pedigree);
-			if(result){
+			//search_file			
+			event=search_List(manager, id, parent,parent, pedigree,root_id);
+			
+			
+			if(event==0){
+				//add GID
+			}else if(event==2){
+				if(!root_id.equals("")){
+					Writer pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csv, true), "UTF-8"));
+					pw.write(global_id+",");
+					pw.close();
+				}
 				printNotSet(pedigree, parent, root, id, csv);
-			}else{
-				//create GID
 			}
 
 		}
 		return result;
 	}
 
-	public static boolean search_List(GermplasmDataManager manager, String id, String parent,String cross, String pedigree) throws IOException, MiddlewareQueryException{
+	public static int search_List(GermplasmDataManager manager, String id, String parent,String cross, String pedigree, String root_id) throws IOException, MiddlewareQueryException, ParseException{
 
-		boolean result=false;
+		int result=0;
 		String csvFile = "E:/xampp/htdocs/GMGR/protected/modules/corrected.csv";
 		String csv = "E:/xampp/htdocs/GMGR/protected/modules/createdGID2.csv";
 		BufferedReader br = null;
@@ -451,9 +469,22 @@ public class test {
 				int id_l= Integer.valueOf(id);
 				String id2_l= ""+(id_l+1);
 
-				processParents(manager, female_nval_l, female_id_l, male_nval_l, male_id_l, cross, csv);
+				
+				Boolean event=processParents(manager, female_nval_l, female_id_l, male_nval_l, male_id_l, cross, csv, cross, id);
+				
+				
+				if(event){
+					result=1;	//success
+					// update the createdGID file, update the row processed and the related pedigree in the list
+					
+					
+					// update the corrected File
+					
+				}else{
+					result=2;	// print NOT SET
+				}
 
-				result=true;
+				//result=true;
 				break;// first to search, exit the loop 
 			}
 		}
@@ -463,7 +494,7 @@ public class test {
 	}
 
 
-	public static void single_Hit(GermplasmDataManager manager,String id, String parent, int gpid1, int gpid2, ArrayList<String> pedigreeList, String root, String csv) throws MiddlewareQueryException, IOException{
+	public static void single_Hit(GermplasmDataManager manager,String id, String parent, int gpid1, int gpid2, ArrayList<String> pedigreeList, String root, String csv,String root_id) throws MiddlewareQueryException, IOException{
 		Boolean error=false;
 
 		for(int i=0; i<pedigreeList.size(); i++){
@@ -484,13 +515,22 @@ public class test {
 
 			if(germplasm==null){ // this is an ERROR, the gid should exist
 				error=true;
+				if(!root_id.equals("")){
+					Writer pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csv, true), "UTF-8"));
+					pw.write(global_id+",");
+					pw.close();
+				}
 				printError(pedigree, parent, root,id,csv); //prints ERROR to file
 
 			}else{
 				gpid2=germplasm.getGpid2();
 				gpid1=germplasm.getGpid1();
 				error=false; //set the flag to false
-
+				if(!root_id.equals("")){
+					Writer pw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csv, true), "UTF-8"));
+					pw.write(global_id+",");
+					pw.close();
+				}
 				printSuccess(pedigree, parent ,id, germplasm,manager,root,csv);	//print to file
 			}
 		}
@@ -644,15 +684,7 @@ public class test {
 				methodDesc="Single cross";
 			}
 		}
-		/*pw.write("N/A" + "," ); // gid
-		pw.write(methodType + "," + methodDesc + ","); // method
-		pw.write("N/A" + "," + "N/A" + ","); // location
-		pw.write("N/A" + ","); // gpid1
-		pw.write("N/A" + "\n"); // gpid2
-		*/
-		System.out.println("****METHOD="+methodType);
-		//List<String> cross_method = new ArrayList<String>();
-		//cross_method.add(methodType);
+		
 		return methodType;
 		
 
@@ -808,10 +840,10 @@ public class test {
 		
 		Germplasm germplasm= manager.getGermplasmByGID(Integer.valueOf(gid));
 		
-		System.out.println("\t id "+ id+ " cells[0]: "+ cells[0]);
-		System.out.println("\t pedigree "+ pedigree+ " cells[2]: "+
-				cells[2]); System.out.println("\t here" +
-						gid);
+		//System.out.println("\t id "+ id+ " cells[0]: "+ cells[0]);
+		//System.out.println("\t pedigree "+ pedigree+ " cells[2]: "+
+		//		cells[2]); System.out.println("\t here" +
+		//				gid);
 
 
 				if (cells[0].equals(id) && cells[2].equals(pedigree)) {
@@ -855,7 +887,7 @@ public class test {
 		String[] cells = line.split(","); 
 		cells[2] = cells[2].replaceAll("\"", "");
 
-		System.out.println("\t id "+ id+ " cells[2]: "+ cells[2]+ " GID: "+germplasm.getGid().toString());;
+		//System.out.println("\t id "+ id+ " cells[2]: "+ cells[2]+ " GID: "+germplasm.getGid().toString());;
 
 		//if (cells[0].equals(id) && cells[2].equals(pedigree)) {
 		if (cells[2].equals(id) ) {
