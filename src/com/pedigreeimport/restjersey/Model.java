@@ -42,7 +42,17 @@ public class Model {
 		return Response.status(200).entity("Genealogy Manager/Pedigree Import")
 				.build();
 	}
-
+    
+	@Path("sortList1")
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response sortList1() throws FileNotFoundException, IOException{
+		new joanieTest();
+		joanieTest.sortList();
+		return Response.status(200).entity("Ok!").build();
+	}
+	
 	@Path("/parse")
 	@GET
 	@Consumes()
