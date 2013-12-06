@@ -31,9 +31,5 @@ public class FileProperties {
         
 	}
 	
-	public String setPath(){
-	//System.out.println("E:/xampp/htdocs/"+"PedigreeImport/docinfo.json");
-		return "/var/www/";
-		//return "E:/xampp/htdocs/";
-	}
+	
 }
