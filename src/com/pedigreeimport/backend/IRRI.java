@@ -42,21 +42,21 @@ public class IRRI {
         Matcher m = p.matcher(line);
 
         if (m.find()) {    //String is a segragating line
-            //System.out.println(" (segragating generations)");
+           // System.out.println(" (segragating generations)");
             segGen();
         } else {    //String is a either an IRRI elite line or a fixed line
+            
+            Pattern p2 = Pattern.compile("IR(\\s+)?\\d+(\\s+)?");
+            Matcher m2 = p2.matcher(line);
+            
             Pattern p1 = Pattern.compile("IRRI");
             Matcher m1 = p1.matcher(line);
 
             if (m1.lookingAt()) {//String is an IRRI elite line
                 //System.out.println(" (elite line)");
                 eliteLine();
-                System.exit(0);
-            }
-            Pattern p2 = Pattern.compile("IR(\\s+)?\\d+(\\s+)?");
-            Matcher m2 = p2.matcher(line);
-
-            if (m2.matches()) {//String is an IRRI elite line
+                //System.exit(0);
+            }else if(m2.matches()) {//String is an IRRI release line
                 //System.out.println(" (released line)");
                 releasedLine();
             } else {//String is an IRRI fixed line
@@ -64,6 +64,7 @@ public class IRRI {
                 fixedLine();
             }
         }
+        
         //System.out.println("list @standardIRRI(): " + listErrorsIRRI);
         return listErrorsIRRI;
     }
@@ -156,10 +157,15 @@ public class IRRI {
         }
     }
     private void fixedLine() {
-        Pattern p = Pattern.compile("IR\\d{2}(N|F|L|T|U|K|W|H|J|D)\\d{3,}((H|R|A|B|S)?)");
+    	
+        Pattern p = Pattern.compile("IR\\d{2}(N|F|L|T|U|K|W|H|J|D|A|C|M)\\d{3,}((H|R|A|B|S)?)");
         Matcher m = p.matcher(line);
+        Pattern p2 = Pattern.compile("IR\\s.+\\(.+\\)");
+        Matcher m2 = p2.matcher(line);
 
-        if (m.matches()) {
+        if (m2.matches()) {
+        	
+        }else if (m.matches()) {
             //System.out.println("correct");
             //String tokens[] = t.tokenize(line);
             //t.stringTokens(tokens);
@@ -167,7 +173,7 @@ public class IRRI {
             //System.out.println("\n>>String not properly formatted.. ");
             spacingFixedLine();
             //errorPatternFixedLine();
-            Pattern p1 = Pattern.compile("IR\\d{2}(N|F|L|T|U|K|W|H|J|D)\\d{3,}((H|R|A|B|S)?)");
+            Pattern p1 = Pattern.compile("IR\\d{2}(N|F|L|T|U|K|W|H|J|D|A|M|C)\\d{3,}((H|R|A|B|S)?)");
             Matcher m1 = p1.matcher(line);
             if (!m1.matches()) {
             	//System.out.println(line + "\t;string pattern not recognized ");
@@ -203,7 +209,14 @@ public class IRRI {
 
     }
 
-    private void errorPatternFixedLine() {
+    private void printGroup(Matcher m) {
+		for(int i=0; i<m.groupCount();i++){
+			System.out.println("group["+i+"]"+m.group(i)); // remarks
+		}
+		
+	}
+
+	private void errorPatternFixedLine() {
         String temp = line;
         Pattern p = Pattern.compile("(IR\\d{2})(.)");
         //Pattern p = Pattern.compile("(IR\\d{2})|(N|F|L|T|U|K|W|H|J|D)(\\d{3,})|(((H|R|AA|B|S)?)$)");

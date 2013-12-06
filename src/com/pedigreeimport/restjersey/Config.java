@@ -14,19 +14,30 @@ public class Config {
 		
 		return factory;
 	}
+
 	
-	
-	
-	/*public ManagerFactory configDB(){
+/*	
+	public ManagerFactory configDB(){
 		DatabaseConnectionParameters local = new DatabaseConnectionParameters(
-				"127.0.0.1", "5528", "local", "phenibquser", "phenibqpass");
+				"127.0.0.1", "3306", "local", "datasourceuser", "ici$rule$");
 		DatabaseConnectionParameters central = new DatabaseConnectionParameters(
-				"127.0.0.1", "5528", "iris_myisam_20121002", "phenibquser", "phenibqpass");
+				"127.0.0.1", "3306", "iris_mysiam_20121002", "datasourceuser", "ici$rule$");
 		ManagerFactory factory = new ManagerFactory(local, central);
 		
 		return factory;
 	}
-	*/
 	
+	
+
+	public ManagerFactory configDB(){
+		DatabaseConnectionParameters local = new DatabaseConnectionParameters(
+				"127.0.0.1", "5528", "local", "datasourceuser", "ici$rule$");
+		DatabaseConnectionParameters central = new DatabaseConnectionParameters(
+				"127.0.0.1", "5528", "iris_myisam_20121002", "datasourceuser", "ici$rule$");
+		ManagerFactory factory = new ManagerFactory(local, central);
+		
+		return factory;
+	}
+*/	
 	
 }

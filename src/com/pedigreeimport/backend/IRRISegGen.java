@@ -17,11 +17,11 @@ public class IRRISegGen {
 	private static String A_IR = "(IR)"; // IRRI Line
 	private static String A_SPACE = "(\\s)";   // white space
 	private static String A_PLANT_NO = "(\\d+)";  // plant number
-	private static String A_LOC = "(UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN)";   //location
+	private static String A_LOC = "(UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN|SDO)";   //location
 	private static String A_SEL_NO = "(\\d+)"; //selection number
 	private static String A_DASH = "(-)";  //dash
 	private static String A_MP = "(\\d+MP)";   //mapping population followed by the plant number
-	private static String A_BM = "((\\d{0,4}B)|R|AC|(C\\d+))"; // breeding methods: “B�? - bulk, “R�? - rapid generation advance or single seed descent, “AC�? - anther culture. “C�? - for composite populations; a succeeding number indicates the specific cycle of composite
+	private static String A_BM = "((\\d{0,4})B|R|AC|(C\\d+))"; // breeding methods: “B�? - bulk, “R�? - rapid generation advance or single seed descent, “AC�? - anther culture. “C�? - for composite populations; a succeeding number indicates the specific cycle of composite
 	private String line;
 	private String tokens[];
 	private Pattern p = Pattern.compile(A_IR + A_PLANT_NO + "(\\s+)?"); // no space between IR and plant number
@@ -172,7 +172,7 @@ public class IRRISegGen {
 	 */
 	public void checkErrorPattern(int i, String temp) {   //ERROR TRAPPING: pattern/s not recognized, unrecognized codes
 		temp = line;
-		Pattern p11 = Pattern.compile("(\\d+)|(IR\\s\\d+)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN)\\s\\d+)|(\\d{0,4}B)|R|AC|(C\\d+)|(\\d+MP)");
+		Pattern p11 = Pattern.compile("(\\d+)|(IR\\s\\d+)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN|SDO)\\s\\d+)|(\\d{0,4})B|R|AC|(C\\d+)|(\\d+MP)");
 		Matcher m11 = p11.matcher(tokens[i]);
 
 		if (!m11.matches()) {
@@ -185,7 +185,7 @@ public class IRRISegGen {
 	public void checkErrorPattern() {   //ERROR TRAPPING: pattern/s not recognized, unrecognized codes
 		for (int i = 0; i < tokens.length; i++) {
 			String temp = line;
-			Pattern p11 = Pattern.compile("(\\d+)|(IR\\s\\d+)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN)\\s\\d+)|(\\d{0,4}B)|R|AC|(C\\d+)|(\\d+MP)");
+			Pattern p11 = Pattern.compile("(\\d+)|(IR\\s\\d+)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN|SDO)\\s\\d+)|(\\d{0,4})B|R|AC|(C\\d+)|(\\d+MP)");
 			Matcher m11 = p11.matcher(tokens[i]);
 			if (!m11.matches()) {
 				temp = temp.replaceAll(tokens[i], tokens[i] + "^");

@@ -81,15 +81,14 @@ public class FixString {
             Pattern p1 = Pattern.compile("IRRI");
             Matcher m1 = p1.matcher(line);
 
+            Pattern p2 = Pattern.compile("IR(\\s+)?\\d+(\\s+)?");
+            Matcher m2 = p2.matcher(line);
+            
             if (m1.lookingAt()) {//String is an IRRI elite line
                 //System.out.println(" (elite line)");
                 eliteLine();
-                System.exit(0);
-            }
-            Pattern p2 = Pattern.compile("IR(\\s+)?\\d+(\\s+)?");
-            Matcher m2 = p2.matcher(line);
-
-            if (m2.matches()) {//String is an IRRI elite line
+               // System.exit(0);
+            }else if (m2.matches()) {//String is an IRRI released line
                 //System.out.println(" (released line)");
                 releasedLine();
             } else {//String is an IRRI fixed line
@@ -169,7 +168,7 @@ public class FixString {
     }
 
     private void fixedLine() {
-        Pattern p = Pattern.compile("IR\\d{2}(N|F|L|T|U|K|W|H|J|D)\\d{3,}((H|R|A|B|S)?)");
+        Pattern p = Pattern.compile("IR\\d{2}(N|F|L|T|U|K|W|H|J|D|A|M|C)\\d{3,}((H|R|A|B|S)?)");
         Matcher m = p.matcher(line);
 
         if (!m.matches()) {
