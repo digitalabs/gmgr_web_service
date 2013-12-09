@@ -47,12 +47,29 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Path("/term")
 public class Model {
+	ManagerFactory factory;
 	@Path("/welcome")
 	@GET
 	@Produces("text/html")
 	public Response welcome() {
-
+		
 		return Response.status(200).entity("Genealogy Manager/Pedigree Import")
+		.build();
+	}
+	@Path("/connect")
+	@GET
+	@Produces("text/html")
+	public Response startConnection() {
+		factory = new Config().configDB();
+		return Response.status(200).entity("Starting Connection..")
+		.build();
+	}
+	@Path("/disconnect")
+	@GET
+	@Produces("text/html")
+	public Response endConnection() {
+		factory.close();
+		return Response.status(200).entity("Connection is closed.")
 		.build();
 	}
 	@Path("/updateMethod")
