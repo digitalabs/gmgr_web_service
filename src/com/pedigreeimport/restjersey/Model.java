@@ -477,4 +477,30 @@ public class Model {
 		return Response.status(201).entity(output).build();
 
 	}
+	
+	@Path("/searchGID")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response searchGID(JSONObject data) throws JSONException, FileNotFoundException,
+			IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
+		
+		new Editor();
+		Editor.searchAllGermplasm((JSONObject)data);
+		
+		return Response.status(200).entity("OK!").build();
+	}
+	
+	@Path("/show_germplasm_details")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response show_germplasm_details(JSONObject data) throws JSONException, FileNotFoundException,
+			IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
+		
+		new Editor();
+		Editor.show_germplasm_details((JSONObject)data);
+		
+		return Response.status(200).entity("OK!").build();
+	}
 }
