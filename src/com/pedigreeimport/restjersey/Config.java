@@ -27,7 +27,7 @@ public class Config {
 		return factory;
 	}
 	
-	
+
 
 	public ManagerFactory configDB(){
 		DatabaseConnectionParameters local = new DatabaseConnectionParameters(
@@ -38,6 +38,5 @@ public class Config {
 		
 		return factory;
 	}
-*/	
-	
+	*/
 }

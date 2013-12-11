@@ -1,20 +1,10 @@
 package com.pedigreeimport.restjersey;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -24,22 +14,17 @@ import javax.ws.rs.Produces;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.generationcp.middleware.exceptions.ConfigException;
 import org.generationcp.middleware.exceptions.MiddlewareQueryException;
 import org.generationcp.middleware.manager.ManagerFactory;
 import org.generationcp.middleware.manager.api.GermplasmDataManager;
-import org.generationcp.middleware.pojos.Location;
-import org.json.simple.JSONArray;
 import org.json.JSONException;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.pedigreeimport.backend.*;
 
-import com.google.gson.Gson;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -53,7 +38,7 @@ public class Model {
 	@Produces("text/html")
 	public Response welcome() {
 		
-		return Response.status(200).entity("Genealogy Manager/Pedigree Import")
+		return Response.status(200).entity("Genealogy Manager")
 		.build();
 	}
 	@Path("/connect")
@@ -72,6 +57,8 @@ public class Model {
 		return Response.status(200).entity("Connection is closed.")
 		.build();
 	}
+	
+	
 	@Path("/updateMethod")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
