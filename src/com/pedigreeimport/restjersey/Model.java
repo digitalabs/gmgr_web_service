@@ -25,14 +25,9 @@ import org.json.simple.parser.ParseException;
 
 import com.pedigreeimport.backend.*;
 
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-
-
 @Path("/term")
 public class Model {
-	ManagerFactory factory;
+	
 	@Path("/welcome")
 	@GET
 	@Produces("text/html")
@@ -41,24 +36,7 @@ public class Model {
 		return Response.status(200).entity("Genealogy Manager")
 		.build();
 	}
-	@Path("/connect")
-	@GET
-	@Produces("text/html")
-	public Response startConnection() {
-		factory = new Config().configDB();
-		return Response.status(200).entity("Starting Connection..")
-		.build();
-	}
-	@Path("/disconnect")
-	@GET
-	@Produces("text/html")
-	public Response endConnection() {
-		factory.close();
-		return Response.status(200).entity("Connection is closed.")
-		.build();
-	}
-	
-	
+		
 	@Path("/updateMethod")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -66,20 +44,17 @@ public class Model {
 	public Response changeMethod(JSONObject data) throws JSONException, FileNotFoundException,
 	IOException, MiddlewareQueryException, ParseException {
 
-
-		ManagerFactory factory = new Config().configDB();
 		List<List<String>> createdGID =new ArrayList<List<String>>();
 		createdGID= (List<List<String>>) data.get("createdGID");
 		int mid=Integer.valueOf((String) data.get("mid"));
 		int gid=Integer.valueOf((String) data.get("gid"));
 
 		String id=(String) data.get("id");
-
+		ManagerFactory factory = new Config().configDB();
 		GermplasmDataManager manager = factory.getGermplasmDataManager();
 		data=new AssignGID().updateMethod(manager, createdGID, mid, gid, id);
 
 		factory.close();
-
 		return Response.status(200).entity(data).build();
 	}
 
@@ -91,9 +66,11 @@ public class Model {
 	MiddlewareQueryException, ParseException, InterruptedException {		
 
 		new test();
-		System.out.println("HERE!");
+		//System.out.println("HERE!");
 		JSONObject output=new JSONObject();
-		output=test.single_createGID(data);
+		ManagerFactory factory = new Config().configDB();
+		output=test.single_createGID(data,factory);
+		factory.close();
 		return Response.status(200).entity(output).build();
 
 	}
@@ -116,20 +93,26 @@ public class Model {
 		checked= (List<String>) json_array.get("checked");
 		list = (List<List<String>>) json_array.get("list");
 		createdGID = (List<List<String>>) json_array.get("createdGID");
-		existingTerm = (List<List<String>>) json_array.get("existingTerm");
+		existingTerm = (List<List<String>>) json_array.get("existing");
 		String userID = (String) json_array.get("userID");
 
-		System.out.println("\t createdGID @ Model: "+createdGID.size()+"\t"+createdGID);
+		//System.out.println("\t createdGID @ Model: "+createdGID.size()+"\t"+createdGID);
+		//System.out.println("\t existing: \t"+existingTerm);
+		//System.out.println("\t list: "+list.size()+"\t"+list);
+		//System.out.println("\t checked: "+checked.size()+"\t"+checked);
+		//System.out.println("\t locationID: \t"+locationID);
+		//System.out.println("\t userID: \t"+userID);
 
 		JSONObject output=new JSONObject();
-		System.out.println();
-		output=test.bulk_createGID2(createdGID,list, checked,Integer.parseInt(locationID),existingTerm, userID);
+		//System.out.println();
+		ManagerFactory factory = new Config().configDB();
+		output=test.bulk_createGID2(createdGID,list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
+		factory.close();
 
+		////System.out.println("list: "+  json_array.get("list"));
+		////System.out.println("createdGID: "+ json_array.get("createdGID"));
 
-		//System.out.println("list: "+  json_array.get("list"));
-		//System.out.println("createdGID: "+ json_array.get("createdGID"));
-
-		//System.out.println("SINGLE CREATE GID ");
+		////System.out.println("SINGLE CREATE GID ");
 
 
 
@@ -158,16 +141,15 @@ public class Model {
 
 
 		JSONObject output=new JSONObject();
-		System.out.println();
-		output=test.bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID);
+		//System.out.println();
+		ManagerFactory factory = new Config().configDB();
+		output=test.bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
+		factory.close();
 
-
-		//System.out.println("list: "+  json_array.get("list"));
-		//System.out.println("createdGID: "+ json_array.get("createdGID"));
-		System.out.println("\t existing: "+output.get("existingTerm"));
-		//System.out.println("SINGLE CREATE GID ");
-
-
+		////System.out.println("list: "+  json_array.get("list"));
+		////System.out.println("createdGID: "+ json_array.get("createdGID"));
+		////System.out.println("\t existing: "+output.get("existingTerm"));
+		////System.out.println("SINGLE CREATE GID ");
 
 		return Response.status(200).entity(output).build();
 	}
@@ -179,12 +161,13 @@ public class Model {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response updateGermplasmName(JSONObject data ) throws MiddlewareQueryException, IOException {
 
+		System.out.println("UPDATING GERMPLASM NAME");
 		List<String> newString= new ArrayList<String>();
 
 		JSONObject json_array = (JSONObject) data;
 		String newName = (String) json_array.get("new");
 		String old = (String) json_array.get("old");
-		System.out.println("new: "+newName);
+		//System.out.println("new: "+newName);
 		String error = new Main().checkString(newName);
 
 		List<List<String>> object = (List<List<String>>) json_array.get("list");
@@ -206,13 +189,13 @@ public class Model {
 				row_output.add(row.get(1));
 				row_output.add(row.get(2));
 
-				System.out.print(":: "+ row.get(3));
-				System.out.println(" \t:: "+ row.get(9));
+				//System.out.print(":: "+ row.get(3));
+				//System.out.println(" \t:: "+ row.get(9));
 
 				if(row.get(5).equals(old)){
 
-					System.out.println("female edited");
-					//System.out.println("New:: "+ row.get(2));
+					//System.out.println("female edited");
+					////System.out.println("New:: "+ row.get(2));
 
 					row_output.add("in standardized format");
 					String[] tokens = new Tokenize().tokenize(newName);
@@ -232,7 +215,7 @@ public class Model {
 				}
 
 				if(row.get(9).equals(old)){
-					System.out.println("male edited");
+					//System.out.println("male edited");
 
 					row_output.add(row.get(6));
 					row_output.add("in standardized format");
@@ -241,7 +224,7 @@ public class Model {
 					row_output.add(gid);
 					row_output.add(newName);
 
-					//System.out.println(" \t New:: "+ row.get(6));
+					////System.out.println(" \t New:: "+ row.get(6));
 
 					newString.add("in standardized format");
 					newString.add(gid);
@@ -272,7 +255,7 @@ public class Model {
 			newString.add("N/A");
 			data_output.put("newString", newString);
 		}
-		System.out.println("list: "+data_output.get("list"));
+		//System.out.println("list: "+data_output.get("list"));
 
 		return Response.status(200).entity(data_output).build();
 	}
@@ -296,7 +279,7 @@ public class Model {
 		List<String> row_object=new ArrayList<String>();
 		List<String> row= new ArrayList<String>();
 
-		System.out.println("size"+object.size());
+		////System.out.println("size"+object.size());
 		for (int m = 0; m < object.size();m++) {
 
 			row_object= object.get(m);
@@ -304,8 +287,8 @@ public class Model {
 
 			row.add("N/A");		//0
 			row.add(row_object.get(1));		//1
-			System.out.print("N/A,");
-			System.out.print(row_object.get(1) + ",");
+			//System.out.print("N/A,");
+			//System.out.print(row_object.get(1) + ",");
 
 
 			for (int i = 2; i < row_object.size(); i++) {
@@ -316,34 +299,34 @@ public class Model {
 					// object.get(count);
 					// count++;
 					correctedTerm = row_object.get(i).toString();
-					// System.out.println(""+correctedTerm);
+					// //System.out.println(""+correctedTerm);
 					row.add(""+k);
-					System.out.print(k+ ",");
+					//System.out.print(k+ ",");
 					k++;
 					error = new Main().checkString(row_object.get(i).toString());
 					if (error.equals("")) {
-						// System.out.print("in standardized format");
+						// //System.out.print("in standardized format");
 						row.add("in standardized format"); // remarks
 						String[] tokens = new Tokenize().tokenize(row_object
 								.get(i).toString());
 						gid = new Tokenize().stringTokens(tokens);
 						row.add(gid); // GID
-						System.out.print(gid); // GID
+						//System.out.print(gid); // GID
 
 					} else {
 						correctedTerm = new FixString().checkString(correctedTerm);
 						error = new Main().checkString(correctedTerm);
-						System.out.print("ERROR:" + error + "|"); // remarks
+						//System.out.print("ERROR:" + error + "|"); // remarks
 						if (error.equals("")) {
-							System.out.println("in standardized format,"); // remarks
+							//System.out.println("in standardized format,"); // remarks
 							row.add("in standardized format"); // remarks
 							String[] tokens = new Tokenize()
 							.tokenize(correctedTerm);
 							gid = new Tokenize().stringTokens(tokens);
 							row.add(gid); // GID
-							System.out.print("\"" + gid + "\"" + ","); // GID
+							//System.out.print("\"" + gid + "\"" + ","); // GID
 						} else {
-							// System.out.print("not in standardized format");
+							// //System.out.print("not in standardized format");
 
 							row.add(error); // remarks
 							row.add("N/A"); // GID
@@ -351,20 +334,20 @@ public class Model {
 					}
 					//if (j == 1 || j==2) {
 					row.add(correctedTerm); // pedigree term
-					System.out.print(correctedTerm + ","); // pedigree term
+					//System.out.print(correctedTerm + ","); // pedigree term
 					//}
-					// System.out.print("count: "+count);
+					// //System.out.print("count: "+count);
 
 				}
 
-				System.out.println();
+				//System.out.println();
 
 			}
 			output.add(row);
 		}
 
-		System.out.println("yeah: "+output);
-		System.out.println("\t\t\t ***END Method Standardize***");
+		//System.out.println("yeah: "+output);
+		//System.out.println("\t\t\t ***END Method Standardize***");
 
 		return Response.status(201).entity(output).build();
 	}
@@ -378,7 +361,7 @@ public class Model {
 		JSONObject json_array = (JSONObject) list;
 
 		List<String> gu_obj=(List<String>) json_array.get("list");
-		System.out.println("list: "+ gu_obj);
+		//System.out.println("list: "+ gu_obj);
 
 		gu_obj=new sortList().algo(gu_obj);
 
@@ -391,75 +374,75 @@ public class Model {
 			row.add("N/A");
 			row.add(gu_obj.get(j));
 
-			//System.out.print("[0] N/A,");
-			//System.out.print("[1] "+gu_obj.get(j) + ",");
+			////System.out.print("[0] N/A,");
+			////System.out.print("[1] "+gu_obj.get(j) + ",");
 			j++;
-			// System.out.print("NULL ,");
+			// //System.out.print("NULL ,");
 
 			for (int i = 1; i <= 2; i++) {
-				// System.out.print(gu_obj.get(j).toString() + "\t");
+				// //System.out.print(gu_obj.get(j).toString() + "\t");
 
 				row.add(gu_obj.get(j).toString()); // pedigree term
-				//System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
+				////System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
 
 				error = new Main().checkString(gu_obj.get(j).toString());
 				row.add(""+k);
-				//System.out.print("[3] "+k + ",");
-				//System.out.print("[ERROR] "+error + ",");
+				////System.out.print("[3] "+k + ",");
+				////System.out.print("[ERROR] "+error + ",");
 
 				k++;
 				if (error.equals("")) {
 
-					//System.out.print("[4] "+"in standardized format,");
+					////System.out.print("[4] "+"in standardized format,");
 					row.add("in standardized format"); // remarks
-					// System.out.print(" in standardized format,");
+					// //System.out.print(" in standardized format,");
 					// //remarks
 					String[] tokens = new Tokenize().tokenize(gu_obj.get(j)
 							.toString());
 					gid = new Tokenize().stringTokens(tokens);
 
 					if (i == 1) {
-						//System.out.print("\"" + gid + "\""); // GID
+						////System.out.print("\"" + gid + "\""); // GID
 						row.add( gid  ); // GID
 
 					}
 					if (i == 2) {
 						if (j == 1) {
 							row.add(  gid);
-							//System.out.print("\"" + gid + "\"");
+							////System.out.print("\"" + gid + "\"");
 						} else {
 							row.add( gid );
-							//System.out.print("\"" + gid +"\"");
+							////System.out.print("\"" + gid +"\"");
 						}
 					}
 
 
 
 				} else {
-					//System.out.print("\"" + error + "\"" + ","); // remarks
+					////System.out.print("\"" + error + "\"" + ","); // remarks
 					row.add(error); // remarks
 					if (i == 2) {
 						row.add("N/A"); // GID
-						//System.out.print("N/A,");
+						////System.out.print("N/A,");
 					}
 					if (i == 1) {
 						row.add("N/A"); // GID
-						//System.out.print("N/A,");
+						////System.out.print("N/A,");
 					}
 				}
 				j++;
 			}
-			//System.out.println();
-			//System.out.println("line: "+line);
+			////System.out.println();
+			////System.out.println("line: "+line);
 
 			//row.add(line);
 			output.add(row);
 
-			//System.out.println("\n \n **row: "+row);
-			//System.out.println("\n \n **output: "+output);
+			////System.out.println("\n \n **row: "+row);
+			////System.out.println("\n \n **output: "+output);
 		}
-		//System.out.println("output: "+output);
-		//System.out.println("output size: "+output.size());
+		////System.out.println("output: "+output);
+		////System.out.println("output size: "+output.size());
 
 		return Response.status(201).entity(output).build();
 
