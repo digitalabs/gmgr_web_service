@@ -15,8 +15,8 @@ public class Config {
 		return factory;
 	}
 
-	/*
 	
+/*
 	public ManagerFactory configDB(){
 		DatabaseConnectionParameters local = new DatabaseConnectionParameters(
 				"127.0.0.1", "3306", "local", "datasourceuser", "ici$rule$");
@@ -28,7 +28,7 @@ public class Config {
 	}
 	
 
-/*
+
 	public ManagerFactory configDB(){
 		DatabaseConnectionParameters local = new DatabaseConnectionParameters(
 				"127.0.0.1", "5528", "local", "datasourceuser", "ici$rule$");

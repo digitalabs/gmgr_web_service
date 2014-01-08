@@ -38,31 +38,47 @@ public class Tokenize {
 	 */
 	public String stringTokens(String tokens[]) throws MiddlewareQueryException, IOException {
 		//FileWriter writer = new FileWriter("c:\\createdGID.csv");
-		String s = "", st = "",f1="";
+		String s = "", st = "";
+		int count=tokens.length-1;
+		while(count>0){
+			for (int i = 0; i < count; i++) {
+				if (i == 0) {
+					s = s + tokens[i];
+				} else {
+					s = s + "-" + tokens[i];
+				}
+			} 
+			
+			if(count==tokens.length){
+				st = st + s;
+			}else{
+				st =  st + "#"+ s;
+			}
+			
+			s="";
+			count--;
+		}
+		//System.out.println("st: "+st);
+		
+		/*
 		s = "";
+		st = "";
+		
 		for (int i = 0; i < tokens.length;) {
 			if (i == 0) {
 				s = s + tokens[i];
-				f1=s;	//f1 generation
-				//createGID(s);
 			} else {
 				s = s + "-" + tokens[i];
-				//int gid=createGID(s);
-				//writer.append(""+gid+", \n");
 			}
 			i++;
 
-			//Germplasm germplasm = manager.getGermplasmByGID(new Integer(50533));
-			//System.out.println(germplasm);
 			if(i==(tokens.length)){
 				st = st + s;
 			}else{
 				st = st + s + "#";
 			}
 		}
-		//writer.flush();
-		//writer.close();
-		//System.out.println(st);
+		*/
 		return st;
 
 	}
