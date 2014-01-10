@@ -416,8 +416,8 @@ public class Model {
 						row.add("N/A"); // GID
 						////System.out.print("N/A,");
 					}
+					row.add(gu_obj.get(j).toString()); // pedigree term
 				}
-				row.add(gu_obj.get(j).toString()); // pedigree term
 			}
 			j++;
 			//System.out.println(j+" :: "+gu_obj.get(j).toString());
