@@ -359,7 +359,7 @@ public class Model {
 	@Path("/post")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createTrackInJSON(JSONObject list) throws IOException, ParseException, MiddlewareQueryException {
+	public Response displayFile(JSONObject list) throws IOException, ParseException, MiddlewareQueryException {
 
 		JSONObject json_array = (JSONObject) list;
 
