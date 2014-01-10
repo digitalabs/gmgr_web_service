@@ -48,6 +48,7 @@ public class test {
 	static List<List<String>> createdGID_local = new ArrayList<List<String>>();
 	static List<String> checked_local = new ArrayList<String>();
 	static String userID_local;
+	static String cross_date;
 
 
 	public static void main(String[] args) throws IOException, MiddlewareQueryException, ParseException {
@@ -326,6 +327,7 @@ public class test {
 				String male_id=row_output.get(6);
 				String male_remarks=row_output.get(7);
 				String male_nval=row_output.get(9);
+				cross_date=row_output.get(10);
 				//cross name
 				String cross=row_output.get(1);
 
@@ -786,6 +788,7 @@ public class test {
 		row.add("N/A" ); // gpid1
 		row.add("N/A" ); // gpid2
 		row.add(""+false ); // gpid2
+		row.add(cross_date ); // cross' date of creation specified in the list
 
 		createdGID_local.add(row);
 		//////System.out.println("row: "+row);
@@ -811,6 +814,7 @@ public class test {
 		row.add("N/A" ); // gpid1
 		row.add("N/A" ); // gpid2
 		row.add(""+false ); // gpid2
+		row.add(cross_date ); // cross' date of creation specified in the list
 
 		createdGID_local.add(row);
 		//////System.out.println("row: "+row);
@@ -837,6 +841,7 @@ public class test {
 		row.add("N/A" ); // gpid1
 		row.add("N/A" ); // gpid2
 		row.add(""+false ); // gpid2
+		row.add(cross_date ); // cross' date of creation specified in the list
 
 		createdGID_local.add(row);
 
@@ -876,6 +881,7 @@ public class test {
 		row.add(""+germplasm.getGpid1()); // gpid1
 		row.add(""+germplasm.getGpid2()); // gpid2
 		row.add(tag ); // gpid2
+		row.add(cross_date ); // cross' date of creation specified in the list 
 
 		/*////System.out.print(id + ",");
 		////System.out.print(parent + ","); // parent
