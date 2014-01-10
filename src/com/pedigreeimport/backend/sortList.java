@@ -15,8 +15,8 @@ public class sortList{
 		sortedList.clear();
 
 		for(int i=0; i<obj.size();i++){
-			if(j<=2){
-				if(j==2){
+			if(j<=3){
+				if(j==3){
 					list.add(s+=""+obj.get(i)+";");
 					s="";
 					j=0;

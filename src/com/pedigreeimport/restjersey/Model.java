@@ -379,44 +379,50 @@ public class Model {
 
 			////System.out.print("[0] N/A,");
 			//System.out.print(" "+gu_obj.get(j) + ",");
-			
+
 			// //System.out.print("NULL ,");
+			System.out.println(j+" :: "+gu_obj.get(j).toString());
 
 			for (int i = 1; i <= 2; i++) {
 				j++;
-				// //System.out.print(gu_obj.get(j).toString() + "\t");
+				if(j< gu_obj.size()){
+					//System.out.println(j+" :: "+gu_obj.get(j).toString());
+					// //System.out.print(gu_obj.get(j).toString() + "\t");
 
-				row.add(gu_obj.get(j).toString()); // pedigree term
-				////System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
+					row.add(gu_obj.get(j).toString()); // pedigree term
+					////System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
 
-				error = new Main().checkString(gu_obj.get(j).toString());
-				row.add(""+k);	//id
-				////System.out.print("[3] "+k + ",");
-				////System.out.print("[ERROR] "+error + ",");
+					error = new Main().checkString(gu_obj.get(j).toString());
+					row.add(""+k);	//id
+					////System.out.print("[3] "+k + ",");
+					////System.out.print("[ERROR] "+error + ",");
 
-				k++;
-				if (error.equals("")) {
+					k++;
+					if (error.equals("")) {
 
-					////System.out.print("[4] "+"in standardized format,");
-					row.add("in standardized format"); // remarks
-					// //System.out.print(" in standardized format,");
-					// //remarks
-					String[] tokens = new Tokenize().tokenize(gu_obj.get(j)
-							.toString());
-					gid = new Tokenize().stringTokens(tokens);
+						////System.out.print("[4] "+"in standardized format,");
+						row.add("in standardized format"); // remarks
+						// //System.out.print(" in standardized format,");
+						// //remarks
+						String[] tokens = new Tokenize().tokenize(gu_obj.get(j)
+								.toString());
+						gid = new Tokenize().stringTokens(tokens);
 
-					row.add( gid  ); // GID
+						row.add( gid  ); // GID
 
-				} else {
-					////System.out.print("\"" + error + "\"" + ","); // remarks
-					row.add(error); // remarks
-					row.add("N/A"); // GID
+					} else {
+						////System.out.print("\"" + error + "\"" + ","); // remarks
+						row.add(error); // remarks
+						row.add("N/A"); // GID
 						////System.out.print("N/A,");
+					}
 				}
 			}
 			j++;
+			//System.out.println(j+" :: "+gu_obj.get(j).toString());
 			row.add(gu_obj.get(j).toString()); // cross' date of creation
 			j++;
+			//System.out.println(j+" :: "+gu_obj.get(j).toString());
 			
 			////System.out.println();
 			////System.out.println("line: "+line);
