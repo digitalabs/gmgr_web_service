@@ -389,7 +389,7 @@ public class Model {
 					//System.out.println(j+" :: "+gu_obj.get(j).toString());
 					// //System.out.print(gu_obj.get(j).toString() + "\t");
 
-					row.add(gu_obj.get(j).toString()); // pedigree term
+					
 					////System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
 
 					error = new Main().checkString(gu_obj.get(j).toString());
@@ -417,6 +417,7 @@ public class Model {
 						////System.out.print("N/A,");
 					}
 				}
+				row.add(gu_obj.get(j).toString()); // pedigree term
 			}
 			j++;
 			//System.out.println(j+" :: "+gu_obj.get(j).toString());
