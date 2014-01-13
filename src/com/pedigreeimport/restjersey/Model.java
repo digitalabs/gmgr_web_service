@@ -366,10 +366,11 @@ public class Model {
 		List<String> gu_obj=(List<String>) json_array.get("list");
 		System.out.println("list: "+ gu_obj);
 
-		//gu_obj=new sortList().algo(gu_obj);
-
+		gu_obj=new sortList().algo(gu_obj);
+      
 		List<List<String>> output = new ArrayList<List<String>>();
 		int k=0;
+		System.out.println("size:"+gu_obj.size());
 		for (int j =0; j< gu_obj.size();){
 			List<String> row= new ArrayList<String>();
 			String error, gid;
@@ -386,6 +387,7 @@ public class Model {
 			for (int i = 1; i <= 2; i++) {
 				j++;
 				if(j< gu_obj.size()){
+			
 					//System.out.println(j+" :: "+gu_obj.get(j).toString());
 					// //System.out.print(gu_obj.get(j).toString() + "\t");
 

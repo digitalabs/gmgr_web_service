@@ -40,6 +40,7 @@ public class sortList{
 			String crossed = column[0];  //*****crossed
 			String female = column[1];  //******female
 			String male = column[2];    //******male
+			String date = column[3];
 			//////System.out.println("List:"+list);
 
 			////System.out.println("**********After sorting******");
@@ -55,8 +56,9 @@ public class sortList{
 			list2.add(column[0]);
 			list2.add(column[1]);
 			list2.add(column[2]);
+			list2.add(column[3]);
 		}
-		//System.out.println("list:"+list2);
+		System.out.println("list:"+list2);
 		
 		
 		return list2;
@@ -76,15 +78,18 @@ public class sortList{
 		List<String> femaleList = new ArrayList<String>();
 		List<String> maleList = new ArrayList<String>();
 		List<String> crossedList = new ArrayList<String>();
+		List<String> crossedDateList = new ArrayList<String>();
 
 		femaleList.clear();
 		maleList.clear();
 		crossedList.clear();
+		crossedDateList.clear();
 
 
 		crossedList = GetCrossedList(list);
 		femaleList = GetFemaleParents(list);
 		maleList = GetMaleParents(list);
+		crossedDateList = GetCrossedDateList(list);
 
 		/*////System.out.println("****BEFORE*****");
 		    ////System.out.println("crossed:"+crossedList);
@@ -93,6 +98,8 @@ public class sortList{
 
 		//***check if female exists in the crossed list
 		while( (crossedList.contains(female) || (crossedList.contains(male)) ) && ( (femaleList.indexOf(female) < crossedList.indexOf(female)) || ((maleList.indexOf(male) < crossedList.indexOf(male))) ) ){
+			
+			
 			
 			if((femaleList.indexOf(female) < crossedList.indexOf(female)) ){
 				//System.out.println("****FEMALE*****");
@@ -112,6 +119,7 @@ public class sortList{
 				crossedList = GetCrossedList(list);
 				femaleList = GetFemaleParents(list);
 				maleList = GetMaleParents(list);
+				crossedDateList = GetCrossedDateList(list);
 				
 				female = femaleList.get(index);
 				male = maleList.get(index);
@@ -158,6 +166,7 @@ public class sortList{
 				crossedList = GetCrossedList(list);
 				femaleList = GetFemaleParents(list);
 				maleList = GetMaleParents(list);
+				crossedDateList = GetCrossedList(list);
 
 				male = maleList.get(index);
 				female = femaleList.get(index);
@@ -177,7 +186,7 @@ public class sortList{
 			}
 
 		}
-
+		//System.out.println("li:"+list);
 		return list;
 	}
 
@@ -211,12 +220,29 @@ public class sortList{
 	public static List<String> GetCrossedList(List<String> list){
 
 		List<String>crossedList = new ArrayList<String>();
-
+        crossedList.clear();
+        
 		for(int i=0;i<list.size();i++){
 			String[] column = list.get(i).split(";");
 			crossedList.add(column[0]);
 		}
 		return crossedList;
+	}
+	
+	public static List<String> GetCrossedDateList(List<String> list){
+		
+		
+		List<String>crossedDateList = new ArrayList<String>();
+		crossedDateList.clear();
+		
+		for(int i=0;i<list.size();i++){
+			String[] column = list.get(i).split(";");
+			
+		  	crossedDateList.add(column[3]);
+		  	
+		}
+		
+		return crossedDateList;
 	}
 
 
