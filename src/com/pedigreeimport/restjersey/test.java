@@ -586,23 +586,31 @@ public class test {
 			}
 
 			//print to file
-			printSuccess(pedigree,parent,id, germplasm.get(0),manager, "false");
-			GID=germplasm.get(0).getGid();
+			if(germplasm.get(0).getLocationId().equals(locationID)){
+				printSuccess(pedigree,parent,id, germplasm.get(0),manager, "false");
+				GID=germplasm.get(0).getGid();
 
 
-			if(pedigreeList.size()>1){
+				if(pedigreeList.size()>1){
 
-				int gpid1= germplasm.get(0).getGpid1();	//get gpid1/root
-				int gpid2= germplasm.get(0).getGpid2();	//get gpid1/root
+					int gpid1= germplasm.get(0).getGpid1();	//get gpid1/root
+					int gpid2= germplasm.get(0).getGpid2();	//get gpid1/root
 
-				pedigreeList.remove(0); // remove the pedigree already processed
+					pedigreeList.remove(0); // remove the pedigree already processed
 
-				//call function to search for the pedigree line
-				single_Hit(manager, id, parent, gpid1, gpid2, pedigreeList,root);
+					//call function to search for the pedigree line
+					single_Hit(manager, id, parent, gpid1, gpid2, pedigreeList,root);
+				}
+
+					
+			}else{
+				pedigreeList.remove(0);
+				printNotSet(pedigree, parent, id);
+				
+				// see flowchart for match_none=true 
 			}
-
 			result=true;	//set flag to true
-
+			
 		}else if(count>1){
 			//multiple_hit
 			////System.out.println("Multiple Hit");
@@ -673,6 +681,144 @@ public class test {
 		////System.out.println(" ###ENDING..Parsing \n");
 
 		return result;
+	}
+	
+	private Boolean assignGID_i(GermplasmDataManager manager,
+			ArrayList<String> pedigreeList,String parent,String id) throws MiddlewareQueryException,
+			IOException {
+
+		Boolean flag = false;
+		
+		for(int i=0; i<pedigreeList.size(); i++){
+			String pedigree=pedigreeList.get(i);
+			if(flag){
+				int count_LOCAL = countGermplasmByName(manager,pedigree, Database.LOCAL);
+				int count_CENTRAL= countGermplasmByName(manager,pedigree,Database.CENTRAL);
+
+				int count=count_LOCAL+ count_CENTRAL;
+
+				List<Germplasm> germplasm = new ArrayList<Germplasm>();
+				List<Germplasm> germplasm_fin = new ArrayList<Germplasm>();
+
+				if(count==1){
+					if(count_LOCAL==1){
+						germplasm=getGermplasm(Database.LOCAL, manager,pedigree, count_LOCAL);
+					}else if(count_LOCAL==1){
+						germplasm=getGermplasm(Database.CENTRAL,manager,pedigree, count_CENTRAL);
+					}
+					if(germplasm.get(0).getLocationId().equals(locationID)){
+						germplasm_fin.add(germplasm.get(i));
+					}
+					flag=true;
+				}else if(count>1){
+					germplasm=getGermplasmList(manager, pedigree, count_LOCAL, count_CENTRAL);
+
+					for(int j=0; j<germplasm.size();j++){
+						if(germplasm.get(j).getLocationId().equals(locationID)){
+							germplasm_fin.add(germplasm.get(j));
+						}
+					}
+					if(germplasm_fin.size()>1){
+						multipleHits_inLocation(germplasm, manager, pedigree, id, pedigree,pedigreeList);
+					}
+					flag=false;
+
+				}else{
+					//no germplasm name in the list's location
+
+				}
+
+			}else{
+				printNotSet(pedigree, parent, id);
+				flag=false;
+			}			
+		}
+		return flag;
+	}
+	public static void multipleHits_inLocation(List<Germplasm> germplasm, GermplasmDataManager manager, String pedigree, String id, String root, ArrayList<String> pedigreeList) throws IOException, MiddlewareQueryException{
+
+		List<Name> name=null;
+		String nval_gpid1, nval_gpid2;
+		List<String> row=new ArrayList<String>();
+
+		//System.out.println("1 existingTerm:"+existingTerm_local);
+
+		for (int i = 0; i < germplasm.size(); i++) {
+
+			row= new ArrayList<String>();
+			////System.out.println(germplasm.get(i).getGid());
+			row.add(id);
+			row.add(root);
+			/*////System.out.println("\n string: " + root);
+			////System.out.println("GID: " + germplasm.get(i).getGid());
+			////System.out.println("gpid1: " + germplasm.get(i).getGpid1());
+			////System.out.println("gpid2: " + germplasm.get(i).getGpid2());
+			 */
+			name = new ArrayList<Name>();
+			if (germplasm.get(i).getGpid1() != 0
+					&& germplasm.get(i).getGpid2() != 0) {
+
+				name=manager.getNamesByGID(germplasm.get(i)
+						.getGpid1(), 0, null);
+				nval_gpid1 = name.get(0).getNval();
+
+				////System.out.println("nval_gpid1: " + nval_gpid1);				
+				name=manager.getNamesByGID(germplasm.get(i)
+						.getGpid2(), 0, null);
+				nval_gpid2 = name.get(0).getNval();
+
+				////System.out.println("nval_gpid2: " + nval_gpid2);
+			} else {
+				if(germplasm.get(i).getGpid1() == 0 && germplasm.get(i).getGpid2() != 0){
+					nval_gpid1 = "Source unknown";	
+					name=manager.getNamesByGID(germplasm.get(i)
+							.getGpid2(), 0, null);
+					nval_gpid2 = name.get(0).getNval();
+
+				}else if(germplasm.get(i).getGpid2() == 0 && germplasm.get(i).getGpid1() != 0){
+					name=manager.getNamesByGID(germplasm.get(i)
+							.getGpid1(), 0, null);
+					nval_gpid1 = name.get(0).getNval();
+					nval_gpid2 = "Source unknown";
+				}else{
+					nval_gpid1 = "Source unknown";
+					nval_gpid2 = "Source unknown";
+				}
+			}
+			Location location = manager.getLocationByID(germplasm.get(i)
+					.getLocationId());
+			Method method = manager.getMethodByID(germplasm.get(i)
+					.getMethodId());
+
+			row.add(""+germplasm.get(i).getGpid1());
+			row.add( nval_gpid1);
+
+			row.add(""+germplasm.get(i).getGpid2());
+			row.add(nval_gpid2);
+
+			row.add(""+germplasm.get(i).getGid()); // gid
+
+			String meth=method.getMname().replace(",", "#");
+			row.add(""+germplasm.get(i).getMethodId());
+			row.add(meth ); // method
+			String loc=location.getLname().replace(",", "#");
+			row.add(""+germplasm.get(i).getLocationId());
+			row.add(loc); // location
+
+			//clearing memory
+			location=null;
+			method=null;
+
+			existingTerm_local.add(row);
+			//System.out.println("row: "+row);
+
+		}
+		//existingTerm_local = existingTerm;
+
+		//System.out.println("2 existingTerm:"+existingTerm_local);
+		//
+		germplasm.clear();
+		name.clear();
 	}
 
 
