@@ -293,13 +293,13 @@ public class Model {
 
 			for (int i = 2; i < row_object.size(); i++) {
 				//for (int j = 1; j < 3; j++) {
-				if(i==2 || i==6){
+				if(i==5 || i==9){
 
 
 					// object.get(count);
 					// count++;
 					correctedTerm = row_object.get(i).toString();
-					// //System.out.println(""+correctedTerm);
+					System.out.println(""+correctedTerm);
 					row.add(""+k);
 					//System.out.print(k+ ",");
 					k++;
@@ -339,7 +339,7 @@ public class Model {
 					// //System.out.print("count: "+count);
 
 				}
-				System.out.println(""+row_object.get(i));
+				//System.out.println(""+row_object.get(i));
 				if(i==10){
 					row.add(row_object.get(i).toString()); // cross' date of creation
 				}
@@ -381,7 +381,7 @@ public class Model {
 			//System.out.print(" "+gu_obj.get(j) + ",");
 
 			// //System.out.print("NULL ,");
-			System.out.println(j+" :: "+gu_obj.get(j).toString());
+			//System.out.println(j+" :: "+gu_obj.get(j).toString());
 
 			for (int i = 1; i <= 2; i++) {
 				j++;
@@ -431,10 +431,9 @@ public class Model {
 			//row.add(line);
 			output.add(row);
 
-			////System.out.println("\n \n **row: "+row);
 			////System.out.println("\n \n **output: "+output);
 		}
-		////System.out.println("output: "+output);
+		//System.out.println("output: "+output);
 		////System.out.println("output size: "+output.size());
 
 		return Response.status(201).entity(output).build();
