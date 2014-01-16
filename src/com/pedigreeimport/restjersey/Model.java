@@ -69,7 +69,7 @@ public class Model {
 		//System.out.println("HERE!");
 		JSONObject output=new JSONObject();
 		ManagerFactory factory = new Config().configDB();
-		output=test.single_createGID(data,factory);
+		output=test.chooseGID(data,factory);
 		factory.close();
 		return Response.status(200).entity(output).build();
 
@@ -211,7 +211,7 @@ public class Model {
 					row_output.add(row.get(3));
 					row_output.add(row.get(4));
 					row_output.add(row.get(5));
-
+					
 				}
 
 				if(row.get(9).equals(old)){
@@ -228,14 +228,15 @@ public class Model {
 
 					newString.add("in standardized format");
 					newString.add(gid);
+					row_output.add(row.get(10));
 				}else{
 					row_output.add(row.get(6));
 					row_output.add(row.get(7));
 					row_output.add(row.get(8));
 					row_output.add(row.get(9));
-
+					row_output.add(row.get(10));
 				}
-
+				
 				output.add(row_output);
 			}
 			data_output.put("list", output);
