@@ -1,7 +1,12 @@
 package com.pedigreeimport.restjersey;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +16,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -19,6 +23,15 @@ import org.generationcp.middleware.exceptions.ConfigException;
 import org.generationcp.middleware.exceptions.MiddlewareQueryException;
 import org.generationcp.middleware.manager.ManagerFactory;
 import org.generationcp.middleware.manager.api.GermplasmDataManager;
+import org.generationcp.middleware.manager.api.PedigreeDataManager;
+import org.generationcp.middleware.pojos.Bibref;
+import org.generationcp.middleware.pojos.Country;
+import org.generationcp.middleware.pojos.GermplasmPedigreeTree;
+import org.generationcp.middleware.pojos.GermplasmPedigreeTreeNode;
+import org.generationcp.middleware.pojos.Location;
+import org.generationcp.middleware.pojos.Method;
+import org.generationcp.middleware.pojos.Name;
+import org.generationcp.middleware.util.Debug;
 import org.json.JSONException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -27,6 +40,11 @@ import com.pedigreeimport.backend.*;
 
 @Path("/term")
 public class Model {
+	
+	private static int counter = 0;
+	private int cnt;
+	private static List<Integer> counterArray = new ArrayList<Integer>();
+	private String outputString = "";
 	
 	@Path("/welcome")
 	@GET
@@ -449,11 +467,173 @@ public class Model {
 	public Response searchGID(JSONObject data) throws JSONException, FileNotFoundException,
 			IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
 		
-		new Editor();
-		Editor.searchAllGermplasm((JSONObject)data);
+		//new Editor().generatePedigreeTreeJson((JSONObject)data);
+		//return Response.status(200).entity("OK!").build();
+		File myFile = new File("E:/xampp/htdocs/GMGR/json_files/tree.json");
+	    myFile.delete();
+	        
+		JSONObject json_array = (JSONObject) data;
+		String gid = (String) json_array.get("GID");
+		String level = (String) json_array.get("LEVEL");
+		JSONObject outputTree = new JSONObject();
 		
-		return Response.status(200).entity("OK!").build();
+		ManagerFactory factory = new Config().configDB();
+		
+		cnt = counter++;
+		
+		if(cnt % 2 == 1)
+		{
+			
+			PedigreeDataManager pedigreeManager = factory.getPedigreeDataManager();
+			    
+	        Debug.println(10, "GID = " + Integer.parseInt(gid) + ", level = " + Integer.parseInt(level) +  ":");
+	        GermplasmPedigreeTree tree = pedigreeManager.generatePedigreeTree(Integer.parseInt(gid),Integer.parseInt(level));
+	   
+	        for(int i=0;i<Integer.parseInt(level);i++)
+	        {
+	        	counterArray.add(0);
+	        }
+	        
+	        if (tree != null) 
+	        {
+	        	outputString = outputString +"{";
+	        	System.out.println("{");
+	            printNode(tree.getRoot(), 1);
+	            outputString = outputString +"\n}";
+	            System.out.println("}");
+	        }
+	        
+	        
+	       BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+				     new FileOutputStream("E:/xampp/htdocs/GMGR/json_files/tree.json"),"UTF-8"));
+	        
+	       // erasor.write(new String().getBytes()); 
+	       // erasor.close(); 
+	        
+	        out.write(outputString);
+	        out.close();
+			
+		    factory.close();
+	        //out.write((new String()).getBytes());
+	       
+		}
+		
+		outputTree.put("tree", outputString);
+		
+		System.out.println("Output: " + outputTree.get("tree"));
+		return Response.status(200).entity(outputTree).build();
 	}
+	
+	private void printNode(GermplasmPedigreeTreeNode node, int level) throws IOException, MiddlewareQueryException {
+	       
+		StringBuffer tabs = new StringBuffer();
+		ManagerFactory factory = new Config().configDB();
+		GermplasmDataManager man = factory.getGermplasmDataManager();
+		
+		Method meth = man.getMethodByID(node.getGermplasm().getMethodId());
+		Location loc = man.getLocationByID(node.getGermplasm().getLocationId());
+		Bibref bibref = man.getBibliographicReferenceByID(node.getGermplasm().getReferenceId());
+		List<Name> names = man.getNamesByGID(node.getGermplasm().getGid(), null, null);
+		Location loc2 = null;
+		
+		Integer cid = loc.getCntryid();
+		Country cnty = man.getCountryById(cid);
+		 
+        for (int ctr = 1; ctr < level; ctr++) {
+            tabs.append("\t");
+        }
+        
+        counterArray.set(level-1, 0);
+        String name = node.getGermplasm().getPreferredName() != null ? node.getGermplasm().getPreferredName().getNval() : null;
+        
+        if(!node.getLinkedNodes().isEmpty()){
+        	Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\",");
+        	
+        	outputString = outputString + "\n "+ tabs.toString() + tabs.toString() +"\"gid\" : \" " + node.getGermplasm().getGid() +"\",\n"
+                    + tabs.toString() +"    \"name\" : \" " + name +"\",\n"
+                    + tabs.toString() +"    \"date\" : \" " + node.getGermplasm().getGdate() +"\",\n"
+                    + tabs.toString() +"    \"id\" : \" " + node.getGermplasm().getGid() +"\",\n"
+                    + tabs.toString() +"    \"layer\" : \" " + (level-1) +"\",\n"
+                    + tabs.toString() +"    \"methodname\" : \" " + meth.getMname() +"\",\n"
+                    + tabs.toString() +"    \"methodtype\" : \" " + meth.getMtype() +"\",\n"
+                    + tabs.toString() +"    \"location\" : \" " + loc.getLname() +"\",\n"
+                    + tabs.toString() +"    \"country\" : \" " + cnty.getIsoabbr() +"\",\n"
+                    + tabs.toString() +"    \"ref\" : \" " + bibref.getAnalyt() +"\",\n";
+            
+            for(int cntr=0;cntr<names.size();cntr++)
+     		{
+     			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
+                  outputString = outputString 
+                  + tabs.toString() +"    \"dates"+cntr+"\" : \" " + names.get(cntr).getNdate() +"\",\n"
+                  + tabs.toString() +"    \"name"+cntr+"\" : \" " + names.get(cntr).getNval() +"\",\n"
+                  + tabs.toString() +"    \"ntype"+cntr+"\" : \" " + names.get(cntr).getTypeId() +"\",\n"
+                  + tabs.toString() +"    \"nstat"+cntr+"\" : \" " + names.get(cntr).getNstat() +"\",\n"
+                  + tabs.toString() +"    \"loc"+cntr+"\" : \" " + loc2.getLname() +"\",\n";
+                 
+    		}
+     		outputString = outputString + tabs.toString() +"    \"gpid1\" : \" " + node.getGermplasm().getGpid1() +"\",\n";
+     		outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\",\n";
+        }
+        	
+        else{
+        
+        	Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\"");
+        
+        	outputString = outputString + "\n "+ tabs.toString() + tabs.toString() + "\"gid\" : \" " + node.getGermplasm().getGid() +"\",\n"
+                    + tabs.toString() +"    \"name\" : \" " + name +"\",\n"
+                    + tabs.toString() +"    \"date\" : \" " + node.getGermplasm().getGdate() +"\",\n"
+                    + tabs.toString() +"    \"id\" : \" " + node.getGermplasm().getGid() +"\",\n"
+                    + tabs.toString() +"    \"layer\" : \" " + (level-1) +"\",\n"
+                    + tabs.toString() +"    \"methodname\" : \" " + meth.getMname() +"\",\n"
+                    + tabs.toString() +"    \"methodtype\" : \" " + meth.getMtype() +"\",\n"
+                    + tabs.toString() +"    \"location\" : \" " + loc.getLname() +"\",\n"
+                    + tabs.toString() +"    \"country\" : \" " + cnty.getIsoabbr() +"\",\n"
+                    + tabs.toString() +"    \"ref\" : \" " + bibref.getAnalyt() +"\",\n";
+            
+            for(int cntr=0;cntr<names.size();cntr++)
+     		{
+     			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
+                  outputString = outputString 
+                  + tabs.toString() +"    \"dates"+cntr+"\" : \" " + names.get(cntr).getNdate() +"\",\n"
+                  + tabs.toString() +"    \"name"+cntr+"\" : \" " + names.get(cntr).getNval() +"\",\n"
+                  + tabs.toString() +"    \"ntype"+cntr+"\" : \" " + names.get(cntr).getTypeId() +"\",\n"
+                  + tabs.toString() +"    \"nstat"+cntr+"\" : \" " + names.get(cntr).getNstat() +"\",\n"
+                  + tabs.toString() +"    \"loc"+cntr+"\" : \" " + loc2.getLname() +"\",\n";
+                 
+    		}
+     		outputString = outputString + tabs.toString() +"    \"gpid1\" : \" " + node.getGermplasm().getGpid1() +"\",\n";
+     		outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\"\n";
+        }
+        
+        if(!node.getLinkedNodes().isEmpty()){
+        	outputString = outputString + tabs.toString() + "\"children\" : \n" + tabs.toString() +"[";
+        	System.out.println(tabs.toString() + "\"children\" : \n" + tabs.toString() +"[");
+        }
+        
+        for (GermplasmPedigreeTreeNode parent : node.getLinkedNodes()) {
+        	
+        	counterArray.set(level-1,counterArray.get(level-1)+1);
+        	
+        	System.out.println(tabs.toString()+"{");
+        	outputString = outputString + "\n" + tabs.toString()+ "{" ;
+        	outputString = outputString + "\n";
+                     printNode(parent, level + 1);
+        	outputString = outputString + "\n" + tabs.toString()+ "}";
+            System.out.println(tabs.toString()+"}");
+           
+            if(counterArray.get(level-1) < node.getLinkedNodes().size() ) 
+            {
+             		outputString = outputString + tabs.toString()+ ","; //check if no sibling
+             		System.out.println(tabs.toString()+",");
+            }
+            
+        }
+        
+        if(!node.getLinkedNodes().isEmpty()){
+        	outputString = outputString + "\n" + tabs.toString()+ "]";
+        	System.out.println(tabs.toString()+"]");
+        }
+    }
 	
 	@Path("/show_germplasm_details")
 	@POST
@@ -463,7 +643,7 @@ public class Model {
 			IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
 		
 		new Editor();
-		Editor.show_germplasm_details((JSONObject)data);
+		//Editor.show_germplasm_details((JSONObject)data);
 		
 		return Response.status(200).entity("OK!").build();
 	}
