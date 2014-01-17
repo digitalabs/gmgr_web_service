@@ -21,17 +21,20 @@ import javax.ws.rs.core.Response;
 
 import org.generationcp.middleware.exceptions.ConfigException;
 import org.generationcp.middleware.exceptions.MiddlewareQueryException;
+import org.generationcp.middleware.hibernate.HibernateUtil;
 import org.generationcp.middleware.manager.ManagerFactory;
 import org.generationcp.middleware.manager.api.GermplasmDataManager;
 import org.generationcp.middleware.manager.api.PedigreeDataManager;
 import org.generationcp.middleware.pojos.Bibref;
 import org.generationcp.middleware.pojos.Country;
+import org.generationcp.middleware.pojos.Germplasm;
 import org.generationcp.middleware.pojos.GermplasmPedigreeTree;
 import org.generationcp.middleware.pojos.GermplasmPedigreeTreeNode;
 import org.generationcp.middleware.pojos.Location;
 import org.generationcp.middleware.pojos.Method;
 import org.generationcp.middleware.pojos.Name;
 import org.generationcp.middleware.util.Debug;
+import org.hibernate.Session;
 import org.json.JSONException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -41,6 +44,8 @@ import com.pedigreeimport.backend.*;
 @Path("/term")
 public class Model {
 	
+	private static GermplasmDataManager manager;
+	private static HibernateUtil hibernateUtil;
 	private static int counter = 0;
 	private int cnt;
 	private static List<Integer> counterArray = new ArrayList<Integer>();
@@ -644,6 +649,37 @@ public class Model {
 		
 		new Editor();
 		//Editor.show_germplasm_details((JSONObject)data);
+		
+		return Response.status(200).entity("OK!").build();
+	}
+	
+	@Path("/editGermplasm")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response editGermplasm(JSONObject data) throws JSONException, FileNotFoundException,
+			IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
+		
+		//new Editor();
+		//Editor.show_germplasm_details((JSONObject)data);
+		//Session session = hibernateUtil.getCurrentSession();
+		//Germplasm g = (Germplasm) session.load(Germplasm.class, 50533);
+		ManagerFactory factory = new Config().configDB();
+		GermplasmDataManager man = factory.getGermplasmDataManager();
+		
+		//g.setGid(50534);
+		Integer nameId = 260142; //Assumption: id=-1 exists
+        Name name = man.getGermplasmNameByID(nameId); 
+        String nameBefore = name.toString();
+        //name.setLocationId(man.getLocationByID(9000).getLocid()); //Assumption: location with id=1 exists
+        //man.updateGermplasmName(name);
+        name.setNval("IR64-1");
+        man.updateGermplasmName(name);
+        Debug.println(0, "testUpdateGermplasmName(" + nameId + ") RESULTS: " 
+                + "\n\tBEFORE: " + nameBefore
+                + "\n\tAFTER: " + name.toString());
+		
+		System.out.println("Edit success!");
 		
 		return Response.status(200).entity("OK!").build();
 	}
