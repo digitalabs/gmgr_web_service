@@ -206,6 +206,7 @@ public class test {
 		int fgid=getGID_fromFile(femaleParent, fid);
 
 		if (has_GID(parent2ID, parent2)) {
+			System.out.println("cross: "+ cross);
 			germplasm=isCross_existing(manager, cross);
 			if (germplasm==null){
 				int methodID=selectMethodType(manager,fgid,mgid,femaleParent,maleParent);
@@ -290,13 +291,15 @@ public class test {
 		int count_CENTRAL= countGermplasmByName(manager,cross,Database.CENTRAL);
 
 		germplasm=getGermplasmList(manager, cross, count_LOCAL, count_CENTRAL);
+		System.out.println("gsize: "+germplasm.size());
 
 		for(int j=0; j<germplasm.size();j++){
 			if(germplasm.get(j).getLocationId().equals(locationID)){
 				germplasm_fin.add(germplasm.get(j));
 			}
 		}
-		if(germplasm_fin.size()==0){
+		System.out.println("gfin size: "+germplasm.size());
+		if(germplasm_fin.size()!=0){
 			return germplasm_fin.get(0);
 		}else{
 			return null;
@@ -307,7 +310,7 @@ public class test {
 		int methodID = 0;
 		String tokens[]=pedigree.split("-");
 		Pattern p = Pattern.compile("(\\d+)|(IR\\s\\d+)|(B)|(\\d+B)|(\\d*R)|(\\d*AC)|(C\\d+)|(\\d+MP)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN|SDO)\\s\\d+)");
-		System.out.println("pedigree: "+tokens[tokens.length-1]);
+		//System.out.println("pedigree: "+tokens[tokens.length-1]);
 		String gen;
 		if(tokens.length==0){
 			gen=pedigree;
@@ -316,7 +319,7 @@ public class test {
 		}
 		Matcher m = p.matcher(gen);
 		if(m.find()){
-			printGroup(m);
+			//printGroup(m);
 			
 			if(m.group(1)!=null && m.group(1).equals(gen)){	
 				methodID=205;// Single plant selection
@@ -672,7 +675,7 @@ public class test {
 
 		existingTerm_local=existingTerm;
 		checked_local=checked;
-
+		list_local=list;
 		userID_local=userID;
 
 
@@ -697,6 +700,7 @@ public class test {
 				String male_id=row_output.get(6);
 				String male_remarks=row_output.get(7);
 				String male_nval=row_output.get(9);
+				cross_date=row_output.get(10);
 				//cross name
 				String cross=row_output.get(1);
 
@@ -1414,6 +1418,7 @@ public class test {
 			
 			//System.out.println("date: "+yr.concat(day).concat(mo));
 			row.add(yr.concat(day).concat(mo));	//date of creation
+			row.add(cross_date);	//date of creation
 
 			//clearing memory
 			location=null;

@@ -223,6 +223,7 @@ public class sortList{
         crossedList.clear();
         
 		for(int i=0;i<list.size();i++){
+			//System.out.println("date: "+list.get(i));
 			String[] column = list.get(i).split(";");
 			crossedList.add(column[0]);
 		}
@@ -234,8 +235,9 @@ public class sortList{
 		
 		List<String>crossedDateList = new ArrayList<String>();
 		crossedDateList.clear();
-		
+		//System.out.println("HERE!");
 		for(int i=0;i<list.size();i++){
+			//System.out.println("date: "+list.get(i));
 			String[] column = list.get(i).split(";");
 			
 		  	crossedDateList.add(column[3]);
