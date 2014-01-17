@@ -1098,6 +1098,7 @@ public class test {
 					//no germplasm name in the list's location
 					if(i==pedigreeList.size()-1){	//if root assign GID from the root
 						createPedigreeLine2(manager, pedigreeList, id, parent);
+						result=true;
 					}else{	//else, not root, print NOT SET
 
 						temp=printNotSet_temp(pedigree, parent, id, temp);
