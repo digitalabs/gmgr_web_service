@@ -479,8 +479,8 @@ public class Model {
 		
 		//new Editor().generatePedigreeTreeJson((JSONObject)data);
 		//return Response.status(200).entity("OK!").build();
-		File myFile = new File("E:/xampp/htdocs/GMGR/json_files/tree.json");
-	    myFile.delete();
+		//File myFile = new File("E:/xampp/htdocs/GMGR/json_files/tree.json");
+	   // myFile.delete();
 	        
 		JSONObject json_array = (JSONObject) data;
 		String gid = (String) json_array.get("GID");
@@ -514,15 +514,15 @@ public class Model {
 	        }
 	        
 	        
-	       BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-				     new FileOutputStream("E:/xampp/htdocs/GMGR/json_files/tree.json"),"UTF-8"));
+	      // BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+			//	     new FileOutputStream("E:/xampp/htdocs/GMGR/json_files/tree.json"),"UTF-8"));
 	        
 	       // erasor.write(new String().getBytes()); 
 	       // erasor.close(); 
 	        
-	        out.write(outputString);
-	        out.close();
-			
+	      //  out.write(outputString);
+	      //  out.close();
+		//	
 		    factory.close();
 	        //out.write((new String()).getBytes());
 	       
