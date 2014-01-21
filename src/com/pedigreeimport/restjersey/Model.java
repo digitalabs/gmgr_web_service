@@ -418,7 +418,11 @@ public class Model {
 					
 					////System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
 
-					error = new Main().checkString(gu_obj.get(j).toString());
+					if(gu_obj.get(j).toString().contains("/")||gu_obj.get(j).toString().contains("*")){
+						error=new CrossOp().main(gu_obj.get(j).toString());
+					}else{
+						error = new Main().checkString(gu_obj.get(j).toString());
+					}
 					row.add(""+k);	//id
 					////System.out.print("[3] "+k + ",");
 					////System.out.print("[ERROR] "+error + ",");
