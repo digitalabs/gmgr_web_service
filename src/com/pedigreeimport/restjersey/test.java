@@ -1574,7 +1574,11 @@ public class test {
 		//System.out.println("female: "+female);
 		fgid=GID;
 		////System.out.println("\nmale:");
-		male=checkParent(manager,male_nval, male_id);
+		if(male_nval.contains("/") || male_nval.contains("*")){
+			male=checkParent_crossOp(manager, male_nval, male_id);
+		}else{
+			male=checkParent(manager,male_nval, male_id);
+		}
 		//System.out.println("male: "+male);
 		mgid=GID;
 
