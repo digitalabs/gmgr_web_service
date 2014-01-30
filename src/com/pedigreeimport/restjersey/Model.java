@@ -43,23 +43,23 @@ import com.pedigreeimport.backend.*;
 
 @Path("/term")
 public class Model {
-	
+
 	private static GermplasmDataManager manager;
 	private static HibernateUtil hibernateUtil;
 	private static int counter = 0;
 	private int cnt;
 	private static List<Integer> counterArray = new ArrayList<Integer>();
 	private String outputString = "";
-	
+
 	@Path("/welcome")
 	@GET
 	@Produces("text/html")
 	public Response welcome() {
-		
+
 		return Response.status(200).entity("Genealogy Manager")
 		.build();
 	}
-		
+
 	@Path("/updateMethod")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -170,7 +170,7 @@ public class Model {
 		factory.close();
 
 		////System.out.println("list: "+  json_array.get("list"));
-		////System.out.println("createdGID: "+ json_array.get("createdGID"));
+		System.out.println("createdGID: "+ output.get("createdGID"));
 		////System.out.println("\t existing: "+output.get("existingTerm"));
 		////System.out.println("SINGLE CREATE GID ");
 
@@ -234,7 +234,7 @@ public class Model {
 					row_output.add(row.get(3));
 					row_output.add(row.get(4));
 					row_output.add(row.get(5));
-					
+
 				}
 
 				if(row.get(9).equals(old)){
@@ -259,7 +259,7 @@ public class Model {
 					row_output.add(row.get(9));
 					row_output.add(row.get(10));
 				}
-				
+
 				output.add(row_output);
 			}
 			data_output.put("list", output);
@@ -299,11 +299,13 @@ public class Model {
 
 		List<List<String>> output = new ArrayList<List<String>>();
 		int k = 0;
-		String correctedTerm, error, gid;
+		String correctedTerm, error, gid="";
 		List<String> row_object=new ArrayList<String>();
 		List<String> row= new ArrayList<String>();
+		List<String> correctedList= new ArrayList<String>();
+		String line="";
 
-		////System.out.println("size"+object.size());
+		System.out.println("*******S T A R T I N G Standardization");
 		for (int m = 0; m < object.size();m++) {
 
 			row_object= object.get(m);
@@ -327,26 +329,70 @@ public class Model {
 					row.add(""+k);
 					//System.out.print(k+ ",");
 					k++;
-					error = new Main().checkString(row_object.get(i).toString());
+					JSONObject parse=new JSONObject();
+					
+					if(row_object.get(i).toString().contains("/")||row_object.get(i).toString().contains("*")){
+						parse=new CrossOp().main(row_object.get(i).toString(),true);	// false= not to standardize
+						JSONObject parse_array = (JSONObject) parse;
+					
+						correctedList=(List<String>) parse_array.get("correctedList");
+						error= (String) parse_array.get("error");
+						correctedTerm =correctedList.get(0);
+						
+					}else{
+						error = new Main().checkString(row_object.get(i).toString());
+					}
+
 					if (error.equals("")) {
 						// //System.out.print("in standardized format");
 						row.add("in standardized format"); // remarks
-						String[] tokens = new Tokenize().tokenize(row_object
-								.get(i).toString());
-						gid = new Tokenize().stringTokens(tokens);
+
+						if(row_object.get(i).toString().contains("/")||row_object.get(i).toString().contains("*")){
+							//System.out.println("tokens: "+ gid);
+							
+							for(int n=1; n<correctedList.size(); n++){
+								gid =  gid + "#"+ correctedList.get(n);
+
+								//System.out.println("tokens: "+ gid);
+							}
+							//System.out.println("tokens: "+ gid);
+						}else{
+							String[] tokens = new Tokenize().tokenize(row_object
+									.get(i).toString());
+							gid = new Tokenize().stringTokens(tokens);
+						}
+
 						row.add(gid); // GID
 						//System.out.print(gid); // GID
 
 					} else {
-						correctedTerm = new FixString().checkString(correctedTerm);
-						error = new Main().checkString(correctedTerm);
+						if(row_object.get(i).toString().contains("/")||row_object.get(i).toString().contains("*")){
+							correctedTerm=correctedList.get(0);
+							error=(String) parse.get("error");
+							
+						}else{
+							correctedTerm = new FixString().checkString(correctedTerm);
+
+							error = new Main().checkString(correctedTerm);
+						}
 						//System.out.print("ERROR:" + error + "|"); // remarks
 						if (error.equals("")) {
 							//System.out.println("in standardized format,"); // remarks
-							row.add("in standardized format"); // remarks
-							String[] tokens = new Tokenize()
-							.tokenize(correctedTerm);
-							gid = new Tokenize().stringTokens(tokens);
+							if(row_object.get(i).toString().contains("/")||row_object.get(i).toString().contains("*")){
+								System.out.println("tokens: "+ gid);
+								for(int n=1; n<correctedList.size(); n++){
+									gid =  gid + "#"+ correctedList.get(n);
+
+									System.out.println("tokens: "+ gid);
+								}
+								System.out.println("tokens: "+ gid);
+								correctedTerm=correctedList.get(0);
+							}else{
+								row.add("in standardized format"); // remarks
+
+								String[] tokens = new Tokenize().tokenize(correctedTerm);
+								gid = new Tokenize().stringTokens(tokens);
+							}
 							row.add(gid); // GID
 							//System.out.print("\"" + gid + "\"" + ","); // GID
 						} else {
@@ -357,8 +403,9 @@ public class Model {
 						}
 					}
 					//if (j == 1 || j==2) {
+					
 					row.add(correctedTerm); // pedigree term
-					//System.out.print(correctedTerm + ","); // pedigree term
+					System.out.print("#####"+correctedTerm); // pedigree term
 					//}
 					// //System.out.print("count: "+count);
 
@@ -369,7 +416,7 @@ public class Model {
 				}
 
 			}
-			
+
 			output.add(row);
 		}
 
@@ -391,13 +438,15 @@ public class Model {
 		System.out.println("list: "+ gu_obj);
 
 		gu_obj=new sortList().algo(gu_obj);
-      
+
 		List<List<String>> output = new ArrayList<List<String>>();
 		int k=0;
+		String line = "";
+		
 		System.out.println("size:"+gu_obj.size());
 		for (int j =0; j< gu_obj.size();){
 			List<String> row= new ArrayList<String>();
-			String error, gid;
+			String error, gid = "";
 
 			row.add("N/A");
 			row.add(gu_obj.get(j));	// Cross name
@@ -407,19 +456,24 @@ public class Model {
 
 			// //System.out.print("NULL ,");
 			//System.out.println(j+" :: "+gu_obj.get(j).toString());
-
+			List<String> correctedList= new ArrayList<String>();
 			for (int i = 1; i <= 2; i++) {
 				j++;
 				if(j< gu_obj.size()){
-			
+
 					//System.out.println(j+" :: "+gu_obj.get(j).toString());
 					// //System.out.print(gu_obj.get(j).toString() + "\t");
 
-					
-					////System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
 
+					////System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
+					JSONObject parse=new JSONObject();
+					List<String> tokens_crossOp= new ArrayList<String>();
 					if(gu_obj.get(j).toString().contains("/")||gu_obj.get(j).toString().contains("*")){
-						error=new CrossOp().main(gu_obj.get(j).toString());
+						parse=new CrossOp().main(gu_obj.get(j).toString(), false);	// not to standardize the parent
+						JSONObject parse_array = (JSONObject) parse;
+						correctedList=(List<String>) parse_array.get("correctedList");
+						error= (String) parse_array.get("error");
+						
 					}else{
 						error = new Main().checkString(gu_obj.get(j).toString());
 					}
@@ -434,9 +488,20 @@ public class Model {
 						row.add("in standardized format"); // remarks
 						// //System.out.print(" in standardized format,");
 						// //remarks
-						String[] tokens = new Tokenize().tokenize(gu_obj.get(j)
-								.toString());
-						gid = new Tokenize().stringTokens(tokens);
+
+						if(gu_obj.get(j).toString().contains("/")||gu_obj.get(j).toString().contains("*")){
+							System.out.println("tokens: "+ gid);
+							for(int n=1; n<correctedList.size(); n++){
+								gid =  gid + "#"+ correctedList.get(n);
+
+								System.out.println("tokens: "+ gid);
+							}
+							System.out.println("tokens: "+ gid);
+						}else{
+							String[] tokens = new Tokenize().tokenize(gu_obj.get(j)
+									.toString());
+							gid = new Tokenize().stringTokens(tokens);
+						}
 
 						row.add( gid  ); // GID
 
@@ -446,7 +511,9 @@ public class Model {
 						row.add("N/A"); // GID
 						////System.out.print("N/A,");
 					}
+					System.out.println("#####"+gu_obj.get(j).toString());
 					row.add(gu_obj.get(j).toString()); // pedigree term
+
 				}
 			}
 			j++;
@@ -454,7 +521,7 @@ public class Model {
 			row.add(gu_obj.get(j).toString()); // cross' date of creation
 			j++;
 			//System.out.println(j+" :: "+gu_obj.get(j).toString());
-			
+
 			////System.out.println();
 			////System.out.println("line: "+line);
 
@@ -469,223 +536,211 @@ public class Model {
 		return Response.status(201).entity(output).build();
 
 	}
-	
+
 	@Path("/searchGID")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response searchGID(JSONObject data) throws JSONException, FileNotFoundException,
-			IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
-		
+	IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
+
 		//new Editor().generatePedigreeTreeJson((JSONObject)data);
 		//return Response.status(200).entity("OK!").build();
-		//File myFile = new File("E:/xampp/htdocs/GMGR/json_files/tree.json");
-	   // myFile.delete();
-	        
+		File myFile = new File("E:/xampp/htdocs/GMGR/json_files/tree.json");
+		myFile.delete();
+
 		JSONObject json_array = (JSONObject) data;
 		String gid = (String) json_array.get("GID");
 		String level = (String) json_array.get("LEVEL");
 		JSONObject outputTree = new JSONObject();
-		
+
 		ManagerFactory factory = new Config().configDB();
-		
+
 		cnt = counter++;
-		
+
 		if(cnt % 2 == 1)
 		{
-			
+
 			PedigreeDataManager pedigreeManager = factory.getPedigreeDataManager();
-			    
-	        Debug.println(10, "GID = " + Integer.parseInt(gid) + ", level = " + Integer.parseInt(level) +  ":");
-	        GermplasmPedigreeTree tree = pedigreeManager.generatePedigreeTree(Integer.parseInt(gid),Integer.parseInt(level));
-	   
-	        for(int i=0;i<Integer.parseInt(level);i++)
-	        {
-	        	counterArray.add(0);
-	        }
-	        
-	        if (tree != null) 
-	        {
-	        	outputString = outputString +"{";
-	        	System.out.println("{");
-	            printNode(tree.getRoot(), 1);
-	            outputString = outputString +"\n}";
-	            System.out.println("}");
-	        }
-	        
-	        
-	      // BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-			//	     new FileOutputStream("E:/xampp/htdocs/GMGR/json_files/tree.json"),"UTF-8"));
-	        
-	       // erasor.write(new String().getBytes()); 
-	       // erasor.close(); 
-	        
-	      //  out.write(outputString);
-	      //  out.close();
-		//	
-		    factory.close();
-	        //out.write((new String()).getBytes());
-	       
+
+			Debug.println(10, "GID = " + Integer.parseInt(gid) + ", level = " + Integer.parseInt(level) +  ":");
+			GermplasmPedigreeTree tree = pedigreeManager.generatePedigreeTree(Integer.parseInt(gid),Integer.parseInt(level));
+
+			for(int i=0;i<Integer.parseInt(level);i++)
+			{
+				counterArray.add(0);
+			}
+
+			if (tree != null) 
+			{
+				outputString = outputString +"{";
+				System.out.println("{");
+				printNode(tree.getRoot(), 1);
+				outputString = outputString +"\n}";
+				System.out.println("}");
+			}
+
+			factory.close();
 		}
-		
+
 		outputTree.put("tree", outputString);
-		
+
 		System.out.println("Output: " + outputTree.get("tree"));
 		return Response.status(200).entity(outputTree).build();
 	}
-	
+
 	private void printNode(GermplasmPedigreeTreeNode node, int level) throws IOException, MiddlewareQueryException {
-	       
+
 		StringBuffer tabs = new StringBuffer();
 		ManagerFactory factory = new Config().configDB();
 		GermplasmDataManager man = factory.getGermplasmDataManager();
-		
+
 		Method meth = man.getMethodByID(node.getGermplasm().getMethodId());
 		Location loc = man.getLocationByID(node.getGermplasm().getLocationId());
 		Bibref bibref = man.getBibliographicReferenceByID(node.getGermplasm().getReferenceId());
 		List<Name> names = man.getNamesByGID(node.getGermplasm().getGid(), null, null);
 		Location loc2 = null;
-		
+
 		Integer cid = loc.getCntryid();
 		Country cnty = man.getCountryById(cid);
-		 
-        for (int ctr = 1; ctr < level; ctr++) {
-            tabs.append("\t");
-        }
-        
-        counterArray.set(level-1, 0);
-        String name = node.getGermplasm().getPreferredName() != null ? node.getGermplasm().getPreferredName().getNval() : null;
-        
-        if(!node.getLinkedNodes().isEmpty()){
-        	Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\",");
-        	
-        	outputString = outputString + "\n "+ tabs.toString() + tabs.toString() +"\"gid\" : \" " + node.getGermplasm().getGid() +"\",\n"
-                    + tabs.toString() +"    \"name\" : \" " + name +"\",\n"
-                    + tabs.toString() +"    \"date\" : \" " + node.getGermplasm().getGdate() +"\",\n"
-                    + tabs.toString() +"    \"id\" : \" " + node.getGermplasm().getGid() +"\",\n"
-                    + tabs.toString() +"    \"layer\" : \" " + (level-1) +"\",\n"
-                    + tabs.toString() +"    \"methodname\" : \" " + meth.getMname() +"\",\n"
-                    + tabs.toString() +"    \"methodtype\" : \" " + meth.getMtype() +"\",\n"
-                    + tabs.toString() +"    \"location\" : \" " + loc.getLname() +"\",\n"
-                    + tabs.toString() +"    \"country\" : \" " + cnty.getIsoabbr() +"\",\n"
-                    + tabs.toString() +"    \"ref\" : \" " + bibref.getAnalyt() +"\",\n";
-            
-            for(int cntr=0;cntr<names.size();cntr++)
-     		{
-     			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
-                  outputString = outputString 
-                  + tabs.toString() +"    \"dates"+cntr+"\" : \" " + names.get(cntr).getNdate() +"\",\n"
-                  + tabs.toString() +"    \"name"+cntr+"\" : \" " + names.get(cntr).getNval() +"\",\n"
-                  + tabs.toString() +"    \"ntype"+cntr+"\" : \" " + names.get(cntr).getTypeId() +"\",\n"
-                  + tabs.toString() +"    \"nstat"+cntr+"\" : \" " + names.get(cntr).getNstat() +"\",\n"
-                  + tabs.toString() +"    \"loc"+cntr+"\" : \" " + loc2.getLname() +"\",\n";
-                 
-    		}
-     		outputString = outputString + tabs.toString() +"    \"gpid1\" : \" " + node.getGermplasm().getGpid1() +"\",\n";
-     		outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\",\n";
-        }
-        	
-        else{
-        
-        	Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\"");
-        
-        	outputString = outputString + "\n "+ tabs.toString() + tabs.toString() + "\"gid\" : \" " + node.getGermplasm().getGid() +"\",\n"
-                    + tabs.toString() +"    \"name\" : \" " + name +"\",\n"
-                    + tabs.toString() +"    \"date\" : \" " + node.getGermplasm().getGdate() +"\",\n"
-                    + tabs.toString() +"    \"id\" : \" " + node.getGermplasm().getGid() +"\",\n"
-                    + tabs.toString() +"    \"layer\" : \" " + (level-1) +"\",\n"
-                    + tabs.toString() +"    \"methodname\" : \" " + meth.getMname() +"\",\n"
-                    + tabs.toString() +"    \"methodtype\" : \" " + meth.getMtype() +"\",\n"
-                    + tabs.toString() +"    \"location\" : \" " + loc.getLname() +"\",\n"
-                    + tabs.toString() +"    \"country\" : \" " + cnty.getIsoabbr() +"\",\n"
-                    + tabs.toString() +"    \"ref\" : \" " + bibref.getAnalyt() +"\",\n";
-            
-            for(int cntr=0;cntr<names.size();cntr++)
-     		{
-     			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
-                  outputString = outputString 
-                  + tabs.toString() +"    \"dates"+cntr+"\" : \" " + names.get(cntr).getNdate() +"\",\n"
-                  + tabs.toString() +"    \"name"+cntr+"\" : \" " + names.get(cntr).getNval() +"\",\n"
-                  + tabs.toString() +"    \"ntype"+cntr+"\" : \" " + names.get(cntr).getTypeId() +"\",\n"
-                  + tabs.toString() +"    \"nstat"+cntr+"\" : \" " + names.get(cntr).getNstat() +"\",\n"
-                  + tabs.toString() +"    \"loc"+cntr+"\" : \" " + loc2.getLname() +"\",\n";
-                 
-    		}
-     		outputString = outputString + tabs.toString() +"    \"gpid1\" : \" " + node.getGermplasm().getGpid1() +"\",\n";
-     		outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\"\n";
-        }
-        
-        if(!node.getLinkedNodes().isEmpty()){
-        	outputString = outputString + tabs.toString() + "\"children\" : \n" + tabs.toString() +"[";
-        	System.out.println(tabs.toString() + "\"children\" : \n" + tabs.toString() +"[");
-        }
-        
-        for (GermplasmPedigreeTreeNode parent : node.getLinkedNodes()) {
-        	
-        	counterArray.set(level-1,counterArray.get(level-1)+1);
-        	
-        	System.out.println(tabs.toString()+"{");
-        	outputString = outputString + "\n" + tabs.toString()+ "{" ;
-        	outputString = outputString + "\n";
-                     printNode(parent, level + 1);
-        	outputString = outputString + "\n" + tabs.toString()+ "}";
-            System.out.println(tabs.toString()+"}");
-           
-            if(counterArray.get(level-1) < node.getLinkedNodes().size() ) 
-            {
-             		outputString = outputString + tabs.toString()+ ","; //check if no sibling
-             		System.out.println(tabs.toString()+",");
-            }
-            
-        }
-        
-        if(!node.getLinkedNodes().isEmpty()){
-        	outputString = outputString + "\n" + tabs.toString()+ "]";
-        	System.out.println(tabs.toString()+"]");
-        }
-    }
-	
+
+		for (int ctr = 1; ctr < level; ctr++) {
+			tabs.append("\t");
+		}
+
+		counterArray.set(level-1, 0);
+		String name = node.getGermplasm().getPreferredName() != null ? node.getGermplasm().getPreferredName().getNval() : null;
+
+		if(!node.getLinkedNodes().isEmpty()){
+			Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\",");
+
+			outputString = outputString + "\n "+ tabs.toString() + tabs.toString() +"\"gid\" : \" " + node.getGermplasm().getGid() +"\",\n"
+			+ tabs.toString() +"    \"name\" : \" " + name +"\",\n"
+			+ tabs.toString() +"    \"date\" : \" " + node.getGermplasm().getGdate() +"\",\n"
+			+ tabs.toString() +"    \"id\" : \" " + node.getGermplasm().getGid() +"\",\n"
+			+ tabs.toString() +"    \"layer\" : \" " + (level-1) +"\",\n"
+			+ tabs.toString() +"    \"methodname\" : \" " + meth.getMname() +"\",\n"
+			+ tabs.toString() +"    \"methodtype\" : \" " + meth.getMtype() +"\",\n"
+			+ tabs.toString() +"    \"location\" : \" " + loc.getLname() +"\",\n"
+			+ tabs.toString() +"    \"country\" : \" " + cnty.getIsoabbr() +"\",\n"
+			+ tabs.toString() +"    \"ref\" : \" " + bibref.getAnalyt() +"\",\n";
+
+			for(int cntr=0;cntr<names.size();cntr++)
+			{
+				loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
+				outputString = outputString 
+				+ tabs.toString() +"    \"dates"+cntr+"\" : \" " + names.get(cntr).getNdate() +"\",\n"
+				+ tabs.toString() +"    \"name"+cntr+"\" : \" " + names.get(cntr).getNval() +"\",\n"
+				+ tabs.toString() +"    \"ntype"+cntr+"\" : \" " + names.get(cntr).getTypeId() +"\",\n"
+				+ tabs.toString() +"    \"nstat"+cntr+"\" : \" " + names.get(cntr).getNstat() +"\",\n"
+				+ tabs.toString() +"    \"loc"+cntr+"\" : \" " + loc2.getLname() +"\",\n";
+
+			}
+			outputString = outputString + tabs.toString() +"    \"gpid1\" : \" " + node.getGermplasm().getGpid1() +"\",\n";
+			outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\",\n";
+		}
+
+		else{
+
+			Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\"");
+
+			outputString = outputString + "\n "+ tabs.toString() + tabs.toString() + "\"gid\" : \" " + node.getGermplasm().getGid() +"\",\n"
+			+ tabs.toString() +"    \"name\" : \" " + name +"\",\n"
+			+ tabs.toString() +"    \"date\" : \" " + node.getGermplasm().getGdate() +"\",\n"
+			+ tabs.toString() +"    \"id\" : \" " + node.getGermplasm().getGid() +"\",\n"
+			+ tabs.toString() +"    \"layer\" : \" " + (level-1) +"\",\n"
+			+ tabs.toString() +"    \"methodname\" : \" " + meth.getMname() +"\",\n"
+			+ tabs.toString() +"    \"methodtype\" : \" " + meth.getMtype() +"\",\n"
+			+ tabs.toString() +"    \"location\" : \" " + loc.getLname() +"\",\n"
+			+ tabs.toString() +"    \"country\" : \" " + cnty.getIsoabbr() +"\",\n"
+			+ tabs.toString() +"    \"ref\" : \" " + bibref.getAnalyt() +"\",\n";
+
+			for(int cntr=0;cntr<names.size();cntr++)
+			{
+				loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
+				outputString = outputString 
+				+ tabs.toString() +"    \"dates"+cntr+"\" : \" " + names.get(cntr).getNdate() +"\",\n"
+				+ tabs.toString() +"    \"name"+cntr+"\" : \" " + names.get(cntr).getNval() +"\",\n"
+				+ tabs.toString() +"    \"ntype"+cntr+"\" : \" " + names.get(cntr).getTypeId() +"\",\n"
+				+ tabs.toString() +"    \"nstat"+cntr+"\" : \" " + names.get(cntr).getNstat() +"\",\n"
+				+ tabs.toString() +"    \"loc"+cntr+"\" : \" " + loc2.getLname() +"\",\n";
+
+			}
+			outputString = outputString + tabs.toString() +"    \"gpid1\" : \" " + node.getGermplasm().getGpid1() +"\",\n";
+			outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\"\n";
+		}
+
+		if(!node.getLinkedNodes().isEmpty()){
+			outputString = outputString + tabs.toString() + "\"children\" : \n" + tabs.toString() +"[";
+			System.out.println(tabs.toString() + "\"children\" : \n" + tabs.toString() +"[");
+		}
+
+		for (GermplasmPedigreeTreeNode parent : node.getLinkedNodes()) {
+
+			counterArray.set(level-1,counterArray.get(level-1)+1);
+
+			System.out.println(tabs.toString()+"{");
+			outputString = outputString + "\n" + tabs.toString()+ "{" ;
+			outputString = outputString + "\n";
+			printNode(parent, level + 1);
+			outputString = outputString + "\n" + tabs.toString()+ "}";
+			System.out.println(tabs.toString()+"}");
+
+			if(counterArray.get(level-1) < node.getLinkedNodes().size() ) 
+			{
+				outputString = outputString + tabs.toString()+ ","; //check if no sibling
+				System.out.println(tabs.toString()+",");
+			}
+
+		}
+
+		if(!node.getLinkedNodes().isEmpty()){
+			outputString = outputString + "\n" + tabs.toString()+ "]";
+			System.out.println(tabs.toString()+"]");
+		}
+	}
+
 	@Path("/show_germplasm_details")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response show_germplasm_details(JSONObject data) throws JSONException, FileNotFoundException,
-			IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
-		
+	IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
+
 		new Editor();
 		//Editor.show_germplasm_details((JSONObject)data);
-		
+
 		return Response.status(200).entity("OK!").build();
 	}
-	
+
 	@Path("/editGermplasm")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response editGermplasm(JSONObject data) throws JSONException, FileNotFoundException,
-			IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
-		
+	IOException, MiddlewareQueryException, ParseException, ConfigException, URISyntaxException {
+
 		//new Editor();
 		//Editor.show_germplasm_details((JSONObject)data);
 		//Session session = hibernateUtil.getCurrentSession();
 		//Germplasm g = (Germplasm) session.load(Germplasm.class, 50533);
 		ManagerFactory factory = new Config().configDB();
 		GermplasmDataManager man = factory.getGermplasmDataManager();
-		
+
 		//g.setGid(50534);
 		Integer nameId = 260142; //Assumption: id=-1 exists
-        Name name = man.getGermplasmNameByID(nameId); 
-        String nameBefore = name.toString();
-        //name.setLocationId(man.getLocationByID(9000).getLocid()); //Assumption: location with id=1 exists
-        //man.updateGermplasmName(name);
-        name.setNval("IR64-1");
-        man.updateGermplasmName(name);
-        Debug.println(0, "testUpdateGermplasmName(" + nameId + ") RESULTS: " 
-                + "\n\tBEFORE: " + nameBefore
-                + "\n\tAFTER: " + name.toString());
-		
+		Name name = man.getGermplasmNameByID(nameId); 
+		String nameBefore = name.toString();
+		//name.setLocationId(man.getLocationByID(9000).getLocid()); //Assumption: location with id=1 exists
+		//man.updateGermplasmName(name);
+		name.setNval("IR64-1");
+		man.updateGermplasmName(name);
+		Debug.println(0, "testUpdateGermplasmName(" + nameId + ") RESULTS: " 
+				+ "\n\tBEFORE: " + nameBefore
+				+ "\n\tAFTER: " + name.toString());
+
 		System.out.println("Edit success!");
-		
+
 		return Response.status(200).entity("OK!").build();
 	}
 }
