@@ -7,12 +7,13 @@ public class Config {
 
 	public ManagerFactory configDB(){
 		DatabaseConnectionParameters local = new DatabaseConnectionParameters(
-				"localhost", "3306", "local", "root", "");
+				"localhost", "3306", "local2", "root", "");
 		DatabaseConnectionParameters central = new DatabaseConnectionParameters(
 				"localhost", "3306", "central", "root", "");
 		ManagerFactory factory = new ManagerFactory(local, central);
 		
 		return factory;
+		
 	}
 
 	

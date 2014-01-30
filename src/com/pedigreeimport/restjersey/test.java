@@ -30,6 +30,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.pedigreeimport.backend.CrossOp;
+import com.pedigreeimport.backend.ParseCrossOp;
 import com.pedigreeimport.backend.Tokenize;
 
 public class test {
@@ -147,7 +149,7 @@ public class test {
 
 		int gid_local=Integer.valueOf(gid);
 		int gpid1_local=gpid1,gpid2_local=gpid2;
-		
+
 		Boolean error=false;
 		int index=-1;
 		for(int i=0; i<pedigreeList.size();i++){
@@ -191,7 +193,7 @@ public class test {
 		gpid1_local=gpid1;
 		for(int i=index-1; i>=0;i--){
 			System.out.println("\t create GID: "+ pedigreeList.get(i));
-			
+
 			int methodID=selectMethodType_DER(pedigreeList.get(i), parent1);
 			gid_local = (int) addGID(manager, pedigreeList.get(i), gpid1_local, gid_local,
 					methodID);
@@ -201,7 +203,7 @@ public class test {
 			createdGID_local=updateFile_createdGID(""+gid_local, parent1ID, pedigreeList.get(i), manager,"new", parent1);	//update the createdGID file
 			createdGID=createdGID_local;
 		}
-		
+
 		int mgid=getGID_fromFile(maleParent, mid);
 		int fgid=getGID_fromFile(femaleParent, fid);
 
@@ -247,7 +249,7 @@ public class test {
 	public static Germplasm isCross_existing(GermplasmDataManager manager,String cross) throws MiddlewareQueryException, IOException{
 		List<Germplasm> germplasm = new ArrayList<Germplasm>();
 		List<Germplasm> germplasm_fin=new ArrayList<Germplasm>();
-		
+
 		int count_LOCAL = countGermplasmByName(manager,cross, Database.LOCAL);
 		int count_CENTRAL= countGermplasmByName(manager,cross,Database.CENTRAL);
 
@@ -268,34 +270,35 @@ public class test {
 	}
 
 	public static int selectMethodType_DER(String pedigree, String parent){
-		int methodID = 0;
+		int methodID = 33;
 		String tokens[]=pedigree.split("-");
 		Pattern p = Pattern.compile("(\\d+)|(IR\\s\\d+)|(B)|(\\d+B)|(\\d*R)|(\\d*AC)|(C\\d+)|(\\d+MP)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN|SDO)\\s\\d+)");
-		//System.out.println("pedigree: "+tokens[tokens.length-1]);
+		System.out.println("pedigree: "+tokens[tokens.length-1]);
 		String gen;
-		if(tokens.length==0){
+		if(!pedigree.contains("-")){	// if F1
 			gen=pedigree;
 		}else{
-		gen=tokens[tokens.length-1];
-		}
-		Matcher m = p.matcher(gen);
-		if(m.find()){
-			//printGroup(m);
-			
-			if(m.group(1)!=null && m.group(1).equals(gen)){	
-				methodID=205;// Single plant selection
-			}else if(m.group(2)!=null && m.group(2).equals(gen)){
-				methodID=33;	// root is unknown
-			}else if(m.group(3)!=null && m.group(3).equals(gen)){
-				methodID=207;	//random bulk
-			}else if(m.group(4)!=null && m.group(4).equals(gen)){
-				methodID=206;	//selected bulk
-			}else{
-				methodID=205;	// no support for C|R|MP yet
+			gen=tokens[tokens.length-1];
+			Matcher m = p.matcher(gen);
+			if(m.find()){
+				//printGroup(m);
+
+				if(m.group(1)!=null && m.group(1).equals(gen)){	
+					methodID=205;// Single plant selection
+				}else if(m.group(2)!=null && m.group(2).equals(gen)){
+					methodID=33;	// root is unknown
+				}else if(m.group(3)!=null && m.group(3).equals(gen)){
+					methodID=207;	//random bulk
+				}else if(m.group(4)!=null && m.group(4).equals(gen)){
+					methodID=206;	//selected bulk
+				}else{
+					methodID=205;	// no support for C|R|MP yet
+				}
 			}
+
 		}
-		
-		
+
+
 		return methodID;
 	}
 	public static void printGroup(Matcher m) {
@@ -305,7 +308,7 @@ public class test {
 			System.out.println(i + " : " + m.group(i));
 		}
 	}
-	
+
 	public static JSONObject single_createGID(JSONObject obj,ManagerFactory factory ) throws MiddlewareQueryException, IOException, ParseException, InterruptedException{
 
 		GermplasmDataManager manager = factory.getGermplasmDataManager();
@@ -400,7 +403,7 @@ public class test {
 		if (has_GID(parent2ID, parent2)) {
 			////System.out.println("PROCESSING CROSS");
 
-			if(germplasm.getGid()==null){
+			if(germplasm.getGid()==null || germplasm.getGpid1()!=fgid || germplasm.getGpid2()!=mgid){
 				////System.out.println("fgid: "+ fgid);
 				////System.out.println("mgid: "+ mgid);
 
@@ -709,6 +712,852 @@ public class test {
 
 		return data_output;
 	}
+	public static List<String> parse_crossOp(List<String> pedigreeList, String nval, String id){
+		List<String> row_output=new ArrayList<String>();
+		for(int i=0; i<list_local.size(); i++){
+			row_output= list_local.get(i);
+			//////System.out.println("row_output: "+row_output);
+			String female_id=row_output.get(2);
+			String female_remarks=row_output.get(3);
+			String female_nval=row_output.get(4);
+			//male
+			String male_id=row_output.get(6);
+			String male_remarks=row_output.get(7);
+			String male_nval=row_output.get(8);
+			cross_date=row_output.get(10);
+			//cross name
+			String cross=row_output.get(1);
+
+			if(female_id.equals(id)){
+				System.out.println(":::: "+female_nval);
+				String tokens[]=female_nval.split("#");
+				for(int j=0; j<tokens.length;j++){
+					if(!tokens[j].equals("")){
+						pedigreeList.add(tokens[j]);
+					}
+				}
+			}
+
+			if(male_id.equals(id)){
+				System.out.println(":::: "+male_nval);
+				String tokens[]=male_nval.split("#");
+				for(int j=0; j<tokens.length;j++){
+					if(!tokens[j].equals("")){
+						pedigreeList.add(tokens[j]);
+					}
+				}
+
+			}
+
+		}
+
+		return pedigreeList;
+	}
+	public static int maxCross(int max,String line) {
+		int count = 0, start = 0, end = line.length();
+		char currChar;
+		while (start < end) {
+			currChar = line.charAt(start);
+			if (currChar == '/') {
+				count++;
+				if (max < count) {
+					max = count;
+				}
+			} else {
+				count = 0;
+			}
+			start++;
+		}
+		return max;
+	}
+	private static JSONObject getParse(String line) throws MiddlewareQueryException, IOException { // method of backCrossing
+		String temp = line;
+		List<String> list = new ArrayList<String>();
+		List<String> correctedList = new ArrayList<String>();
+
+		Pattern p = Pattern.compile("\\*\\d"); // backcross to female
+		Matcher m = p.matcher(line);
+
+		int max =0;
+		max=maxCross(max,line);
+
+		while (m.find()) {
+			String[] tokens = temp.split("\\*\\d", 2);
+			//print(tokens);
+
+			String slash = "";
+			max++;
+			for (int j = max; j > 0;) {
+				slash = slash + "/";
+				j--;
+			}
+			//System.out.println("token: " + tokens[0]);
+			tokens[0] = tokens[0].concat(slash).concat(tokens[0]);
+			temp.replaceFirst("\\*\\d", tokens[0]);
+			temp = tokens[0].concat(tokens[1]);
+			//System.out.println("token: " + temp);
+		}
+
+		System.out.println("\nBackCross to male; ");
+		Pattern p1 = Pattern.compile("\\d\\*\\D"); // backcross to male
+		Matcher m1 = p1.matcher(line);
+
+		while (m1.find()) {
+			String[] tokens = temp.split("\\d\\*", 2);
+			//print(tokens);
+
+			String slash = "";
+			System.out.println("slash: "+max);
+			max++;
+			for (int j = max; j > 0;) {
+				slash = slash + "/";
+				j--;
+			}
+
+			tokens[0] = tokens[0].concat(tokens[1]);
+			temp.replaceFirst("\\*\\d", tokens[0]);
+			temp = tokens[0].concat(slash.concat(tokens[1]));
+			System.out.println("token: " + temp);
+		}
+		JSONObject output= new JSONObject();
+		output.put("max",max);
+		output.put("line",temp);
+		return output;
+
+	}
+	public static List<List<String>> method2(int max, int familyCount,List<String> row,List<List<String>> twoDim, List<List<String>> parents, List<String> row_parents) throws MiddlewareQueryException, IOException {
+		if (max > 0) {
+			String slash = "";
+			for (int i = max; i > 0;) {
+				slash = slash + "/";
+				i--;
+			}
+
+			for (int i = 0; i < twoDim.size(); i++) {
+				for (int j = 0; j < row.size(); j++) {
+					if ("0".equals(twoDim.get(i).get(1))) {
+						//System.out.println("token: " + twoDim.get(i).get(0));
+
+						Pattern p1 = Pattern.compile(slash);
+						Matcher m = p1.matcher(twoDim.get(i).get(0));
+
+						while (m.find()) {
+							String[] temp2 = twoDim.get(i).get(0).split(slash + "|\\+");   // ncarumba used the character + just to flag where to split the string
+							//System.out.println(Arrays.toString(temp2));
+							familyCount++;
+							row_parents = new ArrayList<String>();
+							row_parents.add(twoDim.get(i).get(0));
+							for (int k = 0; k < temp2.length; k++) {
+								row = new ArrayList<String>();
+
+
+								row.add(temp2[k]);
+								row.add("0");
+								twoDim.add(row);
+
+								if (k % 2 == 0) {
+									System.out.println("\n(family" + familyCount + ") female:   " + temp2[k]);
+									row_parents.add(temp2[k]);
+								} else {
+									System.out.println("(family" + familyCount + ") male:     " + temp2[k]+"\n");
+									row_parents.add(temp2[k]);
+								}
+							}
+
+							parents.add(row_parents);
+
+							twoDim.get(i).remove(1);
+							twoDim.get(i).add("1");
+							//System.out.println("end finding "+slash);
+						}
+
+						//System.out.println("list:" + twoDim);
+					}
+
+				}
+			}
+			method2(max - 1, familyCount,row,twoDim,parents,row_parents);
+		} else {
+			//
+
+			//for(int m=0; m<correctedList.size(); m++){
+			//System.out.println("tokens @ parseCross: "+ correctedList.get(m));
+			//}
+
+			return parents;
+		}
+		//for(int m=0; m<list.size(); m++){
+		//System.out.println("@ return tokens @ parseCross: "+ list.get(m));
+		//}
+
+		return parents;
+	}
+	public static Boolean checkString(String id, String pedigree){
+		for(int i=0; i<createdGID_local.size();i++){
+			List<String> row=createdGID_local.get(i);
+			if(row.get(0).equals(id) && row.get(1).equals(pedigree)){
+				return true;
+			}
+		}
+
+		return false;
+	}
+	public static Boolean checkParent_crossOp(GermplasmDataManager manager, String nval, String id) throws MiddlewareQueryException, IOException{
+		String parent=nval;
+		List<String> pedigreeList = new ArrayList<String>();
+		List<List<String>> temp = new ArrayList<List<String>>();
+		List<List<String>> parents = new ArrayList<List<String>>();
+		pedigreeList.add(parent);
+		List<String> row = new ArrayList<String>();
+		new CrossOp();
+		pedigreeList=CrossOp.method2(parent,pedigreeList);
+		Boolean isParent=false;
+		int notParent_index=-1;
+		for(int j=0; j<pedigreeList.size();j++){
+			row = new ArrayList<String>();
+			//System.out.println("::"+pedigreeList.get(j));
+			if(!pedigreeList.get(j).contains("/")){
+				if(!isParent){
+					notParent_index=j;
+				}
+				row.add(pedigreeList.get(j));
+				row.add("0");
+				row.add("0");
+				parents.add(row);
+				//System.out.println("row_parents; "+row);
+				isParent=true;
+			}
+		}
+		System.out.println("PARENTS: "+parents);
+		System.out.println("last index of the crosses:"+notParent_index);
+
+		System.out.println("------");
+		//pedigreeList= parse_crossOp(pedigreeList, nval, id);
+
+		Boolean flag = true;
+		Boolean single_hit=false;
+		Boolean multiple_hit=false;
+		Boolean no_hit=false;
+		Boolean no_hit_flag=false;
+		Boolean exitLoop=false;
+		Boolean result=false;
+
+		List<Integer> check=new ArrayList<Integer>();
+		int index=0;
+		int gpid2=0;
+		int gpid1=0;
+		int gid=0;
+		int count_LOCAL; 
+		int count_CENTRAL;
+		int count=-1;;
+
+		for(int i=0; i< pedigreeList.size();i++){
+
+			List<Germplasm> germplasm_fin = new ArrayList<Germplasm>();
+			List<Germplasm> germplasm = new ArrayList<Germplasm>();
+
+			String pedigree=pedigreeList.get(i);
+			System.out.println("pedigree: "+pedigree);
+			if(no_hit ){
+
+				count_LOCAL = countGermplasmByName(manager,pedigree, Database.LOCAL);
+				count_CENTRAL= countGermplasmByName(manager,pedigree,Database.CENTRAL);
+
+				germplasm=getGermplasmList(manager, pedigree, count_LOCAL, count_CENTRAL);
+				//System.out.println("gcount: "+count_LOCAL);
+				for(int j=0; j<germplasm.size();j++){
+					if(germplasm.get(j).getLocationId().equals(locationID)){
+						germplasm_fin.add(germplasm.get(j));
+					}
+				}
+				count=germplasm_fin.size();
+			}
+			//System.out.println("count: "+count);
+			if(count==1 || single_hit){
+				System.out.println("\t Single HIT");
+				single_hit=true;
+
+				if(i==0 || no_hit){
+					if(i==0){
+						result=true;
+					}
+					no_hit=false;
+
+					temp=printSuccess_temp(pedigree, parent, id, germplasm_fin.get(0), manager, "false",temp);
+					GID=germplasm_fin.get(0).getGid();
+					gpid2=germplasm_fin.get(0).getGpid2();
+					gpid1=germplasm_fin.get(0).getGpid1();
+					System.out.println("gpid1: "+gpid1);
+					System.out.println("gpid2: "+gpid2);
+					gid=germplasm_fin.get(0).getGid();
+
+					check.add(gid);
+					if(gpid1!=0 || gpid2!=0){
+						check.add(gpid1);
+						check.add(gpid2);
+					}
+				}else{
+
+					System.out.println("\t checked: "+check);
+					for(int j=0; j< check.size();j++){
+						Germplasm g1=manager.getGermplasmByGID(check.get(j));
+						List<Name> name = new ArrayList<Name>();
+						//System.out.println("check: "+check.get(j));
+						//System.out.println("gid: "+g1.getGid());
+						name=manager.getNamesByGID(g1.getGid(), 0, null);
+						//System.out.println("name: "+name.get(0).getNval());
+						//System.out.println("P: "+pedigreeList.get(i));
+						if(name.get(0).getNval().equals(pedigreeList.get(i))){
+
+							System.out.println("\t "+pedigreeList.get(i)+" is found with GID="+g1.getGid());
+							temp=printSuccess_temp(pedigreeList.get(i), parent, id, g1, manager, "false",temp);
+							if((!check.contains(g1.getGpid1()) )) {
+								System.out.println("\t gpid1 is not in the check list");
+								if( g1.getGpid1()!=0 )   {
+									System.out.println("\t gpid1 is not 0");
+									check.add(g1.getGpid1());
+								}
+							}
+
+							if((!check.contains(g1.getGpid2()) )) {
+								System.out.println("\t gpid2 is not in the check list");
+								if(g1.getGpid2()!=0  ) {
+									System.out.println("\t gpid2 is not 0");
+									check.add(g1.getGpid2());
+								}
+							}
+
+							gpid1=g1.getGpid1();
+							gpid2=g1.getGpid2();
+							System.out.println("\t gpid1: "+gpid1);
+							System.out.println("\t gpid2: "+gpid2);
+
+							if(pedigreeList.get(i).contains("-") && !pedigreeList.get(i).contains("/")){
+
+								String[] tokens = new Tokenize().tokenize(pedigreeList.get(i));
+								ArrayList<String> pedigreeList_der = new ArrayList<String>();
+
+								new test();
+								pedigreeList_der = test.saveToArray(pedigreeList_der, tokens);
+								for(int n=1; n<pedigreeList_der.size();n++){
+									System.out.println("add:: "+pedigreeList_der.get(n));
+									Germplasm germplasm2=manager.getGermplasmByGID(gpid2);
+									temp=printSuccess_temp(pedigreeList_der.get(n), parent, id, germplasm2, manager, "false",temp);
+									gpid1=germplasm2.getGpid1();
+									gpid2=germplasm2.getGpid2();
+									if(i==pedigreeList_der.size()-2){
+										if(gpid1!=gpid2){
+											germplasm2=manager.getGermplasmByGID(gpid1);
+											printSuccess(pedigreeList_der.get(n), parent, id, germplasm2, manager, "false");
+										}
+									}
+								}
+								pedigreeList_der.clear();
+								tokens=null;
+							}
+						}
+						name=null;
+						g1=null;
+					}
+				}
+
+			}else if(count>1 || multiple_hit){	//multiple hits
+				System.out.println("\t Multiple HIT");
+				multiple_hit=true;
+				if(i==0){
+					printChooseGID(pedigree, parent, id);
+				}else{
+					if(no_hit){
+						for(int k=0;k<temp.size();k++){
+							createdGID_local.add(temp.get(k));
+						}temp.clear();
+						printChooseGID(pedigree, parent, id);
+					}else{
+						printNotSet(pedigreeList.get(i), parent, id);
+					}
+				}
+				no_hit=false;
+
+			}
+			else{	//not existing
+				System.out.println("\t No Hit");
+				//System.out.println("pedigree: "+pedigree);
+				temp=printNotSet_temp(pedigree, parent, id, temp);
+				index=i;
+				no_hit=true;
+				no_hit_flag=true;
+
+				if(i==notParent_index-1){
+					System.out.println("EXIT the LOOP");
+					exitLoop=true;
+					//should exit the loop, check if parents exist
+					break;
+				}
+
+			}
+
+			germplasm.clear();
+			germplasm_fin.clear();
+		}
+		if(exitLoop){
+			//check parents if existing
+			// if all parents are existing then create GID for crosses with operators
+			// if not existing the create GID for that parent
+			// if existing and there is a mutliple hits the set CHOOSE GID for that parent
+			int gid_parent=0;
+			List<String> row_parents=new ArrayList<String>();
+
+			for(int i=0; i<parents.size(); i++){
+				row_parents= parents.get(i);
+
+				//System.out.println("r_parent::"+row_parents);
+				JSONObject output=getPedigreeLine(manager, row_parents.get(0), id, temp, parent, gid_parent);
+				Boolean result_flag=(Boolean) output.get("result");
+				temp=(List<List<String>>) output.get("temp_fin");
+				gid_parent= (Integer) output.get("gid_parent");
+				check.add(gid_parent);
+				if(result_flag){
+					System.out.println("result::"+result_flag);
+					row_parents.set(1, "1");
+					row_parents.set(2, ""+gid_parent);
+				}
+				
+				parents.set(i, row_parents);
+				output.clear();
+			}
+			System.out.println("PARENTS: "+parents);
+			int allExisting=0;
+			for(int i=0; i<parents.size(); i++){
+				row_parents= parents.get(i);;
+				if(!row_parents.get(2).equals("0")){
+					allExisting++;
+				}
+			}
+			if(allExisting==parents.size()){
+				result=true;
+				//all parents exists
+				//created GID for the crosses
+				// update the temp
+				JSONObject output=getParse(pedigreeList.get(0));
+				String line= (String) output.get("line");
+				int max= (Integer) output.get("max");
+				
+				List<List<String>> temp_crossesGID=new ArrayList<List<String>>();
+				
+				temp_crossesGID=createGID_crossParents(manager,pedigreeList,index, temp_crossesGID, check, line, max, parent, id);
+				
+				for(int i=0; i< temp_crossesGID.size(); i++){
+					for(int j=0; j< temp.size(); j++){
+						if(temp_crossesGID.get(i).get(2).equals(temp.get(j).get(2))){
+							temp.set(j, temp_crossesGID.get(i));
+						}
+					//	System.out.println(""+temp_crossesGID.get(i));
+
+					}
+				}
+				//System.out.println("[2]***********");
+				for(int i=0; i< temp.size(); i++){
+					//System.out.println(""+temp.get(i));
+					createdGID_local.add(temp.get(i));
+				}
+				//System.out.println("***********");
+
+
+			}else{
+				//
+				for(int k=0;k<temp.size();k++){
+					createdGID_local.add(temp.get(k));
+				}temp.clear();
+			}
+
+		}else if(!exitLoop && no_hit_flag && !multiple_hit){	// if there is a no hit and then a single hit after
+			result=true;
+			// create GID for the pedigreeList NOT SET
+			System.out.println("if there is a no hit and then a single hit after");
+			JSONObject output=getParse(pedigreeList.get(0));
+			String line= (String) output.get("line");
+			int max= (Integer) output.get("max");
+			
+			List<List<String>> temp_crossesGID=new ArrayList<List<String>>();
+			
+			temp_crossesGID=createGID_crossParents(manager,pedigreeList,index, temp_crossesGID, check, line, max, parent, id);
+			
+			
+			for(int i=0; i< temp_crossesGID.size(); i++){
+				for(int j=0; j< temp.size(); j++){
+					if(temp_crossesGID.get(i).get(2).equals(temp.get(j).get(2))){
+						temp.set(j, temp_crossesGID.get(i));
+					}
+				//	System.out.println(""+temp_crossesGID.get(i));
+
+				}
+			}
+			//System.out.println("[2]***********");
+			for(int i=0; i< temp.size(); i++){
+				//System.out.println(""+temp.get(i));
+				createdGID_local.add(temp.get(i));
+			}
+			
+		}
+		temp.clear();
+		check.clear();
+		pedigreeList.clear();
+
+		return result;
+	}
+	public static List<List<String>> createGID_crossParents(GermplasmDataManager manager, List<String> pedigreeList, int index,List<List<String>> temp_crossesGID, List<Integer> check, String line, int max, String parent, String id) throws MiddlewareQueryException, IOException{
+		
+		String female_nval = null,male_nval;
+		
+		int familyCount = 0;
+		int methodID=0;
+		int gid_cross;
+		int gpid1=0,gpid2=0;
+		
+		List<List<String>> twoDim = new ArrayList<List<String>>();
+		List<String> row2 = new ArrayList<String>();
+		List<List<String>> crosses = new ArrayList<List<String>>();
+		List<String> row_crosses = new ArrayList<String>();
+
+		row2.add(line);
+		row2.add("0");   // 0 for unexplored token
+		twoDim.add(row2);
+		crosses=method2(max, familyCount, row2, twoDim,crosses,row_crosses);
+		crosses.get(0).set(0, parent);
+
+		System.out.println("***"+crosses);
+		System.out.println("***"+check);
+		for(int i=crosses.size()-1; i>=0; i--){
+			row_crosses=crosses.get(i);
+			for(int a=index; a>=0; a--){
+				System.out.println("pedigreelist: "+pedigreeList.get(a)+" crosses: "+row_crosses.get(0));
+				if(pedigreeList.get(a).equals(row_crosses.get(0))){
+					for(int k=1; k< 3; k++){
+						for(int j=0; j< check.size(); j++){
+							System.out.println("K: "+k);
+							System.out.println(" crosses: "+row_crosses.get(k));
+							Germplasm g1=manager.getGermplasmByGID(check.get(j));
+							List<Name> name = new ArrayList<Name>();
+							//System.out.println("check: "+check.get(j));
+							//System.out.println("gid: "+g1.getGid());
+							name=manager.getNamesByGID(g1.getGid(), 0, null);
+							System.out.println("name: "+name.get(0).getNval());
+							//System.out.println("P: "+pedigreeList.get(i));
+							if(name.get(0).getNval().equals(row_crosses.get(k))){
+
+								if(k==1){
+									System.out.println("FEMALE: ");
+									System.out.println("\t "+row_crosses.get(k)+" is found with GID="+g1.getGid());
+									female_nval=row_crosses.get(k);
+									gpid1=g1.getGid();	
+								}else{
+									System.out.println("MALE: ");
+									System.out.println("\t "+row_crosses.get(k)+" is found with GID="+g1.getGid());
+
+									gpid2=g1.getGid();
+									male_nval=row_crosses.get(k);
+									methodID=selectMethodType(manager, gpid1, gpid2, female_nval, male_nval);
+									if(i==0){
+										gid_cross=addGID(manager, parent, gpid1, gpid2, methodID);
+										GID=gid_cross;
+										g1=manager.getGermplasmByGID(gid_cross);
+										temp_crossesGID=printSuccess_temp(parent, parent, id, g1, manager, "new", temp_crossesGID);
+									}else{
+										gid_cross=addGID(manager, row_crosses.get(0), gpid1, gpid2, methodID);
+										g1=manager.getGermplasmByGID(gid_cross);
+										temp_crossesGID=printSuccess_temp(row_crosses.get(0), parent, id, g1, manager, "new", temp_crossesGID);
+									}
+
+									check.add(gid_cross);
+
+								}
+								break;
+							}
+							name=null;
+							g1=null;
+						}
+					}
+				}
+			}
+		}
+		//System.out.println("[1]**********");
+		twoDim.clear();
+		row_crosses.clear();
+		crosses.clear();
+		row2.clear();
+
+		return temp_crossesGID;
+	}
+	
+	public static JSONObject getPedigreeLine(GermplasmDataManager manager,String parent,String id, List<List<String>> temp_fin, String parent2, int GID) throws MiddlewareQueryException,
+	IOException {
+
+		String[] tokens = new Tokenize().tokenize(parent);
+		ArrayList<String> pedigreeList = new ArrayList<String>();
+
+		pedigreeList = saveToArray(pedigreeList, tokens); // pedigreeList[0] is the most recent pedigree, pedigreeList[size] is the root
+
+		Boolean flag = true;
+		Boolean single_hit=false;
+		Boolean multiple_hit=false;
+		Boolean error=false;
+		Boolean result=false;
+
+		List<Germplasm> germplasm_fin = new ArrayList<Germplasm>();
+		List<Germplasm> germplasm = new ArrayList<Germplasm>();
+		List<Germplasm> germplasmList=null;
+
+		List<List<String>> temp = new ArrayList<List<String>>();
+		int index=0;
+		int gpid2=0;
+		int gpid1=0;
+		int gid=0;
+		int gpid2_index=0;
+
+		// index 0 is the parent, index pedigreeList.size()-1 is the root
+		for(int i=0; i<pedigreeList.size(); i++){
+			String pedigree=pedigreeList.get(i);
+			System.out.println("pedigree: "+pedigree);
+			System.out.println("result: "+result);
+			if(flag){
+				int count_LOCAL = countGermplasmByName(manager,pedigree, Database.LOCAL);
+				int count_CENTRAL= countGermplasmByName(manager,pedigree,Database.CENTRAL);
+
+				germplasm=getGermplasmList(manager, pedigree, count_LOCAL, count_CENTRAL);
+				System.out.println("count in db: "+germplasm.size());
+				for(int j=0; j<germplasm.size();j++){
+					//System.out.println("\t ["+j+"]: "+germplasm.get(j).getLocationId());
+					if(germplasm.get(j).getLocationId().equals(locationID)){
+						germplasm_fin.add(germplasm.get(j));
+					}
+				}
+				int count=germplasm_fin.size();
+
+				if(count==1){	// only one germplasm with that name in the location
+					System.out.print("count==1");
+					System.out.println("\t "+pedigree);
+
+					if(i==0){	// if it is the parent
+						temp_fin=printSuccess_temp(pedigree, parent2, id, germplasm_fin.get(0), manager, "false",temp_fin);
+						GID=germplasm_fin.get(0).getGid();
+						gpid2=germplasm_fin.get(0).getGpid2();
+						gpid1=germplasm_fin.get(0).getGpid1();
+						gid=germplasm_fin.get(0).getGid();
+					}else if(i==pedigreeList.size()-1){	// if root
+						//germplasm_fin.get(0)
+						List<Germplasm> list= new ArrayList<Germplasm>();
+						gid=germplasm_fin.get(0).getGid();
+						index=i;
+
+						System.out.println("create GID from "+ pedigreeList.get(i-1));
+						for(int k=i-1;k>=0;k--){
+							System.out.println("\t create GID: "+ pedigreeList.get(k));
+							if(k==i-1){
+								gpid1=gid;
+							}
+							int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
+
+							int gid_single_hit = (int) addGID(manager, pedigreeList.get(k), gpid1, gid,
+									methodID);
+							if(k==0){
+								GID=gid_single_hit;
+							}
+							gid=gid_single_hit;
+
+							Germplasm g=manager.getGermplasmByGID(gid_single_hit);
+
+							list.add(g);
+
+						}
+						int l=0;
+						for (int m = list.size()-1 ; m >= 0; m--) {
+							//printSuccess(pedigreeList.get(l), parent, id, list.get(m), manager, "new");
+							temp_fin=printSuccess_temp(pedigreeList.get(l), parent2, id, list.get(m), manager, "new",temp_fin);
+							l++;
+						}
+						list.clear();
+
+						temp_fin=printSuccess_temp(pedigreeList.get(i), parent2, id, germplasm_fin.get(0), manager, "false",temp_fin);
+					}
+					else{	// not root and not the parent
+						System.out.print("i: "+i);
+						System.out.println("\t|  "+pedigree);
+						temp=printSuccess_temp(pedigree, parent2, id, germplasm_fin.get(0), manager, "false", temp);
+						gpid1=germplasm_fin.get(0).getGpid1();
+						gpid2_index=germplasm_fin.get(0).getGpid2();
+						gid=germplasm_fin.get(0).getGid();
+					}
+
+
+					flag=false;
+					single_hit=true;
+					multiple_hit=false;
+					index=i;
+					result=true;
+
+					//System.out.println("TEMP: "+temp);
+
+				}else if(count>1){	//multiple germplasm name in a location
+					System.out.print("count>1");
+					System.out.println("\t "+pedigree);
+
+					multipleHits_inLocation(germplasm_fin, manager, pedigree, id, parent2,pedigreeList);
+					if(i==0)	// if it is the parent
+						temp_fin=printChooseGID_temp(pedigree, parent2, id,temp_fin);
+					else if(i==pedigreeList.size()-1){	//if it is the root
+						for(int k=0;k<temp.size();k++){
+							temp_fin.add(temp.get(k));
+						}
+						temp_fin=printChooseGID_temp(pedigree, parent2, id,temp_fin);
+					}
+					else{	// if not the root and not the parent
+						temp=printChooseGID_temp(pedigree, parent2, id, temp);
+					}
+					multiple_hit=true;
+					flag=false;
+					index=i;
+					result=false;
+
+				}else{
+					System.out.print("count==0");
+					System.out.println("\t "+pedigree);
+
+					//no germplasm name in the list's location
+					if(i==pedigreeList.size()-1){	//if root assign GID from the root
+						JSONObject output2=createPedigreeLine_CrossOp(manager, pedigreeList, id, pedigreeList.get(i),parent2,temp_fin,GID);
+						GID=(Integer) output2.get("GID");
+						temp_fin=(List<List<String>>) output2.get("temp_fin");
+
+						result=true;
+					}else{	//else, not root, print NOT SET
+
+						temp=printNotSet_temp(pedigree, parent2, id, temp);
+						single_hit=false;
+						multiple_hit=false;
+						flag=true;
+					}
+				}
+
+			}else{
+				if(multiple_hit){
+					System.out.println("\t multiple hit is true");
+					if(i-1==index && (i-1)!=0){	 // if the previous is the 'index' and not the parent
+
+						for(int k=0;k<temp.size();k++){
+							temp_fin.add(temp.get(k));
+						}
+						temp_fin=printNotSet_temp(pedigree, parent2, id,temp_fin);
+					}else{
+						System.out.println("\t"+pedigree+"is NOT SET");
+						temp_fin=printNotSet_temp(pedigree, parent2, id,temp_fin);
+					}
+					single_hit=false;
+					flag=false;
+					multiple_hit=true;
+					result=false;
+				}else if(single_hit){
+					System.out.println("\t Single hit is true");
+					if(i-1==index && (i-1)!=0){	// if the previous is not the parent and is the 'index'
+						//create GID for the index onwards
+
+						List<Germplasm> list= new ArrayList<Germplasm>();
+						//gid=germplasm_fin.get(0).getGid();
+
+						System.out.println("create GID from "+ pedigreeList.get(i-2));
+						for(int k=i-2;k>=0;k--){
+							System.out.println("\t create GID: "+ pedigreeList.get(k));
+
+							int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
+
+							gpid2=gid;
+
+							System.out.println("gpid1: "+gpid1);
+							System.out.println("gpid2: "+gpid2);
+
+							int gid_single_hit = (int) addGID(manager, pedigreeList.get(k), gpid1, gpid2,
+									methodID);
+							if(k==0){
+								GID=gid_single_hit;
+							}
+							gid=gid_single_hit;
+
+							Germplasm g=manager.getGermplasmByGID(gid_single_hit);
+
+							//printSuccess(pedigreeList.get(k), parent, id, g, manager, "false");
+							list.add(g);
+
+						}
+						int l=0;
+						for (int m = list.size()-1 ; m >= 0; m--) {
+							temp_fin=printSuccess_temp(pedigreeList.get(l), parent2, id, list.get(m), manager, "new",temp_fin);
+							l++;
+						}
+						list.clear();
+
+						//printSuccess(pedigreeList.get(i-1), parent, id, germplasm_fin.get(0), manager, "false");
+						temp_fin.add(temp.get(index));
+
+						Germplasm g=manager.getGermplasmByGID(gpid2_index);
+
+						if(g==null){ // this is an ERROR, the gid should exist
+							error=true;
+
+							temp_fin=printError_temp(pedigree, parent2,id,temp); //prints ERROR to file
+
+						}else{
+							gpid2=g.getGpid2();
+							gpid1=g.getGpid1();
+							error=false; //set the flag to false
+
+							temp_fin=printSuccess_temp(pedigree,parent2,id, g,manager, "false",temp_fin);	//print to file
+							System.out.println("\t"+pedigree+" is found");
+						}
+					}else{
+						Germplasm g;
+						if(error){	//if the precedent pedigree does not exist
+
+							germplasmList = new ArrayList<Germplasm>();
+
+							int count_LOCAL = countGermplasmByName(manager,pedigree, Database.LOCAL);
+							int count_CENTRAL= countGermplasmByName(manager,pedigree,Database.CENTRAL);
+							germplasmList=getGermplasmList( manager,pedigree, count_LOCAL, count_CENTRAL); //gets lists of germplasm with that name
+							g= getGermplasmByGpid(manager, gpid1, germplasmList);	// get the germplasm of the same gpid1, for derivative line, or gid equals to the gpid1
+						}else{
+							g=manager.getGermplasmByGID(gpid2);
+							System.out.println("gpid2="+gpid2);
+						}
+						if(g==null){ // this is an ERROR, the gid should exist
+							error=true;
+
+							temp_fin=printError_temp(pedigree, parent2,id,temp_fin); //prints ERROR to file
+
+						}else{
+							gpid2=g.getGpid2();
+							gpid1=g.getGpid1();
+							error=false; //set the flag to false
+
+							temp_fin=printSuccess_temp(pedigree,parent2,id, g,manager, "false",temp_fin);	//print to file
+						}
+					}
+					single_hit=true;
+					flag=false;
+					multiple_hit=false;
+					result=true;
+				}
+			}			
+		}
+
+		temp.clear();
+		germplasm.clear();
+		germplasm_fin.clear();
+		JSONObject output= new JSONObject();
+		System.out.println(parent+": "+result);
+		output.put("result", result);
+		output.put("temp_fin", temp_fin);
+		output.put("gid_parent", GID);
+		return output;
+	}
+
 	private static Boolean processParents(GermplasmDataManager manager,
 			String female_nval, String female_id, String male_nval,
 			String male_id, String cross, List<List<String>> list) throws MiddlewareQueryException, IOException {
@@ -716,19 +1565,22 @@ public class test {
 		boolean female=false, male=false;
 		int fgid = 0, mgid = 0;
 
-		//female=parse(manager,female_nval,female_nval, female_id);
-		female=checkParent(manager,female_nval, female_id);
+		if(female_nval.contains("/") || female_nval.contains("*")){
+			System.out.println("female has cross operators");
+			female=checkParent_crossOp(manager, female_nval, female_id);
+		}else{
+			female=checkParent(manager,female_nval, female_id);
+		}
 		//System.out.println("female: "+female);
 		fgid=GID;
 		////System.out.println("\nmale:");
-		//male=parse(manager,male_nval,male_nval, male_id);
 		male=checkParent(manager,male_nval, male_id);
 		//System.out.println("male: "+male);
 		mgid=GID;
 
 		if(male && female){
 			Germplasm germplasm=isCross_existing(manager, cross);
-			if (germplasm==null){
+			if (germplasm==null || germplasm.getGpid1()!=fgid || germplasm.getGpid2()!=mgid){
 				System.out.println("createdGID for cross "+ cross);
 				int methodID=selectMethodType(manager,fgid,mgid,female_nval,male_nval);
 
@@ -789,6 +1641,7 @@ public class test {
 		int gpid2=0;
 		int gpid1=0;
 		int gid=0;
+		int gpid2_index=0;
 
 		// index 0 is the parent, index pedigreeList.size()-1 is the root
 		for(int i=0; i<pedigreeList.size(); i++){
@@ -799,8 +1652,9 @@ public class test {
 				int count_CENTRAL= countGermplasmByName(manager,pedigree,Database.CENTRAL);
 
 				germplasm=getGermplasmList(manager, pedigree, count_LOCAL, count_CENTRAL);
-
+				System.out.println("count in db: "+germplasm.size());
 				for(int j=0; j<germplasm.size();j++){
+					//System.out.println("\t ["+j+"]: "+germplasm.get(j).getLocationId());
 					if(germplasm.get(j).getLocationId().equals(locationID)){
 						germplasm_fin.add(germplasm.get(j));
 					}
@@ -814,7 +1668,7 @@ public class test {
 					if(i==0){	// if it is the parent
 						printSuccess(pedigree, parent, id, germplasm_fin.get(0), manager, "false");
 						GID=germplasm_fin.get(0).getGid();
-						//gpid2=germplasm_fin.get(0).getGpid2();
+						gpid2=germplasm_fin.get(0).getGpid2();
 						gpid1=germplasm_fin.get(0).getGpid1();
 						gid=germplasm_fin.get(0).getGid();
 					}else if(i==pedigreeList.size()-1){	// if root
@@ -857,6 +1711,7 @@ public class test {
 						System.out.println("\t|  "+pedigree);
 						temp=printSuccess_temp(pedigree, parent, id, germplasm_fin.get(0), manager, "false", temp);
 						gpid1=germplasm_fin.get(0).getGpid1();
+						gpid2_index=germplasm_fin.get(0).getGpid2();
 						gid=germplasm_fin.get(0).getGid();
 					}
 
@@ -966,7 +1821,7 @@ public class test {
 						//printSuccess(pedigreeList.get(i-1), parent, id, germplasm_fin.get(0), manager, "false");
 						createdGID_local.add(temp.get(index));
 
-						Germplasm g=manager.getGermplasmByGID(gpid2);
+						Germplasm g=manager.getGermplasmByGID(gpid2_index);
 
 						if(g==null){ // this is an ERROR, the gid should exist
 							error=true;
@@ -1021,6 +1876,33 @@ public class test {
 		return result;
 	}
 
+	private static List<List<String>> printError_temp(String pedigree, String parent, String id, List<List<String>> temp) {
+		List<String> row= new ArrayList<String>();
+
+		row.add(id);
+		row.add(parent); // parent
+		row.add(pedigree); // pedigree
+
+		////System.out.println("Does not Exist");
+
+		row.add("Does not Exist" ); // gid
+		row.add("N/A"); // method
+		row.add("N/A"); // method
+		row.add("N/A"); // location
+		row.add("N/A"); // location
+		row.add("N/A" ); // gpid1
+		row.add("N/A" ); // gpid2
+		row.add(""+false ); // gpid2
+		row.add(cross_date ); // cross' date of creation specified in the list
+
+		createdGID_local.add(row);
+		//////System.out.println("row: "+row);
+		//////System.out.println("output: "+createdGID_local);
+		//row.clear();
+		temp.add(row);
+		return temp;
+	}
+
 	private static List<List<String>> printSuccess_temp(String pedigree,String parent, String id,
 			Germplasm germplasm, GermplasmDataManager manager,
 			String tag, List<List<String>> temp) throws MiddlewareQueryException {
@@ -1072,7 +1954,14 @@ public class test {
 
 		temp.add(row);
 
-		System.out.println("size:"+temp.size()+" temp: "+row);
+		/*System.out.println("size:"+temp.size()+" temp: "+row);
+
+		System.out.println("\n------------");
+		for(int i=0; i<temp.size(); i++){
+			System.out.println(""+temp.get(i));
+		}
+		System.out.println("------------");
+		*/
 		//////System.out.println("output: "+createdGID_local);
 		//row.clear();
 		return temp;
@@ -1200,9 +2089,9 @@ public class test {
 			row.add(""+germplasm.get(i).getLocationId());
 			row.add(loc); // location
 			row.add(pedigree); // pedigree name
-			
+
 			String date=germplasm.get(i).getGdate().toString();
-			
+
 			String yr,day,mo;
 			//System.out.println("date: "+date);
 			if(date.equals("0")){
@@ -1215,7 +2104,7 @@ public class test {
 				day=date.charAt(4)+""+date.charAt(5)+"-";
 				mo=date.charAt(6)+""+date.charAt(7)+"";
 			}
-			
+
 			//System.out.println("date: "+yr.concat(day).concat(mo));
 			row.add(yr.concat(day).concat(mo));	//date of creation
 			row.add(cross_date);	//date of creation
@@ -1272,7 +2161,7 @@ public class test {
 		}
 
 		for (int i = list.size() - 1; i >= 0; i--) {
-			////System.out.println("YEAAAAAH id: " +id);
+			System.out.println("pedigreeList: " +pedigreeList.get(i));
 			printSuccess(pedigreeList.get(i), parent, id, list.get(i), manager, "new");
 		}
 
@@ -1281,6 +2170,59 @@ public class test {
 		list.clear();
 
 		g=null;
+
+	}
+
+	private static JSONObject createPedigreeLine_CrossOp(GermplasmDataManager manager,
+			ArrayList<String> pedigreeList, String id, String parent,String parent2, List<List<String>> temp_fin, int GID) throws MiddlewareQueryException {
+		int gpid2 = 0, gpid1 = 0, gid;
+
+		Collections.reverse(pedigreeList);
+
+		List<Germplasm> list= new ArrayList<Germplasm>();
+		Germplasm g;
+		for (int i = 0; i < pedigreeList.size(); i++) {
+
+			g=new Germplasm();
+
+			if (i == 0) {
+				int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
+				gid = (int) addGID(manager, pedigreeList.get(i), gpid1, gpid2,
+						methodID);
+				g=manager.getGermplasmByGID(gid);
+				gpid2 = gid;
+				gpid1 = gid;
+			} else {
+				int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
+				gid = (int) addGID(manager, pedigreeList.get(i), gpid1, gpid2,
+						methodID);
+				g=manager.getGermplasmByGID(gid);
+				gpid2 = gid;
+			}
+			//pedigreeList_GID.add(gid);
+			list.add(g);
+			//////System.out.println(pedigreeList.get(i) + " gpid1: " + gpid1
+			//		+ " gpid2: " + gpid2);
+			if(i==pedigreeList.size()-1){
+				GID=gid;
+			}
+		}
+
+		for (int i = list.size() - 1; i >= 0; i--) {
+			System.out.println("pedigreeList: " +pedigreeList.get(i));
+			temp_fin=printSuccess_temp(pedigreeList.get(i), parent2, id, list.get(i), manager, "new", temp_fin);
+		}
+
+		//clearing memory
+		pedigreeList.clear();
+		list.clear();
+
+		g=null;
+
+		JSONObject output=new JSONObject();
+		output.put("GID", GID);
+		output.put("temp_fin", temp_fin);
+		return output;
 
 	}
 
@@ -1376,7 +2318,7 @@ public class test {
 		row.add(pedigree); // pedigree
 
 		//////System.out.println("gid: " + germplasm.getGid());
-
+		//System.out.println("location: " + germplasm.getLocationId());
 		Location location = manager.getLocationByID(germplasm.getLocationId());
 		Method method = manager.getMethodByID(germplasm.getMethodId());
 
@@ -1494,7 +2436,7 @@ public class test {
 			String loc=location.getLname().replace(",", "#");
 			row.add(""+germplasm.get(i).getLocationId());
 			row.add(loc); // location
-			
+
 			System.out.println("date: "+germplasm.get(i).getGdate());
 			row.add(""+germplasm.get(i).getGdate());	//date of creation
 
@@ -1645,8 +2587,9 @@ public class test {
 		}else if((female_germplasm.getMethodId()==103 && male_germplasm.getMethodId()==103) 
 				|| (female_germplasm.getMethodId()==106 && male_germplasm.getMethodId()==103)
 				|| (female_germplasm.getMethodId()==103 && male_germplasm.getMethodId()==106)
-				|| (female_germplasm.getMethodId()==106 && male_germplasm.getMethodId()==106)){
-			methodType=106; //Cross between two three-way or more complex crosses
+				|| (female_germplasm.getMethodId()==106 && male_germplasm.getMethodId()==106)
+				|| (female_germplasm.getMethodId()==106 && male_germplasm.getMethodId()==101)){
+			methodType=106; //Cross between two three-way or more complex crosses or 1 3-way and a single cross
 			methodDesc="Complex Cross";
 		}else{
 			methodType=101;	//if AXB; single cross
