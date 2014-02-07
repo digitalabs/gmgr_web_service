@@ -25,6 +25,7 @@ import org.generationcp.middleware.hibernate.HibernateUtil;
 import org.generationcp.middleware.manager.ManagerFactory;
 import org.generationcp.middleware.manager.api.GermplasmDataManager;
 import org.generationcp.middleware.manager.api.PedigreeDataManager;
+import org.generationcp.middleware.pojos.Attribute;
 import org.generationcp.middleware.pojos.Bibref;
 import org.generationcp.middleware.pojos.Country;
 import org.generationcp.middleware.pojos.Germplasm;
@@ -571,7 +572,7 @@ public class Model {
 			PedigreeDataManager pedigreeManager = factory.getPedigreeDataManager();
 			    
 	        Debug.println(10, "GID = " + Integer.parseInt(gid) + ", level = " + Integer.parseInt(level) +  ":");
-	        GermplasmPedigreeTree tree = pedigreeManager.generatePedigreeTree(Integer.parseInt(gid),Integer.parseInt(level));
+	        GermplasmPedigreeTree tree = pedigreeManager.generatePedigreeTree(Integer.parseInt(gid),Integer.parseInt(level),true);
 	   
 	        for(int i=0;i<Integer.parseInt(level);i++)
 	        {
@@ -612,7 +613,7 @@ public class Model {
 	
 	private void editor() throws IOException, MiddlewareQueryException {
 		
-		ManagerFactory factory = new Config().configDB2();
+		ManagerFactory factory = new Config().configDB();
 		GermplasmDataManager man = factory.getGermplasmDataManager();
 		
 		Germplasm germ = man.getGermplasmByGID(-129);
@@ -622,12 +623,18 @@ public class Model {
 	private void printNode(GermplasmPedigreeTreeNode node, int level, List <Name> names, Location loc2, List <Attribute> attributes, int cid, Country cnty, GermplasmDataManager man, Method meth, Bibref bibref, Location loc) throws IOException, MiddlewareQueryException {
 	       
 		StringBuffer tabs = new StringBuffer();
+		String descBibref = "N/A";
 		//ManagerFactory factory = new Config().configDB();
 		//GermplasmDataManager man = factory.getGermplasmDataManager();
 		
 		meth = man.getMethodByID(node.getGermplasm().getMethodId());
 		loc = man.getLocationByID(node.getGermplasm().getLocationId());
-		bibref = man.getBibliographicReferenceByID(node.getGermplasm().getReferenceId());
+		
+		if(node.getGermplasm().getReferenceId()!=0){
+			bibref = man.getBibliographicReferenceByID(node.getGermplasm().getReferenceId());
+			descBibref = bibref.getAnalyt();
+		}
+		
 		names = man.getNamesByGID(node.getGermplasm().getGid(), null, null);
 		loc2 = null;
 		attributes = man.getAttributesByGID(node.getGermplasm().getGid());
@@ -654,7 +661,7 @@ public class Model {
                     + tabs.toString() +"    \"methodtype\" : \"" + meth.getMtype() +"\",\n"
                     + tabs.toString() +"    \"location\" : \"" + loc.getLname() +"\",\n"
                     + tabs.toString() +"    \"country\" : \"" + cnty.getIsoabbr() +"\",\n"
-                    + tabs.toString() +"    \"ref\" : \"" + bibref.getAnalyt() +"\",\n";
+                    + tabs.toString() +"    \"ref\" : \"" + descBibref +"\",\n";
             
             for(int cntr=0;cntr<names.size();cntr++)
      		{
@@ -698,7 +705,7 @@ public class Model {
                     + tabs.toString() +"    \"methodtype\" : \"" + meth.getMtype() +"\",\n"
                     + tabs.toString() +"    \"location\" : \"" + loc.getLname() +"\",\n"
                     + tabs.toString() +"    \"country\" : \"" + cnty.getIsoabbr() +"\",\n"
-                    + tabs.toString() +"    \"ref\" : \"" + bibref.getAnalyt() +"\",\n";
+                    + tabs.toString() +"    \"ref\" : \"" + descBibref +"\",\n";
             
             for(int cntr=0;cntr<names.size();cntr++)
      		{
