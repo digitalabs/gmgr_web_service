@@ -560,11 +560,19 @@ public class Model {
 		JSONObject json_array = (JSONObject) data;
 		String gid = (String) json_array.get("GID");
 		String level = (String) json_array.get("LEVEL");
+		String sel = (String) json_array.get("SEL");
 		JSONObject outputTree = new JSONObject();
 		
-		//ManagerFactory factory = new Config().configDB();
+			//ManagerFactory factory = new Config().configDB();
 		
 		cnt = counter++;
+		Boolean bool;
+		if(Integer.parseInt(sel)==1)
+		{
+			bool = true;
+		}
+		else
+			bool = false;
 		
 		if(cnt % 2 == 1)
 		{
@@ -572,7 +580,7 @@ public class Model {
 			PedigreeDataManager pedigreeManager = factory.getPedigreeDataManager();
 			    
 	        Debug.println(10, "GID = " + Integer.parseInt(gid) + ", level = " + Integer.parseInt(level) +  ":");
-	        GermplasmPedigreeTree tree = pedigreeManager.generatePedigreeTree(Integer.parseInt(gid),Integer.parseInt(level),true);
+	        GermplasmPedigreeTree tree = pedigreeManager.generatePedigreeTree(Integer.parseInt(gid),Integer.parseInt(level), bool);
 	   
 	        for(int i=0;i<Integer.parseInt(level);i++)
 	        {
@@ -662,6 +670,11 @@ public class Model {
                     + tabs.toString() +"    \"location\" : \"" + loc.getLname() +"\",\n"
                     + tabs.toString() +"    \"country\" : \"" + cnty.getIsoabbr() +"\",\n"
                     + tabs.toString() +"    \"ref\" : \"" + descBibref +"\",\n";
+        		
+        		if(meth.getMtype().equals("GEN"))
+        		{
+        			outputString = outputString + tabs.toString() +"    \"warning\" : \"" + "true" +"\",\n";
+        		}
             
             for(int cntr=0;cntr<names.size();cntr++)
      		{
@@ -707,6 +720,11 @@ public class Model {
                     + tabs.toString() +"    \"country\" : \"" + cnty.getIsoabbr() +"\",\n"
                     + tabs.toString() +"    \"ref\" : \"" + descBibref +"\",\n";
             
+        	if(meth.getMtype().equals("GEN"))
+    		{
+    			outputString = outputString + tabs.toString() +"    \"warning\" : \"" + "true" +"\",\n";
+    		}
+        	
             for(int cntr=0;cntr<names.size();cntr++)
      		{
      			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
@@ -761,8 +779,8 @@ public class Model {
 
 		new Editor();
 		//Editor.show_germplasm_details((JSONObject)data);
-
 		return Response.status(200).entity("OK!").build();
+		
 	}
 
 	@Path("/editGermplasm")
@@ -778,14 +796,16 @@ public class Model {
 		//Germplasm g = (Germplasm) session.load(Germplasm.class, 50533);
 		ManagerFactory factory = new Config().configDB();
 		GermplasmDataManager man = factory.getGermplasmDataManager();
-
+		Germplasm germplasm = null;
+		
+		
 		//g.setGid(50534);
-		Integer nameId = 260142; //Assumption: id=-1 exists
+		Integer nameId = 50533; //Assumption: id=-1 exists
 		Name name = man.getGermplasmNameByID(nameId); 
 		String nameBefore = name.toString();
 		//name.setLocationId(man.getLocationByID(9000).getLocid()); //Assumption: location with id=1 exists
 		//man.updateGermplasmName(name);
-		name.setNval("IR64-1");
+		name.setNval("IR64-1kel");
 		man.updateGermplasmName(name);
 		Debug.println(0, "testUpdateGermplasmName(" + nameId + ") RESULTS: " 
 				+ "\n\tBEFORE: " + nameBefore
