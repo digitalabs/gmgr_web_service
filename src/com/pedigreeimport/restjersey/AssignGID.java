@@ -298,7 +298,7 @@ public class AssignGID {
 		new FileProperties().setFilePermission(createdFile);
 	}
 
-	public void chooseGID() throws IOException, ParseException,
+	/*public void chooseGID() throws IOException, ParseException,
 	MiddlewareQueryException {
 		ManagerFactory factory = new Config().configDB();
 		GermplasmDataManager manager = factory.getGermplasmDataManager();
@@ -409,7 +409,7 @@ public class AssignGID {
 					 * then check if there previous derivative already exist in that
 					 * location if does not, create, if existing, use that GID *
 					 */
-					flag = pedigreeNotExisting(manager, pedigreeList, index - 2,
+					/*flag = pedigreeNotExisting(manager, pedigreeList, index - 2,
 							parent1ID, term);
 				}
 			}
@@ -463,7 +463,7 @@ public class AssignGID {
 			}
 		}
 		factory.close();
-	}
+	}*/
 
 	private int getGID_fromFile(String pedigree, String id) throws IOException {
 		String csv = "E:/xampp/htdocs/GMGR/csv_files/createdGID.csv";
@@ -599,7 +599,7 @@ public class AssignGID {
 		return flag;
 	}
 
-	public void createGID() throws FileNotFoundException, IOException,
+	/*public void createGID() throws FileNotFoundException, IOException,
 	MiddlewareQueryException, ParseException {
 
 		ManagerFactory factory = new Config().configDB();
@@ -690,7 +690,7 @@ public class AssignGID {
 		// close the database connection
 		factory.close();
 		new FileProperties().setFilePermission(csv);
-	}
+	}*/
 
 	public void tokenize(GermplasmDataManager manager, Writer pw,
 			String id, String pedigree) throws IOException,
