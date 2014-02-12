@@ -37,12 +37,12 @@ import org.generationcp.middleware.pojos.Location;
 import org.generationcp.middleware.pojos.Method;
 import org.generationcp.middleware.pojos.Name;
 import org.generationcp.middleware.util.Debug;
-import org.hibernate.Session;
 import org.json.JSONException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.pedigreeimport.backend.*;
+import com.pedigreeimport.restjersey.Config;
 
 @Path("/term")
 public class Model {

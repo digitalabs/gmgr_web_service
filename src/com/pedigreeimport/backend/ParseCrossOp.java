@@ -11,6 +11,7 @@ import org.generationcp.middleware.exceptions.MiddlewareQueryException;
 import org.json.simple.JSONObject;
 
 import com.pedigreeimport.restjersey.AssignGid;
+import com.pedigreeimport.backend.Tokenize;
 
 
 /*
@@ -243,6 +244,7 @@ public class ParseCrossOp {
 												System.out.println("---------");
 
 												if(temp2[k].contains("-")){
+													
 													Pattern p = Pattern.compile("IR");
 										            Matcher m1 = p.matcher(correctedTerm);
 										            String[] tokens={""};

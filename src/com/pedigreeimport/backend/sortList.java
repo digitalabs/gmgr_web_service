@@ -5,7 +5,7 @@ import java.io.*;
 
 public class sortList{
 
-	public static List<String> algo(List<String> obj) throws IOException{
+	public List<String> algo(List<String> obj) throws IOException{
 		int j=0;
 		String s="";
 		List<String> list = new ArrayList<String>();

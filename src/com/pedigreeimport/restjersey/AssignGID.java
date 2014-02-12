@@ -23,7 +23,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import com.pedigreeimport.backend.CrossOp;
-import com.pedigreeimport.backend.ParseCrossOp;
 import com.pedigreeimport.backend.Tokenize;
 
 public class AssignGid {
