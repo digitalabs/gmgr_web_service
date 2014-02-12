@@ -202,7 +202,7 @@ public class Model {
         
 		ManagerFactory factory = new Config().configDB(db_details);
 		
-		output=AssignGid.chooseGID(data,factory);
+		output=AssignGid.chooseGID_cross(data,factory);
 
 		factory.close();
 		return Response.status(200).entity(output).build();
@@ -285,8 +285,7 @@ public class Model {
 		List<List<String>> list= new ArrayList<List<String>>();
 		List<List<String>> existingTerm= new ArrayList<List<String>>();
 		List<String> db_details = new ArrayList<String>();
-		
-		db_details.clear();
+
 		
 		JSONObject json_array = (JSONObject) data;
 		String locationID = (String) json_array.get("locationID");
@@ -316,7 +315,7 @@ public class Model {
 		//System.out.println();
 		ManagerFactory factory = new Config().configDB(db_details);
 		output=AssignGid.bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
-
+		db_details.clear();
 		factory.close();
 
 		////System.out.println("list: "+  json_array.get("list"));
@@ -415,7 +414,7 @@ public class Model {
 			data_output.put("new", newName);
 			data_output.put("old", old);
 			data_output.put("updated", true);
-
+			
 
 		}else{
 
@@ -428,6 +427,7 @@ public class Model {
 			data_output.put("newString", newString);
 		}
 		//System.out.println("list: "+data_output.get("list"));
+		System.out.println(""+newString);
 
 		return Response.status(200).entity(data_output).build();
 	}
@@ -758,7 +758,9 @@ public class Model {
 		JSONObject outputTree = new JSONObject();
 		
 			//ManagerFactory factory = new Config().configDB();
-		
+		System.out.println("gid: "+gid);
+		System.out.println("level: "+level);
+		System.out.println("sel: "+sel);
 		cnt = counter++;
 		Boolean bool;
 		if(Integer.parseInt(sel)==1)
