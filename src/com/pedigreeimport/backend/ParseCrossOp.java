@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import org.generationcp.middleware.exceptions.MiddlewareQueryException;
 import org.json.simple.JSONObject;
 
-import com.pedigreeimport.restjersey.test;
+import com.pedigreeimport.restjersey.AssignGid;
 
 
 /*
@@ -60,13 +60,14 @@ public class ParseCrossOp {
 		row.add(temp);
 		row.add("0");   // 0 for unexplored token
 		twoDim.add(row);
-		
+		list.add(line);
 		list=getParsed_parents(max, familyCount, row, list, twoDim);
-		System.out.println("------");
+		/*System.out.println("------");
 		for(int j=0; j<list.size();j++){
 			System.out.println("::"+list.get(j));
 		}
 		System.out.println("------");
+		*/
 		return list;
 		
 	}
@@ -94,12 +95,15 @@ public class ParseCrossOp {
 							//System.out.println(Arrays.toString(temp2));
 							familyCount++;
 							for (int k = 0; k < temp2.length; k++) {
+								//System.out.println("temp2[k] "+temp2[k]);
 								row = new ArrayList<String>();
 								row.add(temp2[k]);
 								row.add("0");
 								twoDim.add(row);
+								
 								if(!list.contains(temp2[k])){
 										list=sort(list,temp2[k]);
+										//System.out.println("LIST: "+list);
 								}
 							}
 							twoDim.get(i).remove(1);
@@ -122,9 +126,10 @@ public class ParseCrossOp {
 
 			return list;
 		}
-		//for(int m=0; m<list.size(); m++){
-		//System.out.println("@ return tokens @ parseCross: "+ list.get(m));
-		//}
+		/*for(int m=0; m<list.size(); m++){
+		System.out.println("@ return tokens @ parseCross: "+ list.get(m));
+		}
+		*/
 		
 		return list;
 
@@ -210,7 +215,7 @@ public class ParseCrossOp {
 										if(standardize){
 											//System.out.println("standardize");
 											String correctedTerm = new FixString().checkString(temp2[k]);
-
+											System.out.println("correctedTermz; "+correctedTerm);
 											String result = new Main().checkString(correctedTerm);
 											if(!result.equals("")){
 												error+=result;
@@ -238,12 +243,21 @@ public class ParseCrossOp {
 												System.out.println("---------");
 
 												if(temp2[k].contains("-")){
-
-													String[] tokens = new Tokenize().tokenize(correctedTerm);
+													Pattern p = Pattern.compile("IR");
+										            Matcher m1 = p.matcher(correctedTerm);
+										            String[] tokens={""};
+										            if (m1.lookingAt()) {
+										            	tokens = new Tokenize().tokenize(correctedTerm);
+														
+										            }else{
+										            	tokens[0]="";
+										            }
+										            
+													//String[] tokens = new Tokenize().tokenize(correctedTerm);
 													ArrayList<String> pedigreeList = new ArrayList<String>();
 
-													new test();
-													pedigreeList = test.saveToArray(pedigreeList, tokens);
+													new AssignGid();
+													pedigreeList = AssignGid.saveToArray(pedigreeList, tokens);
 													for(int n=1; n<pedigreeList.size();n++){
 														correctedList.add(pedigreeList.get(n));
 														System.out.println("add:: "+pedigreeList.get(n));														list.add(pedigreeList.get(n));
@@ -261,12 +275,20 @@ public class ParseCrossOp {
 												correctedList=sort(correctedList,temp2[k]);
 												list=sort(list,temp2[k]);
 												if(temp2[k].contains("-")){
-
-													String[] tokens = new Tokenize().tokenize(temp2[k]);
+													Pattern p = Pattern.compile("IR");
+										            Matcher m1 = p.matcher(temp2[k]);
+										            String[] tokens={""};
+										            if (m1.lookingAt()) {
+										            	tokens = new Tokenize().tokenize(temp2[k]);
+														
+										            }else{
+										            	tokens[0]="";
+										            }
+													
 													ArrayList<String> pedigreeList = new ArrayList<String>();
 
-													new test();
-													pedigreeList = test.saveToArray(pedigreeList, tokens);
+													new AssignGid();
+													pedigreeList = AssignGid.saveToArray(pedigreeList, tokens);
 													for(int n=1; n<pedigreeList.size();n++){
 														correctedList.add(pedigreeList.get(n));
 														System.out.println("add:: "+pedigreeList.get(n));														list.add(pedigreeList.get(n));
@@ -314,7 +336,7 @@ public class ParseCrossOp {
 	private static List<String> sort(List<String> list, String line) {
 		String temp=line;
 		Boolean crossOp=false;
-
+//System.out.println("Sort");
 		if(line.contains("/") || line.contains("*") || (line.contains("/") && line.contains("*"))){
 			crossOp=true;
 		}
@@ -360,8 +382,9 @@ public class ParseCrossOp {
 		System.out.println(" "+ list.get(m));
 		}
 		
+		
 		System.out.println("---------");
-		*/
+*/
 		
 		return list;
 

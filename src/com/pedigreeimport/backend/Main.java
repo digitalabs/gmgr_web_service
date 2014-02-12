@@ -27,7 +27,11 @@ public class Main {
             Matcher m = p.matcher(line);
 
             if (m.lookingAt()) {    // Breeding Line is IRRI
-                list= new IRRI().standardIRRI(line);
+            	if(line.contains("(")){
+            		list="";
+            	}else{
+            		list= new IRRI().standardIRRI(line);
+            	}
                 //list = new IRRI().getListErrorsIRRI();
                 
             }else{

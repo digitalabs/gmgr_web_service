@@ -10,6 +10,8 @@ import java.io.Writer;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -59,6 +61,24 @@ public class Model {
 		return Response.status(200).entity("Genealogy Manager")
 		.build();
 	}
+	@Path("/createNew")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response CreateNew(JSONObject data) throws FileNotFoundException, IOException,
+	MiddlewareQueryException, ParseException, InterruptedException {		
+
+		new AssignGid();
+		//System.out.println("HERE!");
+		JSONObject output=new JSONObject();
+		ManagerFactory factory = new Config().configDB();
+		output=AssignGid.createNew(data,factory);
+		System.out.println("existingTerm: "+output.get("existingTerm"));
+		factory.close();
+		return Response.status(200).entity(output).build();
+
+	}
+
 
 	@Path("/updateMethod")
 	@POST
@@ -75,8 +95,9 @@ public class Model {
 		String id=(String) data.get("id");
 		ManagerFactory factory = new Config().configDB();
 		GermplasmDataManager manager = factory.getGermplasmDataManager();
-		data=new AssignGID().updateMethod(manager, createdGID, mid, gid, id);
-
+		data=new TestAssign().updateMethod(manager, createdGID, mid, gid, id);
+		manager=null;
+		createdGID.clear();
 		factory.close();
 		return Response.status(200).entity(data).build();
 	}
@@ -88,11 +109,28 @@ public class Model {
 	public Response chooseGID2(JSONObject data) throws FileNotFoundException, IOException,
 	MiddlewareQueryException, ParseException, InterruptedException {		
 
-		new test();
+		new AssignGid();
+		//System.out.println("HERE!");
+		JSONObject output=new JSONObject();
+		
+		ManagerFactory factory = new Config().configDB();
+		output=AssignGid.chooseGID(data,factory);
+		factory.close();
+		return Response.status(200).entity(output).build();
+
+	}
+	@Path("/chooseGID_cross")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response chooseGID_cross(JSONObject data) throws FileNotFoundException, IOException,
+	MiddlewareQueryException, ParseException, InterruptedException {		
+
+		new AssignGid();
 		//System.out.println("HERE!");
 		JSONObject output=new JSONObject();
 		ManagerFactory factory = new Config().configDB();
-		output=test.chooseGID(data,factory);
+		output=AssignGid.chooseGID_cross(data,factory);
 		factory.close();
 		return Response.status(200).entity(output).build();
 
@@ -102,8 +140,8 @@ public class Model {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createGID3(JSONObject data) throws FileNotFoundException, IOException,
-	MiddlewareQueryException, ParseException, InterruptedException {
-		new test();
+	MiddlewareQueryException, ParseException, InterruptedException, NumberFormatException, java.text.ParseException {
+		new AssignGid();
 		//new AssignGID().createGID();
 		//print_checkedBox();
 		List<String> checked= new ArrayList<String>();
@@ -129,15 +167,13 @@ public class Model {
 		JSONObject output=new JSONObject();
 		//System.out.println();
 		ManagerFactory factory = new Config().configDB();
-		output=test.bulk_createGID2(createdGID,list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
+		output=AssignGid.bulk_createGID2(createdGID,list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
 		factory.close();
 
 		////System.out.println("list: "+  json_array.get("list"));
 		////System.out.println("createdGID: "+ json_array.get("createdGID"));
 
 		////System.out.println("SINGLE CREATE GID ");
-
-
 
 		return Response.status(200).entity(output).build();
 	}
@@ -147,8 +183,8 @@ public class Model {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createGID2(JSONObject data) throws FileNotFoundException, IOException,
-	MiddlewareQueryException, ParseException, InterruptedException {
-		new test();
+	MiddlewareQueryException, ParseException, InterruptedException, NumberFormatException, java.text.ParseException {
+		new AssignGid();
 		//new AssignGID().createGID();
 		//print_checkedBox();
 		List<String> checked= new ArrayList<String>();
@@ -162,11 +198,10 @@ public class Model {
 		existingTerm = (List<List<String>>) json_array.get("existingTerm");
 		String userID = (String) json_array.get("userID");
 
-
 		JSONObject output=new JSONObject();
 		//System.out.println();
 		ManagerFactory factory = new Config().configDB();
-		output=test.bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
+		output=AssignGid.bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
 		factory.close();
 
 		////System.out.println("list: "+  json_array.get("list"));
@@ -357,9 +392,16 @@ public class Model {
 							}
 							//System.out.println("tokens: "+ gid);
 						}else{
-							String[] tokens = new Tokenize().tokenize(row_object
-									.get(i).toString());
-							gid = new Tokenize().stringTokens(tokens);
+							Pattern p = Pattern.compile("IR");
+				            Matcher m1 = p.matcher(line);
+
+				            if (m1.lookingAt()) {
+				            	String[] tokens = new Tokenize().tokenize(row_object.get(i).toString());
+								gid = new Tokenize().stringTokens(tokens);
+				            }else{
+				            	gid="";
+				            }
+							
 						}
 
 						row.add(gid); // GID
@@ -390,8 +432,15 @@ public class Model {
 							}else{
 								row.add("in standardized format"); // remarks
 
-								String[] tokens = new Tokenize().tokenize(correctedTerm);
-								gid = new Tokenize().stringTokens(tokens);
+								Pattern p = Pattern.compile("IR");
+					            Matcher m1 = p.matcher(line);
+
+					            if (m1.lookingAt()) {
+					            	String[] tokens = new Tokenize().tokenize(correctedTerm);
+									gid = new Tokenize().stringTokens(tokens);
+					            }else{
+					            	gid="";
+					            }
 							}
 							row.add(gid); // GID
 							//System.out.print("\"" + gid + "\"" + ","); // GID
@@ -408,7 +457,7 @@ public class Model {
 					System.out.print("#####"+correctedTerm); // pedigree term
 					//}
 					// //System.out.print("count: "+count);
-
+					gid="";
 				}
 				//System.out.println(""+row_object.get(i));
 				if(i==10){
@@ -442,7 +491,8 @@ public class Model {
 		List<List<String>> output = new ArrayList<List<String>>();
 		int k=0;
 		String line = "";
-		
+		JSONObject parse;
+		List<String> correctedList;
 		System.out.println("size:"+gu_obj.size());
 		for (int j =0; j< gu_obj.size();){
 			List<String> row= new ArrayList<String>();
@@ -456,7 +506,7 @@ public class Model {
 
 			// //System.out.print("NULL ,");
 			//System.out.println(j+" :: "+gu_obj.get(j).toString());
-			List<String> correctedList= new ArrayList<String>();
+			correctedList= new ArrayList<String>();
 			for (int i = 1; i <= 2; i++) {
 				j++;
 				if(j< gu_obj.size()){
@@ -465,9 +515,9 @@ public class Model {
 					// //System.out.print(gu_obj.get(j).toString() + "\t");
 
 
-					////System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
-					JSONObject parse=new JSONObject();
-					List<String> tokens_crossOp= new ArrayList<String>();
+					System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
+					parse=new JSONObject();
+					
 					if(gu_obj.get(j).toString().contains("/")||gu_obj.get(j).toString().contains("*")){
 						parse=new CrossOp().main(gu_obj.get(j).toString(), false);	// not to standardize the parent
 						JSONObject parse_array = (JSONObject) parse;
@@ -498,9 +548,17 @@ public class Model {
 							}
 							System.out.println("tokens: "+ gid);
 						}else{
-							String[] tokens = new Tokenize().tokenize(gu_obj.get(j)
-									.toString());
-							gid = new Tokenize().stringTokens(tokens);
+							Pattern p = Pattern.compile("IR");
+				            Matcher m = p.matcher(line);
+
+				            if (m.lookingAt()) {
+				            	String[] tokens = new Tokenize().tokenize(gu_obj.get(j)
+										.toString());
+								gid = new Tokenize().stringTokens(tokens);
+				            }else{
+				            	gid="";
+				            }
+							
 						}
 
 						row.add( gid  ); // GID
@@ -511,6 +569,7 @@ public class Model {
 						row.add("N/A"); // GID
 						////System.out.print("N/A,");
 					}
+					gid="";
 					System.out.println("#####"+gu_obj.get(j).toString());
 					row.add(gu_obj.get(j).toString()); // pedigree term
 

@@ -121,7 +121,7 @@ public class CrossOp {
 		String temp = line;
 		int max =0;
 		max=maxCross(max,line);
-		System.out.println("\nBackCross to female; ");
+		//System.out.println("\nBackCross to female; ");
 		Pattern p = Pattern.compile("\\*\\d\\/"); // backcross to female
 		Matcher m = p.matcher(line);
 
@@ -144,7 +144,7 @@ public class CrossOp {
 			
 		}
 		
-		System.out.println("\nBackCross to male; ");
+		//System.out.println("\nBackCross to male; ");
         Pattern p1 = Pattern.compile("\\d\\*\\D"); // backcross to male
         Matcher m1 = p1.matcher(line);
 		
@@ -180,7 +180,7 @@ public class CrossOp {
         }
 
 		
-			System.out.println("exapanded: "+temp);
+			//System.out.println("exapanded: "+temp);
 		
 			new ParseCrossOp();
 			return ParseCrossOp.parsedStrings(temp, list);   // call the SngleCross class to simplify into a family unit with male and female parent

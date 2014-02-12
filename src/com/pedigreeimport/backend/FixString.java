@@ -41,7 +41,7 @@ public class FixString {
 
         Pattern p = Pattern.compile("IR");
         Matcher m = p.matcher(line);
-        String standard = null;
+        String standard = line;
 
         if (m.lookingAt()) {    // Breeding Line is IRRI
             standard = standardIRRI(line);
