@@ -27,7 +27,7 @@ public class Config {
 		
 		System.out.println("db_details:"+db_details);
 	
-	    if(db_details.contains( "undefined")){
+	    if(db_details.contains( "undefined") || db_details.get(0)==""){
 	    	db_details.clear();
 	    }
 		if(db_details.size() != 0){
