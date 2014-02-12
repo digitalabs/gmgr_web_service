@@ -73,6 +73,7 @@ public class AssignGid {
 		existingTerm_local=existingTerm;
 		System.out.println("existingTerm: "+existingTerm);
 		System.out.println("existingTerm_l: "+existingTerm_local);
+		cross_date = (String) jsonObject.get("cdate");
 
 
 		String userID = (String) jsonObject.get("userID");
@@ -133,6 +134,16 @@ public class AssignGid {
 				//list_local=update_list(germplasm1, female_id, cross);
 				////System.out.println("\t id: "+fid + "/" + mid);
 				////System.out.println("\t id: "+ cross);
+				List<Germplasm> glist=new ArrayList<Germplasm>();
+				glist.add(germplasm1);
+				for(int i=0;i<createdGID_local.size();i++){
+					if(createdGID_local.get(i).get(1).equals(createdGID_local.get(i).get(2)) && createdGID_local.get(i).get(2).equals(cross)){
+						multipleHits_inLocation(glist, createdGID_local.get(i).get(2), createdGID_local.get(i).get(0), createdGID_local.get(i).get(1));
+						createdGID_local=updateCreatedGID("CHOOSE GID", createdGID_local.get(i).get(0), createdGID_local.get(i).get(2), "false", createdGID);
+						createdGID=createdGID_local;
+					}
+				}
+				glist.clear();
 				germplasm1=null;
 				//germplasm=null;
 
@@ -309,6 +320,8 @@ public class AssignGid {
 		locationID = Integer.valueOf((String) details.get(6));
 		int gpid1 = Integer.valueOf((String) details.get(8));
 		int gpid2 = Integer.valueOf((String) details.get(9));
+		
+		cross_date = (String) jsonObject.get("cdate");
 
 
 		String parent1ID = (String) details.get(0);
@@ -334,9 +347,10 @@ public class AssignGid {
 		String temp;
 		mid=mid.replaceAll("\"", "");
 		fid=fid.replaceAll("\"", "");
+		System.out.println("fid: "+fid);
+		System.out.println("mid: "+mid);
 		int mid2=Integer.valueOf(mid),fid2=Integer.valueOf(fid);
-		//////System.out.println("fid: "+fid2);
-		//////System.out.println("mid: "+mid2);
+		
 		if (Integer.valueOf(mid) < Integer.valueOf(fid)) {
 			temp = mid;
 			mid = fid;
@@ -422,6 +436,16 @@ public class AssignGid {
 				list_local=update_list(germplasm1, fid, cross);
 				////System.out.println("\t id: "+fid + "/" + mid);
 				////System.out.println("\t id: "+ cross);
+				List<Germplasm> glist=new ArrayList<Germplasm>();
+				glist.add(germplasm1);
+				for(int i=0;i<createdGID_local.size();i++){
+					if(createdGID_local.get(i).get(1).equals(createdGID_local.get(i).get(2)) && createdGID_local.get(i).get(2).equals(cross)){
+						multipleHits_inLocation(glist, createdGID_local.get(i).get(2), createdGID_local.get(i).get(0), createdGID_local.get(i).get(1));
+						createdGID_local=updateCreatedGID("CHOOSE GID", createdGID_local.get(i).get(0), createdGID_local.get(i).get(2), "false", createdGID);
+						createdGID=createdGID_local;
+					}
+				}
+				glist.clear();
 
 				germplasm1=null;
 
@@ -485,6 +509,7 @@ public class AssignGid {
 		int gpid1 = Integer.valueOf((String) jsonObject.get("gpid1"));
 		int gpid2 = Integer.valueOf((String) jsonObject.get("gpid2"));
 		int gid = Integer.valueOf((String) jsonObject.get("gid"));
+		cross_date = (String) jsonObject.get("cdate");
 
 
 		String female_id=(String) jsonObject.get("female_id");
@@ -1387,11 +1412,12 @@ public class AssignGid {
 		}
 		System.out.println("gfin size: "+germplasm.size());
 		if(germplasm_fin.size()!=0){
-			if(germplasm_fin.get(0).getGpid1()==fgid && germplasm_fin.get(0).getGpid2()==mgid){
-				return germplasm_fin.get(0);
-			}else{
-				return null;
+			for(int i=0;i<germplasm_fin.size();i++){
+				if(germplasm_fin.get(i).getGpid1()==fgid && germplasm_fin.get(i).getGpid2()==mgid){
+					return germplasm_fin.get(i);
+				}
 			}
+			return null;
 		}else{
 			return null;
 		}
@@ -1835,7 +1861,7 @@ public class AssignGid {
 		//existingTerm.clear();
 
 		//////System.out.println("output: "+createdGID_local);
-		//////System.out.println("list: "+list_local);
+		System.out.println("list: "+list_local);
 		existingTerm= existingTerm_local;
 		JSONObject data_output= new JSONObject();
 		data_output.put("existingTerm",existingTerm);
@@ -2379,7 +2405,7 @@ public class AssignGid {
 				count=germplasm_fin.size();
 			}
 			System.out.println("count: "+count);
-			if(count==1 || single_hit){
+			if(count==-1 || single_hit){
 				System.out.println("\t Single HIT");
 				single_hit=true;
 
@@ -2474,7 +2500,7 @@ public class AssignGid {
 					}
 				}
 
-			}else if(count>1 || multiple_hit){	//multiple hits
+			}else if(count>0 || multiple_hit){	//multiple hits
 				System.out.println("\t Multiple HIT");
 				multiple_hit=true;
 				if(i==0){
@@ -4153,7 +4179,7 @@ public class AssignGid {
 				}
 				int count=germplasm_fin.size();
 
-				if(count==1){	// only one germplasm with that name in the location
+				if(count==-1){	// only one germplasm with that name in the location
 					System.out.print("count==1");
 					System.out.println("\t "+pedigree);
 
@@ -4216,7 +4242,7 @@ public class AssignGid {
 
 					//System.out.println("TEMP: "+temp);
 
-				}else if(count>1){	//multiple germplasm name in a location
+				}else if(count>0){	//multiple germplasm name in a location
 					System.out.print("count>1");
 					System.out.println("\t "+pedigree);
 
@@ -4243,8 +4269,38 @@ public class AssignGid {
 
 					//no germplasm name in the list's location
 					if(i==pedigreeList.size()-1){	//if root assign GID from the root
-						createPedigreeLine2( pedigreeList, id, parent);
-						result=true;
+						System.out.println("\t "+pedigree+ "is the root");
+						int fid=-1;
+						
+						if(Integer.valueOf(id)%2==0){
+							fid=Integer.valueOf(id);
+						}else{
+							fid=Integer.valueOf(id)-1;
+						}
+						System.out.println("\t fid: "+fid);
+						
+						Boolean isExisting=false;
+						for(int j=0; j<list_local.size();j++){
+							
+							System.out.println("\t 0: "+list_local.get(j).get(2));
+							if(Integer.valueOf(list_local.get(j).get(2))<fid){
+								System.out.println("\t here @ "+list_local.get(j).get(0));
+								if(list_local.get(j).get(1).equals(parent) && list_local.get(j).get(0).equals("N/A")){
+									isExisting=true;
+								}
+							
+							}
+						}
+						if(isExisting){
+							printNotSet(pedigree, parent, id);
+							result=false;
+						}else{
+							createPedigreeLine2( pedigreeList, id, parent);
+							result=true;
+						}
+						//checks if it is a parent in earlier entries
+						//if yes print NOT SET
+						//if no create pedigreeLine
 					}else{	//else, not root, print NOT SET
 
 						temp=printNotSet_temp(pedigree, parent, id, temp);
@@ -5224,13 +5280,13 @@ public class AssignGid {
 		germplasm1.setMethodId(methodID);
 		int gnpgs=0;
 		if(methodID==107){
-			gnpgs=-1;
+			gnpgs=2;
 			nameType=3;
 		}else if(methodID==205 || methodID==33 || methodID==207 || methodID==206){
-			gnpgs=2;
+			gnpgs=-1;
 			nameType=2;
 		}else{
-			gnpgs=-1;
+			gnpgs=2;
 			nameType=5;
 		}
 		germplasm1.setGnpgs(gnpgs);

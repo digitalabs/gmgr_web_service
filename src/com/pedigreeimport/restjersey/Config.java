@@ -1,11 +1,11 @@
 package com.pedigreeimport.restjersey;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.generationcp.middleware.manager.DatabaseConnectionParameters;
 import org.generationcp.middleware.manager.ManagerFactory;
 
-import antlr.collections.List;
 
 public class Config {
 
@@ -23,7 +23,7 @@ public class Config {
 			 *  db_details.get(5): central database username
 			
 	*/
-	public ManagerFactory configDB(java.util.List<String> db_details){
+	public ManagerFactory configDB(List<String> db_details){
 		
 		System.out.println("db_details:"+db_details);
 	
@@ -34,29 +34,38 @@ public class Config {
 			
 			
 			
-			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
+		/*	DatabaseConnectionParameters local = new DatabaseConnectionParameters(
 					"localhost", db_details.get(1), db_details.get(0), db_details.get(2), "");
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
 					"localhost", db_details.get(4), db_details.get(3), db_details.get(5), "");
 			ManagerFactory factory = new ManagerFactory(local, central);
-            
-			/*
+          */  
+			
 			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
-					"localhost", db_details.get(1), "local2", "root", "");
+					"localhost", "3306", "local3", "root", "");
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
-					"localhost", db_details.get(4), "central6", "root", "");
+					"localhost", "3306", "central", "root", "");
 			ManagerFactory factory = new ManagerFactory(local, central);
-            */
+            
 			return factory;
 			
 		}else{
+			/*
 			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
 					"localhost", "3306", "local2", "root", "");
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
 					"localhost", "3306", "central6", "root", "");
 			ManagerFactory factory = new ManagerFactory(local, central);
+			*/
+			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
+					"localhost", "3306", "local3", "root", "");
+			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
+					"localhost", "3306", "central", "root", "");
+			ManagerFactory factory = new ManagerFactory(local, central);
 
 			return factory;
+			
+			
 		}
 		
 	}
