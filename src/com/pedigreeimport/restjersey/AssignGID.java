@@ -3,6 +3,7 @@ package com.pedigreeimport.restjersey;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -93,7 +94,14 @@ public class AssignGid {
 
 		Boolean isFound_female = null,isFound_male=null;
 		int mgid,fgid;
+		
+		System.out.println("cross: " + cross);
+		System.out.println("create_nval: "+create_nval);
+		System.out.println("gpid1_nval: "+gpid1_nval);
+		System.out.println("gpid2_nval: "+gpid2_nval);
+		
 		if(cross.equals(create_nval)){
+			System.out.println("CLICK CREATE NEW CROSS" );
 			updateCreatedGID("NOT SET", fid + "/" + mid, cross, "false", createdGID_local);
 
 			if(female_nval.contains("/") || female_nval.contains("*")){
@@ -119,7 +127,7 @@ public class AssignGid {
 			mgid=GID;
 			System.out.println("female: "+isFound_female);
 			System.out.println("male: "+isFound_male);
-			if(isFound_female && isFound_male){
+			/*if(isFound_female && isFound_male){
 				System.out.println("createdGID for cross "+ cross);
 				int methodID=selectMethodType(fgid,mgid,female_nval,male_nval,cross);
 				
@@ -149,6 +157,7 @@ public class AssignGid {
 
 			}
 			System.out.println("existingTerm: "+existingTerm_local);
+			*/
 		}else{
 			if(theParent.contains("/") || theParent.contains("*")){
 				System.out.println("create_nval has cross operators");
@@ -210,9 +219,10 @@ public class AssignGid {
 					if(i==pedigreeList.size()-1){
 						GID=gid;
 					}
-					g=null;
+					
 					updateCreatedGID(""+gid, chosenID, pedigreeList.get(i), "new", createdGID_local);
 				}
+				g=null;
 			}
 		}
 		int gid1=0,gid2=0;
@@ -624,7 +634,7 @@ public class AssignGid {
 			System.out.println("createdGID: "+list_local);
 		}
 		 */Germplasm germplasm=manager.getGermplasmByGID( Integer.valueOf((String) jsonObject.get("gid")));
-		 list_local=update_list(germplasm, female_id+"/"+male_id, cross);
+		 list_local=update_list(germplasm, female_id, cross);
 		 details.clear();
 		 jsonObject.clear();
 		 //germplasm=null;
@@ -744,24 +754,6 @@ public class AssignGid {
 		System.out.println("createdGID: "+ createdGID_local);
 		return createdGID;
 
-	}
-
-	public static List<List<String>> getParsedCrossOp_list(List<List<String>> output, String nval, String id){
-		/*	List<String> row_createdGID=new ArrayList<String>();
-		List<String> row_output=new ArrayList<String>();
-
-		for(int i=0; i<createdGID_local.size(); i++){
-			row_createdGID= createdGID_local.get(i);
-			row_output=new ArrayList<String>();
-
-			if(row_createdGID.equals(id) && ){
-				row_output.add(row_createdGID.get(2));
-
-			}
-		}
-		 */
-
-		return output;
 	}
 
 	public static List<List<String>> chooseGID_crossOP(String chooseGID_id, String chooseGID_nval, String parent2_nval, String parent2_id, String theParent, String lastDeriv_parent, int gid_local, int gpid1_local, int gpid2_local,String gid, int gpid1, int gpid2, List<List<String>> createdGID ) throws MiddlewareQueryException, IOException, InterruptedException{
@@ -1699,7 +1691,7 @@ public class AssignGid {
 	public static JSONObject bulk_createGID2(List<List<String>> createdGID,List<List<String>> list, List<String> checked, int locationID_l, List<List<String>> existingTerm, String userID, ManagerFactory factory)throws IOException,
 	MiddlewareQueryException, ParseException, InterruptedException, java.text.ParseException {
 
-		////System.out.println(" ###Starting..BULK CREATION of GID");
+		System.out.println(" ###Starting..BULK CREATION of GID oF UNPROCESSED DATA");
 		manager = factory.getGermplasmDataManager();
 
 		createdGID_local = new ArrayList<List<String>>();
@@ -1722,11 +1714,11 @@ public class AssignGid {
 		locationID=locationID_l;
 		List<String> row_output=new ArrayList<String>();
 
-		//System.out.println("HERE BULK2 existing: "+existingTerm);
-		//System.out.println("HERE BULK2 checked: "+checked);
-		//System.out.println("HERE BULK2 createdGID: "+createdGID);
-		//System.out.println("HERE BULK2 list: "+list);
-		//////System.out.println("HERE: "+checked.size());
+		System.out.println("HERE BULK2 existing: "+existingTerm);
+		System.out.println("HERE BULK2 checked: "+checked);
+		System.out.println("HERE BULK2 createdGID: "+createdGID);
+		System.out.println("HERE BULK2 list: "+list);
+		System.out.println("HERE: "+checked.size());
 		for (int i = 0; i < checked.size(); i++) {
 			//////System.out.println("\n CHECK:: "+ checked.get(i));
 
@@ -1896,8 +1888,6 @@ public class AssignGid {
 	}
 	private static JSONObject getParse(String line) throws MiddlewareQueryException, IOException { // method of backCrossing
 		String temp = line;
-		List<String> list = new ArrayList<String>();
-		List<String> correctedList = new ArrayList<String>();
 
 		Pattern p = Pattern.compile("\\*\\d"); // backcross to female
 		Matcher m = p.matcher(line);
@@ -1927,23 +1917,40 @@ public class AssignGid {
 		Matcher m1 = p1.matcher(line);
 
 		while (m1.find()) {
-			String[] tokens = temp.split("\\d\\*", 2);
-			//print(tokens);
-
-			String slash = "";
 			System.out.println("slash: "+max);
+			String slash1 = "";
+			for (int j = max; j > 0;) {
+				slash1 = slash1 + "/";
+				j--;
+			}
+			System.out.println("slash: "+slash1);
+			String[] tokens = temp.split("\\"+slash1+"\\d\\*", 2);
+			//print(tokens);
+			System.out.println(Arrays.toString(tokens));
+			String slash = "";
+			
 			max++;
 			for (int j = max; j > 0;) {
 				slash = slash + "/";
 				j--;
 			}
-
-			tokens[0] = tokens[0].concat(tokens[1]);
-			temp.replaceFirst("\\*\\d", tokens[0]);
-			temp = tokens[0].concat(slash.concat(tokens[1]));
-			System.out.println("token: " + temp);
-		}
-		JSONObject output= new JSONObject();
+			
+			if(tokens.length==1){
+				tokens = temp.split("\\d\\*", 2);
+				tokens[0] = tokens[0].concat(tokens[1]);
+				temp.replaceFirst("\\*\\d", tokens[0]);
+				System.out.println("token[0]: " + tokens[0]);
+				temp = tokens[0].concat(slash.concat(tokens[1]));
+				System.out.println("token: " + temp);
+			}else{
+				tokens[0] = tokens[0].concat(slash.concat(tokens[1]));
+				temp.replaceFirst("\\*\\d", tokens[0]);
+				System.out.println("token[0]: " + tokens[0]);
+				temp = tokens[0].concat(slash1.concat(tokens[1]));
+				System.out.println("token: " + temp);
+				
+			}
+		}		JSONObject output= new JSONObject();
 		output.put("max",max);
 		output.put("line",temp);
 		return output;
@@ -2060,7 +2067,7 @@ public class AssignGid {
 		List<String> row = new ArrayList<String>();
 		new CrossOp();
 		pedigreeList=CrossOp.method2(parent,pedigreeList);
-		pedigreeList.remove(1);
+		//pedigreeList.remove(1);
 
 		Boolean isParent=false;
 		int notParent_index=-1;
@@ -2341,14 +2348,14 @@ public class AssignGid {
 		List<String> row = new ArrayList<String>();
 		new CrossOp();
 		pedigreeList=CrossOp.method2(parent,pedigreeList);
-		pedigreeList.remove(1);
+		//pedigreeList.remove(1);
 
 		Boolean isParent=false;
 		int notParent_index=-1;
 		for(int j=0; j<pedigreeList.size();j++){
 			row = new ArrayList<String>();
 			//System.out.println("::"+pedigreeList.get(j));
-			if(!pedigreeList.get(j).contains("/")){
+			if(!pedigreeList.get(j).contains("/") && !pedigreeList.get(j).contains("*")){
 				if(!isParent){
 					notParent_index=j;
 				}
@@ -3512,7 +3519,7 @@ public class AssignGid {
 		new CrossOp();
 		pedigreeList=CrossOp.method2(parent,pedigreeList);
 		System.out.println(""+pedigreeList);
-		pedigreeList.remove(1);
+		//pedigreeList.remove(1);
 		System.out.println(""+pedigreeList);
 
 		for(int j=0; j<pedigreeList.size();j++){
@@ -3649,7 +3656,7 @@ public class AssignGid {
 		List<String> row = new ArrayList<String>();
 		new CrossOp();
 		pedigreeList=CrossOp.method2(parent,pedigreeList);
-		pedigreeList.remove(1);
+		//pedigreeList.remove(1);
 
 		Boolean isParent=false;
 		int notParent_index=-1;
@@ -5697,14 +5704,15 @@ public class AssignGid {
 			MiddlewareQueryException {
 
 
-		////System.out.println("*** Starting Updating corrected.csv");
+		System.out.println("*** Starting Updating List");
+		System.out.println("*** ");
 		List<List<String>> output=new ArrayList<List<String>>();
 		List<String> row_object= new ArrayList<String>();
 		////System.out.println("\t list: "+list_local);
 		for (int i = 0; i < list_local.size();i++) {
 
 			row_object= list_local.get(i);
-			//System.out.println("row_object.get(2): "+ row_object.get(2) +" id:" +id);
+			System.out.println("row_object.get(2): "+ row_object.get(2) +" id:" +id);
 			if (row_object.get(2).equals(id) ) {
 				row_object.set(0,germplasm.getGid().toString());
 				list_local.set(i, row_object);
