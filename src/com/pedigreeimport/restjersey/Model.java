@@ -925,6 +925,12 @@ public class Model {
      		outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\"\n";
         }
         
+		if(node.getLinkedNodes().size()==0)
+        {
+        	outputString = outputString + tabs.toString() + ",\"children\" : \n" + tabs.toString() +"[{}]";
+        	System.out.println(tabs.toString() + "\"children\" : \n" + tabs.toString() +"[");
+        }
+		
         if(!node.getLinkedNodes().isEmpty()){
         	outputString = outputString + tabs.toString() + "\"children\" : \n" + tabs.toString() +"[";
         	System.out.println(tabs.toString() + "\"children\" : \n" + tabs.toString() +"[");
