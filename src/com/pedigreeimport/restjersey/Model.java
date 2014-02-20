@@ -36,6 +36,7 @@ import org.generationcp.middleware.pojos.GermplasmPedigreeTreeNode;
 import org.generationcp.middleware.pojos.Location;
 import org.generationcp.middleware.pojos.Method;
 import org.generationcp.middleware.pojos.Name;
+import org.generationcp.middleware.pojos.UserDefinedField;
 import org.generationcp.middleware.util.Debug;
 import org.json.JSONException;
 import org.json.simple.JSONObject;
@@ -97,9 +98,9 @@ public class Model {
         
 		ManagerFactory factory = new Config().configDB(db_details);
 		//output=test.chooseGID(data,factory);
-		new AssignGid();
+		new AssignGID();
 		//ManagerFactory factory = new Config().configDB();
-		output=AssignGid.createNew(data,factory);
+		output=AssignGID.createNew(data,factory);
 		System.out.println("existingTerm: "+output.get("existingTerm"));
 		factory.close();
 		return Response.status(200).entity(output).build();
@@ -136,7 +137,7 @@ public class Model {
 	public Response chooseGID2(JSONObject data) throws FileNotFoundException, IOException,
 	MiddlewareQueryException, ParseException, InterruptedException {		
 
-		new AssignGid();
+		new AssignGID();
 		//System.out.println("HERE!");
 		JSONObject output=new JSONObject();
 		JSONObject json_array= (JSONObject)data;
@@ -162,7 +163,7 @@ public class Model {
         db_details.add(central_db_username);
 		
 		ManagerFactory factory = new Config().configDB(db_details);
-		output=AssignGid.chooseGID(data,factory);
+		output=AssignGID.chooseGID(data,factory);
 		factory.close();
 		return Response.status(200).entity(output).build();
 
@@ -174,7 +175,7 @@ public class Model {
 	public Response chooseGID_cross(JSONObject data) throws FileNotFoundException, IOException,
 	MiddlewareQueryException, ParseException, InterruptedException {		
 
-		new AssignGid();
+		new AssignGID();
 		//System.out.println("HERE!");
 		JSONObject output=new JSONObject();
 
@@ -202,7 +203,7 @@ public class Model {
         
 		ManagerFactory factory = new Config().configDB(db_details);
 		
-		output=AssignGid.chooseGID_cross(data,factory);
+		output=AssignGID.chooseGID_cross(data,factory);
 
 		factory.close();
 		return Response.status(200).entity(output).build();
@@ -214,7 +215,7 @@ public class Model {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createGID3(JSONObject data) throws FileNotFoundException, IOException,
 	MiddlewareQueryException, ParseException, InterruptedException, NumberFormatException, java.text.ParseException {
-		new AssignGid();
+		new AssignGID();
 		//new AssignGID().createGID();
 		//print_checkedBox();
 		List<String> checked= new ArrayList<String>();
@@ -260,7 +261,7 @@ public class Model {
 		//System.out.println();
 
 		ManagerFactory factory = new Config().configDB(db_details);
-		output=AssignGid.bulk_createGID2(createdGID,list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
+		output=AssignGID.bulk_createGID2(createdGID,list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
 
 		factory.close();
 
@@ -278,7 +279,7 @@ public class Model {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createGID2(JSONObject data) throws FileNotFoundException, IOException,
 	MiddlewareQueryException, ParseException, InterruptedException, NumberFormatException, java.text.ParseException {
-		new AssignGid();
+		new AssignGID();
 		//new AssignGID().createGID();
 		//print_checkedBox();
 		List<String> checked= new ArrayList<String>();
@@ -314,7 +315,7 @@ public class Model {
 		JSONObject output=new JSONObject();
 		//System.out.println();
 		ManagerFactory factory = new Config().configDB(db_details);
-		output=AssignGid.bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
+		output=AssignGID.bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
 		db_details.clear();
 		factory.close();
 
@@ -815,7 +816,7 @@ public class Model {
 		return Response.status(200).entity(outputTree).build();
 	}
 	
-	private void printNode(GermplasmPedigreeTreeNode node, int level, List <Name> names, Location loc2, List <Attribute> attributes, int cid, Country cnty, GermplasmDataManager man, Method meth, Bibref bibref, Location loc) throws IOException, MiddlewareQueryException {
+    private void printNode(GermplasmPedigreeTreeNode node, int level, List <Name> names, Location loc2, List <Attribute> attributes, int cid, Country cnty, GermplasmDataManager man, Method meth, Bibref bibref, Location loc) throws IOException, MiddlewareQueryException {
 	       
 		StringBuffer tabs = new StringBuffer();
 		String descBibref = "N/A";
@@ -863,11 +864,20 @@ public class Model {
             
             for(int cntr=0;cntr<names.size();cntr++)
      		{
-     			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
+     			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());
+     			  UserDefinedField result = null;
+     			  String res = "---";
+     			  System.out.println("Nametype: " + names.get(cntr).getTypeId());
+     			  if(names.get(cntr).getTypeId()!= 0)
+     			  {
+     				  result = man.getUserDefinedFieldByID(names.get(cntr).getTypeId());
+     				  res = result.getFname();
+     			  }
+     			  
                   outputString = outputString 
                   + tabs.toString() +"    \"dates"+cntr+"\" : \"" + names.get(cntr).getNdate() +"\",\n"
                   + tabs.toString() +"    \"name"+cntr+"\" : \"" + names.get(cntr).getNval() +"\",\n"
-                  + tabs.toString() +"    \"ntype"+cntr+"\" : \"" + names.get(cntr).getTypeId() +"\",\n"
+                  + tabs.toString() +"    \"ntype"+cntr+"\" : \"" + res +"\",\n"
                   + tabs.toString() +"    \"nstat"+cntr+"\" : \"" + names.get(cntr).getNstat() +"\",\n"
                   + tabs.toString() +"    \"loc"+cntr+"\" : \"" + loc2.getLname() +"\",\n";
                  
@@ -876,15 +886,28 @@ public class Model {
             for(int cntr=0;cntr<attributes.size();cntr++)
      		{
      			  loc2 = man.getLocationByID(attributes.get(cntr).getLocationId());	
+     			  UserDefinedField result = null;
+     			  String res = "---";
+     			  String des = "---";
+     			  System.out.println("Atype: " + attributes.get(cntr).getAid());
+     			  if(attributes.get(cntr).getAid()!= 0)
+     			  {
+     				  result = man.getUserDefinedFieldByID(attributes.get(cntr).getAid());
+     				  if(result!=null){
+     					  res = result.getFname();
+     					  des = result.getFdesc();
+     				  }
+     			  }
                   outputString = outputString 
                   + tabs.toString() +"    \"aid"+cntr+"\" : \"" + attributes.get(cntr).getAid() +"\",\n"
                   + tabs.toString() +"    \"atype"+cntr+"\" : \"" + attributes.get(cntr).getTypeId() +"\",\n"
                   + tabs.toString() +"    \"aval"+cntr+"\" : \"" + attributes.get(cntr).getAval() +"\",\n"
                   + tabs.toString() +"    \"aloc"+cntr+"\" : \"" + loc2.getLname() +"\",\n"
+                  + tabs.toString() +"    \"aname"+cntr+"\" : \"" + res +"\",\n"
+                  + tabs.toString() +"    \"ades"+cntr+"\" : \"" + des +"\",\n"
                   + tabs.toString() +"    \"adate"+cntr+"\" : \"" + attributes.get(cntr).getAdate() +"\",\n";
                  
     		}
-            
             
      		outputString = outputString + tabs.toString() +"    \"gpid1\" : \"" + node.getGermplasm().getGpid1() +"\",\n";
      		outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\",\n";
@@ -913,16 +936,59 @@ public class Model {
             for(int cntr=0;cntr<names.size();cntr++)
      		{
      			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
+     			  UserDefinedField result = null;
+    			  String res = "---";
+    			  System.out.println("Nametype: " + names.get(cntr).getTypeId());
+    			  if(names.get(cntr).getTypeId()!= 0)
+    			  {
+    				  result = man.getUserDefinedFieldByID(names.get(cntr).getTypeId());
+    				  res = result.getFname();
+    			  }
                   outputString = outputString 
                   + tabs.toString() +"    \"dates"+cntr+"\" : \"" + names.get(cntr).getNdate() +"\",\n"
                   + tabs.toString() +"    \"name"+cntr+"\" : \"" + names.get(cntr).getNval() +"\",\n"
-                  + tabs.toString() +"    \"ntype"+cntr+"\" : \"" + names.get(cntr).getTypeId() +"\",\n"
+                  + tabs.toString() +"    \"ntype"+cntr+"\" : \"" + res +"\",\n"
                   + tabs.toString() +"    \"nstat"+cntr+"\" : \"" + names.get(cntr).getNstat() +"\",\n"
                   + tabs.toString() +"    \"loc"+cntr+"\" : \"" + loc2.getLname() +"\",\n";
                  
     		}
+            
+            for(int cntr=0;cntr<attributes.size();cntr++)
+     		{
+     			  loc2 = man.getLocationByID(attributes.get(cntr).getLocationId());	
+     			  UserDefinedField result = null;
+     			  String res = "---";
+     			  String des = "---";
+     			  System.out.println("Atype: " + attributes.get(cntr).getAid());
+     			  if(attributes.get(cntr).getAid()!= 0)
+     			  {
+     				  result = man.getUserDefinedFieldByID(attributes.get(cntr).getAid());
+     				  if(result!=null){
+     					  res = result.getFname();
+     					  des = result.getFdesc();
+     				  }
+     			  }
+                  outputString = outputString 
+                  + tabs.toString() +"    \"aid"+cntr+"\" : \"" + attributes.get(cntr).getAid() +"\",\n"
+                  + tabs.toString() +"    \"atype"+cntr+"\" : \"" + attributes.get(cntr).getTypeId() +"\",\n"
+                  + tabs.toString() +"    \"aval"+cntr+"\" : \"" + attributes.get(cntr).getAval() +"\",\n"
+                  + tabs.toString() +"    \"aloc"+cntr+"\" : \"" + loc2.getLname() +"\",\n"
+                  + tabs.toString() +"    \"aname"+cntr+"\" : \"" + res +"\",\n"
+                  + tabs.toString() +"    \"ades"+cntr+"\" : \"" + des +"\",\n"
+                  + tabs.toString() +"    \"adate"+cntr+"\" : \"" + attributes.get(cntr).getAdate() +"\",\n";
+                 
+    		}
+            
      		outputString = outputString + tabs.toString() +"    \"gpid1\" : \"" + node.getGermplasm().getGpid1() +"\",\n";
      		outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\"\n";
+        }
+        
+        System.out.println(tabs.toString() + "size : " + node.getLinkedNodes().size());
+        
+		if(node.getLinkedNodes().size()==0 && (level-1) == 0)
+        {
+        	outputString = outputString + tabs.toString() + ",\"children\" : \n" + tabs.toString() +"[{}]";
+        	System.out.println(tabs.toString() + "\"children\" : \n" + tabs.toString() +"[");
         }
         
         if(!node.getLinkedNodes().isEmpty()){
