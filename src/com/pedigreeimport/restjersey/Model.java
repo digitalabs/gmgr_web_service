@@ -632,8 +632,6 @@ public class Model {
 	       
 		StringBuffer tabs = new StringBuffer();
 		String descBibref = "N/A";
-		//ManagerFactory factory = new Config().configDB();
-		//GermplasmDataManager man = factory.getGermplasmDataManager();
 		
 		meth = man.getMethodByID(node.getGermplasm().getMethodId());
 		loc = man.getLocationByID(node.getGermplasm().getLocationId());
@@ -678,11 +676,20 @@ public class Model {
             
             for(int cntr=0;cntr<names.size();cntr++)
      		{
-     			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
+     			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());
+     			  UserDefinedField result = null;
+     			  String res = "---";
+     			  System.out.println("Nametype: " + names.get(cntr).getTypeId());
+     			  if(names.get(cntr).getTypeId()!= 0)
+     			  {
+     				  result = man.getUserDefinedFieldByID(names.get(cntr).getTypeId());
+     				  res = result.getFname();
+     			  }
+     			  
                   outputString = outputString 
                   + tabs.toString() +"    \"dates"+cntr+"\" : \"" + names.get(cntr).getNdate() +"\",\n"
                   + tabs.toString() +"    \"name"+cntr+"\" : \"" + names.get(cntr).getNval() +"\",\n"
-                  + tabs.toString() +"    \"ntype"+cntr+"\" : \"" + names.get(cntr).getTypeId() +"\",\n"
+                  + tabs.toString() +"    \"ntype"+cntr+"\" : \"" + res +"\",\n"
                   + tabs.toString() +"    \"nstat"+cntr+"\" : \"" + names.get(cntr).getNstat() +"\",\n"
                   + tabs.toString() +"    \"loc"+cntr+"\" : \"" + loc2.getLname() +"\",\n";
                  
@@ -691,15 +698,28 @@ public class Model {
             for(int cntr=0;cntr<attributes.size();cntr++)
      		{
      			  loc2 = man.getLocationByID(attributes.get(cntr).getLocationId());	
+     			  UserDefinedField result = null;
+     			  String res = "---";
+     			  String des = "---";
+     			  System.out.println("Atype: " + attributes.get(cntr).getAid());
+     			  if(attributes.get(cntr).getAid()!= 0)
+     			  {
+     				  result = man.getUserDefinedFieldByID(attributes.get(cntr).getAid());
+     				  if(result!=null){
+     					  res = result.getFname();
+     					  des = result.getFdesc();
+     				  }
+     			  }
                   outputString = outputString 
                   + tabs.toString() +"    \"aid"+cntr+"\" : \"" + attributes.get(cntr).getAid() +"\",\n"
                   + tabs.toString() +"    \"atype"+cntr+"\" : \"" + attributes.get(cntr).getTypeId() +"\",\n"
                   + tabs.toString() +"    \"aval"+cntr+"\" : \"" + attributes.get(cntr).getAval() +"\",\n"
                   + tabs.toString() +"    \"aloc"+cntr+"\" : \"" + loc2.getLname() +"\",\n"
+                  + tabs.toString() +"    \"aname"+cntr+"\" : \"" + res +"\",\n"
+                  + tabs.toString() +"    \"ades"+cntr+"\" : \"" + des +"\",\n"
                   + tabs.toString() +"    \"adate"+cntr+"\" : \"" + attributes.get(cntr).getAdate() +"\",\n";
                  
     		}
-            
             
      		outputString = outputString + tabs.toString() +"    \"gpid1\" : \"" + node.getGermplasm().getGpid1() +"\",\n";
      		outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\",\n";
@@ -728,19 +748,56 @@ public class Model {
             for(int cntr=0;cntr<names.size();cntr++)
      		{
      			  loc2 = man.getLocationByID(names.get(cntr).getLocationId());	
+     			  UserDefinedField result = null;
+    			  String res = "---";
+    			  System.out.println("Nametype: " + names.get(cntr).getTypeId());
+    			  if(names.get(cntr).getTypeId()!= 0)
+    			  {
+    				  result = man.getUserDefinedFieldByID(names.get(cntr).getTypeId());
+    				  res = result.getFname();
+    			  }
                   outputString = outputString 
                   + tabs.toString() +"    \"dates"+cntr+"\" : \"" + names.get(cntr).getNdate() +"\",\n"
                   + tabs.toString() +"    \"name"+cntr+"\" : \"" + names.get(cntr).getNval() +"\",\n"
-                  + tabs.toString() +"    \"ntype"+cntr+"\" : \"" + names.get(cntr).getTypeId() +"\",\n"
+                  + tabs.toString() +"    \"ntype"+cntr+"\" : \"" + res +"\",\n"
                   + tabs.toString() +"    \"nstat"+cntr+"\" : \"" + names.get(cntr).getNstat() +"\",\n"
                   + tabs.toString() +"    \"loc"+cntr+"\" : \"" + loc2.getLname() +"\",\n";
                  
     		}
+            
+            for(int cntr=0;cntr<attributes.size();cntr++)
+     		{
+     			  loc2 = man.getLocationByID(attributes.get(cntr).getLocationId());	
+     			  UserDefinedField result = null;
+     			  String res = "---";
+     			  String des = "---";
+     			  System.out.println("Atype: " + attributes.get(cntr).getAid());
+     			  if(attributes.get(cntr).getAid()!= 0)
+     			  {
+     				  result = man.getUserDefinedFieldByID(attributes.get(cntr).getAid());
+     				  if(result!=null){
+     					  res = result.getFname();
+     					  des = result.getFdesc();
+     				  }
+     			  }
+                  outputString = outputString 
+                  + tabs.toString() +"    \"aid"+cntr+"\" : \"" + attributes.get(cntr).getAid() +"\",\n"
+                  + tabs.toString() +"    \"atype"+cntr+"\" : \"" + attributes.get(cntr).getTypeId() +"\",\n"
+                  + tabs.toString() +"    \"aval"+cntr+"\" : \"" + attributes.get(cntr).getAval() +"\",\n"
+                  + tabs.toString() +"    \"aloc"+cntr+"\" : \"" + loc2.getLname() +"\",\n"
+                  + tabs.toString() +"    \"aname"+cntr+"\" : \"" + res +"\",\n"
+                  + tabs.toString() +"    \"ades"+cntr+"\" : \"" + des +"\",\n"
+                  + tabs.toString() +"    \"adate"+cntr+"\" : \"" + attributes.get(cntr).getAdate() +"\",\n";
+                 
+    		}
+            
      		outputString = outputString + tabs.toString() +"    \"gpid1\" : \"" + node.getGermplasm().getGpid1() +"\",\n";
      		outputString = outputString + tabs.toString() +"    \""+"gpid2"+"\""+": \"" + node.getGermplasm().getGpid2() + "\"\n";
         }
         
-        if(node.getLinkedNodes().size()==0)
+        System.out.println(tabs.toString() + "size : " + node.getLinkedNodes().size());
+        
+		if(node.getLinkedNodes().size()==0)
         {
         	outputString = outputString + tabs.toString() + ",\"children\" : \n" + tabs.toString() +"[{}]";
         	System.out.println(tabs.toString() + "\"children\" : \n" + tabs.toString() +"[");
