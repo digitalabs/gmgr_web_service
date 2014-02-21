@@ -1416,7 +1416,7 @@ public class AssignGid {
 	}
 
 	public static int selectMethodType_DER(String pedigree, String parent){
-		int methodID = 33;
+		int methodID = 31;	// unknown
 		String tokens[]=pedigree.split("-");
 		Pattern p = Pattern.compile("(\\d+)|(IR\\s\\d+)|(B)|(\\d+B)|(\\d*R)|(\\d*AC)|(C\\d+)|(\\d+MP)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN|SDO)\\s\\d+)");
 		System.out.println("pedigree: "+tokens[tokens.length-1]);
@@ -1424,21 +1424,31 @@ public class AssignGid {
 		if(!pedigree.contains("-")){	// if F1
 			gen=pedigree;
 		}else{
+			int i=0;
 			gen=tokens[tokens.length-1];
 			Matcher m = p.matcher(gen);
 			if(m.find()){
 				printGroup(m);
+				
+				System.out.println("group: "+ m.group(i));
+				i++;
 
 				if(m.group(1)!=null && m.group(1).equals(gen)){	
 					methodID=205;// Single plant selection
 				}else if(m.group(2)!=null && m.group(2).equals(gen)){
-					methodID=33;	// root is unknown
+					methodID=31;	// root is unknown
 				}else if(m.group(3)!=null && m.group(3).equals(gen)){
 					methodID=207;	//random bulk
 				}else if(m.group(4)!=null && m.group(4).equals(gen)){
 					methodID=206;	//selected bulk
-				}else{
-					methodID=205;	// no support for C|R|MP yet
+				}else if(m.group(6)!=null && m.group(6).equals(gen)){
+					methodID=202;	// AC
+				}
+				/*else if(m.group(5)!=null && m.group(5).equals(gen)){
+					methodID=208;	// R
+				}*/
+				else{
+					methodID=31;	//unknown	
 				}
 			}
 
@@ -2371,7 +2381,6 @@ public class AssignGid {
 		System.out.println("last index of the crosses:"+notParent_index);
 
 		System.out.println("------");
-		//pedigreeList= parse_crossOp(pedigreeList, nval, id);
 
 		Boolean flag = true;
 		Boolean single_hit=false;
@@ -2562,7 +2571,7 @@ public class AssignGid {
 			//check parents if existing
 			// if all parents are existing then create GID for crosses with operators
 			// if not existing the create GID for that parent
-			// if existing and there is a mutliple hits the set CHOOSE GID for that parent
+			// if existing and there are mutliple hits, set CHOOSE GID for that parent
 			int gid_parent=0;
 			List<String> row_parents=new ArrayList<String>();
 
@@ -2597,13 +2606,23 @@ public class AssignGid {
 				//all parents exists
 				//created GID for the crosses
 				// update the temp
-				JSONObject output=getParse(pedigreeList.get(0));
-				String line= (String) output.get("line");
-				int max= (Integer) output.get("max");
+				//JSONObject output=getParse(pedigreeList.get(0));
+				//String line= (String) output.get("line");
+				//int max= (Integer) output.get("max");
+				String line=pedigreeList.get(0);
+				int max =0;
+				max=maxCross(max,line);
 
 				List<List<String>> temp_crossesGID=new ArrayList<List<String>>();
-
-				temp_crossesGID=createGID_crossParents(pedigreeList,index, temp_crossesGID, check, line, max, parent, id);
+				/*if(line.contains("*")){
+					//createPedigreeLine2(pedigreeList, id, parent)
+					
+					temp_crossesGID=createPedigreeLine_CrossOp(pedigreeList, id, parent, parent2, temp_fin, gid_parent);
+					
+					
+				}else{*/
+					temp_crossesGID=createGID_crossParents(pedigreeList,index, temp_crossesGID, check, line, max, parent, id);
+				//}
 
 				for(int i=0; i< temp_crossesGID.size(); i++){
 					for(int j=0; j< temp.size(); j++){
@@ -2725,14 +2744,14 @@ public class AssignGid {
 									methodID=selectMethodType( gpid1, gpid2, female_nval, male_nval,parent);
 									if(i==0){
 										
-										gid_cross=addGID( parent, gpid1, gpid2, methodID,2,false);
+										gid_cross=addGID( parent, gpid1, gpid2, methodID,2,false);	// ntype=2
 										GID=gid_cross;
 										g1=manager.getGermplasmByGID(gid_cross);
 										//temp_crossesGID=printSuccess_temp(parent, parent, id, g1,  "new", temp_crossesGID);
 										updateCreatedGID(""+g1.getGid(), id, parent, "new", createdGID_local);
 									}else{
 										
-										gid_cross=addGID( row_crosses.get(0), gpid1, gpid2, methodID,2,false);
+										gid_cross=addGID( row_crosses.get(0), gpid1, gpid2, methodID,2,false);	// ntype=2
 										g1=manager.getGermplasmByGID(gid_cross);
 										//temp_crossesGID=printSuccess_temp(row_crosses.get(0), parent, id, g1,  "new", temp_crossesGID);
 										updateCreatedGID(""+g1.getGid(), id, parent, "new", createdGID_local);
@@ -2811,13 +2830,13 @@ public class AssignGid {
 									methodID=selectMethodType( gpid1, gpid2, female_nval, male_nval,parent);
 									if(i==0){
 										
-										gid_cross=addGID( parent, gpid1, gpid2, methodID,2,false);
+										gid_cross=addGID( parent, gpid1, gpid2, methodID,3,false);	 // ntype=3
 										GID=gid_cross;
 										g1=manager.getGermplasmByGID(gid_cross);
 										temp_crossesGID=printSuccess_temp(parent, parent, id, g1,  "new", temp_crossesGID);
 									}else{
 										
-										gid_cross=addGID( row_crosses.get(0), gpid1, gpid2, methodID,2,false);
+										gid_cross=addGID( row_crosses.get(0), gpid1, gpid2, methodID,3,false);// ntype=3
 										g1=manager.getGermplasmByGID(gid_cross);
 										temp_crossesGID=printSuccess_temp(row_crosses.get(0), parent, id, g1,  "new", temp_crossesGID);
 									}
@@ -2912,7 +2931,7 @@ public class AssignGid {
 							int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
 							
 							int gid_single_hit = (int) addGID( pedigreeList.get(k), gpid1, gid,
-									methodID,5,false);
+									methodID,5,false);	// ntype=5
 							if(k==0){
 								GID=gid_single_hit;
 							}
@@ -3024,7 +3043,7 @@ public class AssignGid {
 							System.out.println("gpid2: "+gpid2);
 							
 							int gid_single_hit = (int) addGID( pedigreeList.get(k), gpid1, gpid2,
-									methodID,5,false);
+									methodID,5,false);	// ntype=5
 							if(k==0){
 								GID=gid_single_hit;
 							}
@@ -3187,7 +3206,7 @@ public class AssignGid {
 							int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
 							
 							int gid_single_hit = (int) addGID( pedigreeList.get(k), gpid1, gid,
-									methodID,5,false);
+									methodID,5,false);	// ntype=5
 							if(k==0){
 								GID=gid_single_hit;
 							}
@@ -3304,7 +3323,7 @@ public class AssignGid {
 							System.out.println("gpid2: "+gpid2);
 							
 							int gid_single_hit = (int) addGID( pedigreeList.get(k), gpid1, gpid2,
-									methodID,5,false);
+									methodID,5,false);	// ntype=5
 							if(k==0){
 								GID=gid_single_hit;
 							}
@@ -3663,7 +3682,7 @@ public class AssignGid {
 		for(int j=0; j<pedigreeList.size();j++){
 			row = new ArrayList<String>();
 			//System.out.println("::"+pedigreeList.get(j));
-			if(!pedigreeList.get(j).contains("/")){
+			if(!pedigreeList.get(j).contains("/") && !pedigreeList.get(j).contains("*")){
 				if(!isParent){
 					notParent_index=j;
 				}
@@ -3679,7 +3698,6 @@ public class AssignGid {
 		System.out.println("last index of the crosses:"+notParent_index);
 
 		System.out.println("------");
-		//pedigreeList= parse_crossOp(pedigreeList, nval, id);
 
 		List<Integer> check=new ArrayList<Integer>();
 
@@ -3790,7 +3808,7 @@ public class AssignGid {
 		if(germplasm_filtered.size()==1){ // there exists a cross name that is equals with the female and male names and equals with given date
 			System.out.println("there exists a cross name that is equals with the female and male names and equals with given date");
 			// get the female gid and male gid
-			// set the line for the female using that gid, and same goes to the male line
+			// set the line for the female using that gid, same goes to the male line
 
 			//for the female parent
 			int gid=germplasm_filtered.get(0).getGid(), gpid1=germplasm_filtered.get(0).getGpid1(),gpid2=germplasm_filtered.get(0).getGpid2();
@@ -3954,7 +3972,7 @@ public class AssignGid {
 					}
 
 					//System.out.println("date: "+yr.concat(day).concat(mo));
-					row.add(yr.concat(day).concat(mo));	//date of creation
+					row.add("0");	//date of creation
 					row.add(cross_date);	//date of creation
 
 					//clearing memory
@@ -4078,6 +4096,7 @@ public class AssignGid {
 				}else{	// no existing same cross name and same female at male
 					System.out.println("no existing same cross name and same female at male");
 					System.out.println("female has cross operators");
+					System.out.println("create the cross");
 					if(female_nval.contains("/") || female_nval.contains("*")){
 
 						female=checkParent_crossOp( female_nval, female_id);
@@ -4105,7 +4124,7 @@ public class AssignGid {
 						System.out.println("createdGID for cross "+ cross);
 						int methodID=selectMethodType(fgid,mgid,female_nval,male_nval,cross);
 						
-						int cross_gid = (int) addGID( cross,fgid,mgid,  methodID,2,true);
+						int cross_gid = (int) addGID( cross,fgid,mgid,  methodID,2,true);	// ntype=2
 
 						Germplasm germplasm1 = manager.getGermplasmByGID(cross_gid);
 
@@ -4211,7 +4230,7 @@ public class AssignGid {
 							int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
 							
 							int gid_single_hit = (int) addGID( pedigreeList.get(k), gpid1, gid,
-									methodID,5,false);
+									methodID,5,false);	// ntype=5
 							if(k==0){
 								GID=gid_single_hit;
 							}
@@ -4354,7 +4373,7 @@ public class AssignGid {
 							System.out.println("gpid2: "+gpid2);
 							
 							int gid_single_hit = (int) addGID( pedigreeList.get(k), gpid1, gpid2,
-									methodID,5,false);
+									methodID,5,false);	// ntype=5
 							if(k==0){
 								GID=gid_single_hit;
 							}
@@ -4506,8 +4525,8 @@ public class AssignGid {
 							int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
 							
 							int gid_single_hit = (int) addGID( pedigreeList.get(k), gpid1, gid,
-									methodID,5,false);
-							if(k==0){
+									methodID,5,false);	// ntype=5
+							if(k==0){	
 								GID=gid_single_hit;
 							}
 							gid=gid_single_hit;
@@ -4628,7 +4647,7 @@ public class AssignGid {
 							System.out.println("gpid2: "+gpid2);
 							
 							int gid_single_hit = (int) addGID( pedigreeList.get(k), gpid1, gpid2,
-									methodID,5,false);
+									methodID,5,false);	// ntype=5
 							if(k==0){
 								GID=gid_single_hit;
 							}
@@ -4722,7 +4741,7 @@ public class AssignGid {
 		row.add("N/A"); // location
 		row.add("N/A" ); // gpid1
 		row.add("N/A" ); // gpid2
-		row.add(""+false ); // gpid2
+		row.add(""+false ); // tag
 		row.add(cross_date ); // cross' date of creation specified in the list
 		row.add("N/A" ); //date of the created GID
 
@@ -4975,7 +4994,7 @@ public class AssignGid {
 				int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
 				
 				gid = (int) addGID( pedigreeList.get(i), gpid1, gpid2,
-						methodID,5,false);
+						methodID,5,false);	// ntype=5
 				g=manager.getGermplasmByGID(gid);
 				gpid2 = gid;
 				gpid1 = gid;
@@ -4983,7 +5002,7 @@ public class AssignGid {
 				int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
 				
 				gid = (int) addGID( pedigreeList.get(i), gpid1, gpid2,
-						methodID,5,false);
+						methodID,5,false);	// ntype=5
 				g=manager.getGermplasmByGID(gid);
 				gpid2 = gid;
 			}
@@ -5025,7 +5044,7 @@ public class AssignGid {
 				int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
 				
 				gid = (int) addGID( pedigreeList.get(i), gpid1, gpid2,
-						methodID,5,false);
+						methodID,5,false);	// ntype=5
 				g=manager.getGermplasmByGID(gid);
 				gpid2 = gid;
 				gpid1 = gid;
@@ -5033,7 +5052,7 @@ public class AssignGid {
 				int methodID=selectMethodType_DER(pedigreeList.get(i), parent);
 				
 				gid = (int) addGID( pedigreeList.get(i), gpid1, gpid2,
-						methodID,5,false);
+						methodID,5,false);	// ntype=5
 				g=manager.getGermplasmByGID(gid);
 				gpid2 = gid;
 			}
@@ -5286,15 +5305,19 @@ public class AssignGid {
 		Germplasm germplasm1 = new Germplasm();
 		germplasm1.setMethodId(methodID);
 		int gnpgs=0;
-		if(methodID==107){
-			gnpgs=2;
-			nameType=3;
-		}else if(methodID==205 || methodID==33 || methodID==207 || methodID==206){
-			gnpgs=-1;
-			nameType=2;
+		/*if(methodID==107){	// 107 = backcross
+			gnpgs=2;	//cross
+			nameType=3;	// unnamed cross
+		}else */
+		//if(nameType==3){
+			//nameType=3;	//unnamed cross
+		//}
+		if(methodID==205 || methodID==31 || methodID==207 || methodID==206){	// 205=SPS 33=UNKNOWN 207=random bulk  206=selected bulk
+			gnpgs=-1;	//derivative
+			//nameType=5;	//derivative
 		}else{
-			gnpgs=2;
-			nameType=5;
+			gnpgs=2;	//cross
+			//nameType=2;	//cross
 		}
 		germplasm1.setGnpgs(gnpgs);
 		germplasm1.setGpid1(gpid1);
