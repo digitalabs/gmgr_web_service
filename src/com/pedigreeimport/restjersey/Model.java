@@ -1179,7 +1179,7 @@ public class Model {
         	outputString = outputString + tabs.toString() + ",\"children\" : \n" + tabs.toString() +"[{}]";
         	System.out.println(tabs.toString() + "\"children\" : \n" + tabs.toString() +"[");
         }
-        
+
         if(!node.getLinkedNodes().isEmpty()){
         	outputString = outputString + tabs.toString() + "\"children\" : \n" + tabs.toString() +"[";
         	System.out.println(tabs.toString() + "\"children\" : \n" + tabs.toString() +"[");
