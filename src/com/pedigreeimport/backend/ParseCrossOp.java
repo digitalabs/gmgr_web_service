@@ -323,13 +323,10 @@ public class ParseCrossOp {
 										            
 										            
 													//String[] tokens = new Tokenize().tokenize(correctedTerm);
-													
 
-													new AssignGid();
-													
-													pedigreeList = AssignGid.saveToArray(pedigreeList, tokens);
+													pedigreeList =new AssignGid().saveToArray(pedigreeList, tokens);
 													ArrayList<String> pedigreeList_list = new ArrayList<String>(); 
-													pedigreeList_list=AssignGid.saveToArray(pedigreeList_list, tokens_list);
+													pedigreeList_list=new AssignGid().saveToArray(pedigreeList_list, tokens_list);
 													index++;
 													for(int n=1; n<pedigreeList.size();n++){
 														correctedList.add(index,pedigreeList.get(n));
@@ -398,8 +395,7 @@ public class ParseCrossOp {
 													
 													ArrayList<String> pedigreeList = new ArrayList<String>();
 
-													new AssignGid();
-													pedigreeList = AssignGid.saveToArray(pedigreeList, tokens);
+													pedigreeList = new AssignGid().saveToArray(pedigreeList, tokens);
 													
 													for(int n=1; n<pedigreeList.size();n++){
 														correctedList.add(pedigreeList.get(n));

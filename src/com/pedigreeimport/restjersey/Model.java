@@ -96,7 +96,7 @@ public class Model {
 		//output=test.chooseGID(data,factory);
 		new AssignGid();
 		//ManagerFactory factory = new Config().configDB();
-		output=AssignGid.createNew(data,factory);
+		output=new AssignGid().createNew(data,factory);
 		System.out.println("existingTerm: "+output.get("existingTerm"));
 		factory.close();
 		return Response.status(200).entity(output).build();
@@ -159,7 +159,7 @@ public class Model {
 		db_details.add(central_db_username);
 
 		ManagerFactory factory = new Config().configDB(db_details);
-		output=AssignGid.chooseGID(data,factory);
+		output=new AssignGid().chooseGID(data,factory);
 		factory.close();
 		return Response.status(200).entity(output).build();
 
@@ -199,7 +199,7 @@ public class Model {
 
 		ManagerFactory factory = new Config().configDB(db_details);
 
-		output=AssignGid.chooseGID_cross(data,factory);
+		output=new AssignGid().chooseGID_cross(data,factory);
 
 		factory.close();
 		return Response.status(200).entity(output).build();
@@ -257,7 +257,7 @@ public class Model {
 		//System.out.println();
 
 		ManagerFactory factory = new Config().configDB(db_details);
-		output=AssignGid.bulk_createGID2(createdGID,list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
+		output=new AssignGid().bulk_createGID2(createdGID,list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
 
 		factory.close();
 
@@ -275,7 +275,7 @@ public class Model {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createGID2(JSONObject data) throws FileNotFoundException, IOException,
 	MiddlewareQueryException, ParseException, InterruptedException, NumberFormatException, java.text.ParseException {
-		new AssignGid();
+		
 		//new AssignGid().createGID();
 		//print_checkedBox();
 		List<String> checked= new ArrayList<String>();
@@ -311,7 +311,7 @@ public class Model {
 		JSONObject output=new JSONObject();
 		//System.out.println();
 		ManagerFactory factory = new Config().configDB(db_details);
-		output=AssignGid.bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
+		output=new AssignGid().bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
 		db_details.clear();
 		factory.close();
 
