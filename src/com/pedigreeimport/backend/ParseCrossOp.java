@@ -88,7 +88,7 @@ public class ParseCrossOp {
 		list=getParsed_parents(max, familyCount, row, list, twoDim);
 		
 		
-		System.out.println("------");
+		System.out.println("@parsed strings------");
 		for(int j=0; j<list.size();j++){
 			System.out.println("::"+list.get(j));
 		}
@@ -323,13 +323,10 @@ public class ParseCrossOp {
 										            
 										            
 													//String[] tokens = new Tokenize().tokenize(correctedTerm);
-													
 
-													new AssignGid();
-													
-													pedigreeList = AssignGid.saveToArray(pedigreeList, tokens);
+													pedigreeList =new AssignGid().saveToArray(pedigreeList, tokens);
 													ArrayList<String> pedigreeList_list = new ArrayList<String>(); 
-													pedigreeList_list=AssignGid.saveToArray(pedigreeList_list, tokens_list);
+													pedigreeList_list=new AssignGid().saveToArray(pedigreeList_list, tokens_list);
 													index++;
 													for(int n=1; n<pedigreeList.size();n++){
 														correctedList.add(index,pedigreeList.get(n));
@@ -376,21 +373,26 @@ public class ParseCrossOp {
 												//correctedTerm = new FixString().checkString(temp2[k]);
 												//result = new Main().checkString(temp2[k]);
 												System.out.println("result:" +result);
+												System.out.println("correctedTerm::" +correctedTerm);
 												
 												
 											if(!result.equals("")){
+												System.out.println("!!!ERROR FOUND");
 												error+=result;
 											}else{
+												System.out.println("NO ERROR");
 												correctedList=sort(correctedList,temp2[k]);
 												list=sort(list,temp2[k]);
 												
 												if(temp2[k].contains("-") && !temp2[k].contains("*") && !temp2[k].contains("/")){
+													System.out.println("NO / and *");
 													
-													Pattern p = Pattern.compile("IR");
-										            Matcher m1 = p.matcher(correctedTerm);
+													Pattern p = Pattern.compile("IR.");
+										            Matcher m1 = p.matcher(temp2[k]);
 										            String[] tokens={""};
 										            if (m1.lookingAt()) {
-										            	tokens = new Tokenize().tokenize(correctedTerm);
+										            	tokens = new Tokenize().tokenize(temp2[k]);
+										            	System.out.println("Starts with  IR: ");
 														
 										            }else{
 										            	tokens[0]="";
@@ -398,8 +400,7 @@ public class ParseCrossOp {
 													
 													ArrayList<String> pedigreeList = new ArrayList<String>();
 
-													new AssignGid();
-													pedigreeList = AssignGid.saveToArray(pedigreeList, tokens);
+													pedigreeList = new AssignGid().saveToArray(pedigreeList, tokens);
 													
 													for(int n=1; n<pedigreeList.size();n++){
 														correctedList.add(pedigreeList.get(n));

@@ -33,8 +33,8 @@ public class Config {
 		if(db_details.size() != 0){
 			
 			
-			/*
-			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
+			
+			/*DatabaseConnectionParameters local = new DatabaseConnectionParameters(
 					"localhost", "3306", "local3", "root", "");
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
 					"localhost", "3306", "central", "root", "");

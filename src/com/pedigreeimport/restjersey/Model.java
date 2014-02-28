@@ -96,7 +96,7 @@ public class Model {
 		//output=test.chooseGID(data,factory);
 		new AssignGid();
 		//ManagerFactory factory = new Config().configDB();
-		output=AssignGid.createNew(data,factory);
+		output=new AssignGid().createNew(data,factory);
 		System.out.println("existingTerm: "+output.get("existingTerm"));
 		factory.close();
 		return Response.status(200).entity(output).build();
@@ -159,7 +159,7 @@ public class Model {
 		db_details.add(central_db_username);
 
 		ManagerFactory factory = new Config().configDB(db_details);
-		output=AssignGid.chooseGID(data,factory);
+		output=new AssignGid().chooseGID(data,factory);
 		factory.close();
 		return Response.status(200).entity(output).build();
 
@@ -199,7 +199,7 @@ public class Model {
 
 		ManagerFactory factory = new Config().configDB(db_details);
 
-		output=AssignGid.chooseGID_cross(data,factory);
+		output=new AssignGid().chooseGID_cross(data,factory);
 
 		factory.close();
 		return Response.status(200).entity(output).build();
@@ -257,7 +257,7 @@ public class Model {
 		//System.out.println();
 
 		ManagerFactory factory = new Config().configDB(db_details);
-		output=AssignGid.bulk_createGID2(createdGID,list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
+		output=new AssignGid().bulk_createGID2(createdGID,list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
 
 		factory.close();
 
@@ -275,7 +275,7 @@ public class Model {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response createGID2(JSONObject data) throws FileNotFoundException, IOException,
 	MiddlewareQueryException, ParseException, InterruptedException, NumberFormatException, java.text.ParseException {
-		new AssignGid();
+		
 		//new AssignGid().createGID();
 		//print_checkedBox();
 		List<String> checked= new ArrayList<String>();
@@ -311,7 +311,7 @@ public class Model {
 		JSONObject output=new JSONObject();
 		//System.out.println();
 		ManagerFactory factory = new Config().configDB(db_details);
-		output=AssignGid.bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
+		output=new AssignGid().bulk_createGID(list, checked,Integer.parseInt(locationID),existingTerm, userID,factory);
 		db_details.clear();
 		factory.close();
 
@@ -883,7 +883,7 @@ public class Model {
 		factory.close();
 		return Response.status(200).entity(outputTree).build();
 	}
-
+	
 	private void printNode(GermplasmPedigreeTreeNode node, int level, List <Name> names, Location loc2, List <Attribute> attributes, int cid, Country cnty, GermplasmDataManager man, Method meth, Bibref bibref, Location loc) throws IOException, MiddlewareQueryException {
 	       
 		StringBuffer tabs = new StringBuffer();
@@ -957,7 +957,16 @@ public class Model {
      			  UserDefinedField result = null;
      			  String res = "---";
      			  String des = "---";
+     			  String val = "---";
+     			  String date = "---";
+     			  
      			  System.out.println("Atype: " + attributes.get(cntr).getAid());
+     			  if(attributes.get(cntr).getAval()!=null || attributes.get(cntr).getAdate() != null )
+     			  {
+     				  val = attributes.get(cntr).getAval();
+     				  date = attributes.get(cntr).getAdate().toString();
+     			  }
+     			  
      			  if(attributes.get(cntr).getAid()!= 0)
      			  {
      				  result = man.getUserDefinedFieldByID(attributes.get(cntr).getTypeId());
@@ -969,11 +978,11 @@ public class Model {
                   outputString = outputString 
                   + tabs.toString() +"    \"aid"+cntr+"\" : \"" + attributes.get(cntr).getAid() +"\",\n"
                   + tabs.toString() +"    \"atype"+cntr+"\" : \"" + attributes.get(cntr).getTypeId() +"\",\n"
-                  + tabs.toString() +"    \"aval"+cntr+"\" : \"" + attributes.get(cntr).getAval() +"\",\n"
+                  + tabs.toString() +"    \"aval"+cntr+"\" : \"" + val +"\",\n"
                   + tabs.toString() +"    \"aloc"+cntr+"\" : \"" + loc2.getLname() +"\",\n"
                   + tabs.toString() +"    \"aname"+cntr+"\" : \"" + res +"\",\n"
                   + tabs.toString() +"    \"ades"+cntr+"\" : \"" + des +"\",\n"
-                  + tabs.toString() +"    \"adate"+cntr+"\" : \"" + attributes.get(cntr).getAdate() +"\",\n";
+                  + tabs.toString() +"    \"adate"+cntr+"\" : \"" + date +"\",\n";
                  
     		}
             
@@ -1027,7 +1036,16 @@ public class Model {
      			  UserDefinedField result = null;
      			  String res = "---";
      			  String des = "---";
+     			  String val = "---";
+    			  String date = "---";
+    			  
      			  System.out.println("Atype: " + attributes.get(cntr).getAid());
+     			  if(attributes.get(cntr).getAval()!=null || attributes.get(cntr).getAdate() != null )
+    			  {
+    				  val = attributes.get(cntr).getAval();
+    				  date = attributes.get(cntr).getAdate().toString();
+    			  }
+     			 
      			  if(attributes.get(cntr).getAid()!= 0)
      			  {
      				  result = man.getUserDefinedFieldByID(attributes.get(cntr).getTypeId());
@@ -1036,14 +1054,15 @@ public class Model {
      					  des = result.getFname();
      				  }
      			  }
+     			  
                   outputString = outputString 
                   + tabs.toString() +"    \"aid"+cntr+"\" : \"" + attributes.get(cntr).getAid() +"\",\n"
                   + tabs.toString() +"    \"atype"+cntr+"\" : \"" + attributes.get(cntr).getTypeId() +"\",\n"
-                  + tabs.toString() +"    \"aval"+cntr+"\" : \"" + attributes.get(cntr).getAval() +"\",\n"
+                  + tabs.toString() +"    \"aval"+cntr+"\" : \"" + val +"\",\n"
                   + tabs.toString() +"    \"aloc"+cntr+"\" : \"" + loc2.getLname() +"\",\n"
                   + tabs.toString() +"    \"aname"+cntr+"\" : \"" + res +"\",\n"
                   + tabs.toString() +"    \"ades"+cntr+"\" : \"" + des +"\",\n"
-                  + tabs.toString() +"    \"adate"+cntr+"\" : \"" + attributes.get(cntr).getAdate() +"\",\n";
+                  + tabs.toString() +"    \"adate"+cntr+"\" : \"" + date +"\",\n";
                  
     		}
             
@@ -1088,7 +1107,6 @@ public class Model {
         	System.out.println(tabs.toString()+"]");
         }
     }
-
 
 	@Path("/show_germplasm_details")
 	@POST
