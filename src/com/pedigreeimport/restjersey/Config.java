@@ -31,19 +31,18 @@ public class Config {
 	    	db_details.clear();
 	    }
 		if(db_details.size() != 0){
+			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
+					"localhost", db_details.get(1), db_details.get(0), db_details.get(2), "");
+			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
+					"localhost", db_details.get(4), db_details.get(3), db_details.get(5), "");
 			
-			
+			/*ManagerFactory factory = new ManagerFactory(local, central);
 			
 			/*DatabaseConnectionParameters local = new DatabaseConnectionParameters(
-					"localhost", "3306", "local3", "root", "");
-			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
-					"localhost", "3306", "central", "root", "");
-			ManagerFactory factory = new ManagerFactory(local, central);
-			*/
-			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
 					"localhost", "3306", "local", "datasourceuser", "ici$rule$");
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
 					"localhost", "3306", "iris_mysiam_20121002", "datasourceuser", "ici$rule$");
+			*/
 			ManagerFactory factory = new ManagerFactory(local, central);
             
 			return factory;
