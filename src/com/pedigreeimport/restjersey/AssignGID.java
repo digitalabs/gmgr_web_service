@@ -4680,7 +4680,7 @@ public class AssignGid {
 			if(j==crosses.size()-1){
 				System.out.println("GID: "+gid);
 				System.out.println("GID2: "+parent2GID);
-				methodID=selectMethodType(gid, parent2GID, backcrosses.get(0).get(0), parent2, crosses.get(j).get(0),0);
+				methodID=selectMethodType(gid, parent2GID, backcrosses.get(0).get(0), parent2, crosses.get(j).get(0),107);
 				gid=addGID(crosses.get(j).get(0), gid, parent2GID, methodID, 3, false);
 				crossesGID=printSuccess_temp(crosses.get(j).get(0), parent, id, manager.getGermplasmByGID(gid), "new", crossesGID);
 				crosses.get(j).set(1,""+gid);
