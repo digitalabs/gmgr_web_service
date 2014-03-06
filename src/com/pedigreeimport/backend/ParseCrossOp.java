@@ -177,7 +177,7 @@ public class ParseCrossOp {
 	 */
 	private JSONObject method(int max, int familyCount, String error,List<String> row,List<String> list,List<List<String>> twoDim, JSONObject output, List<String> correctedList, Boolean standardize) throws MiddlewareQueryException, IOException {
 
-
+		int index;
 		if (max > 0) {
 			String slash = "";
 			for (int i = max; i > 0;) {
@@ -214,7 +214,7 @@ public class ParseCrossOp {
 									if(temp2[k].contains("/")){
 										list=sort(list,temp2[k]);
 										correctedList=sort(correctedList,temp2[k]);
-										int index=0;
+										index=0;
 										for(int n=0; n<correctedList.size();n++ ){
 											
 											if(temp2[k].equals(list.get(n))){
@@ -251,16 +251,16 @@ public class ParseCrossOp {
 													String[] parsed=temp2[k].split("\\*");
 													correctedTerm = new FixString().checkString(parsed[1]);
 													result = new Main().checkString(correctedTerm);
-													correctedTerm=parsed[0].concat("*".concat(correctedTerm));
-													//temp2[k]=parsed[1];
+													//correctedTerm=parsed[0].concat("*".concat(correctedTerm));
+													temp2[k]=parsed[1];
 												}else{
 													p2 = Pattern.compile("(\\d+)(\\*)(\\d)(.+)"); // backcross to female
 													m2 = p2.matcher(temp2[k]);
 													String[] parsed=temp2[k].split("\\*");
 													correctedTerm = new FixString().checkString(parsed[0]);
 													result = new Main().checkString(correctedTerm);
-													correctedTerm=correctedTerm.concat("*".concat(parsed[1]));
-													//temp2[k]=parsed[0];
+													//=correctedTerm.concat("*".concat(parsed[1]));
+													temp2[k]=parsed[0];
 												}
 												
 											}else{
@@ -292,13 +292,16 @@ public class ParseCrossOp {
 														System.out.println("list: "+correctedList.get(n));
 													}
 												}
-												System.out.println("---------"); int index=0;
+												System.out.println("---------"); 
+												index=-1;
 												for(int r=0; r<correctedList.size(); r++){
 													if(correctedList.get(r).equals(correctedTerm)){
 														index=r;
 													}
-												System.out.println(" "+ correctedList.get(r));
+												
 												}
+												System.out.println("index @ST: "+ index);
+												System.out.println("corrected@ST: "+ correctedList);
 												System.out.println("---------");
 
 
@@ -354,7 +357,7 @@ public class ParseCrossOp {
 													correctedTerm = new FixString().checkString(parsed[1]);
 													result = new Main().checkString(correctedTerm);
 													correctedTerm=parsed[0].concat("*".concat(correctedTerm));
-													//temp2[k]=parsed[1];
+													temp2[k]=parsed[1];
 												}else{
 													p2 = Pattern.compile("(\\d+)(\\*)(\\d)(.+)"); // backcross to female
 													m2 = p2.matcher(temp2[k]);
@@ -362,7 +365,7 @@ public class ParseCrossOp {
 													correctedTerm = new FixString().checkString(parsed[0]);
 													result = new Main().checkString(correctedTerm);
 													correctedTerm=correctedTerm.concat("*".concat(parsed[1]));
-													//temp2[k]=parsed[0];
+													temp2[k]=parsed[0];
 												}
 												
 											}else{
