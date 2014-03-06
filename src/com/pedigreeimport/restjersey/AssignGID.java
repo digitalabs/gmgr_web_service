@@ -410,6 +410,8 @@ public class AssignGid {
 			System.out.println("The parent has cross operators");
 			System.out.println("parent q");
 			if(theParent.contains("*")){
+				createdGID=updateCreatedGID(gid, parent1ID,lastDeriv_parent , "false", createdGID);
+				createdGID_local=createdGID;
 				createdGID=chooseGID_bc(parent1ID, parent1, theParent,lastDeriv_parent,gid_local, gpid1_local, gpid2_local,gid, gpid1, gpid2,createdGID);
 			}else{
 				createdGID=updateCreatedGID(gid, parent1ID,lastDeriv_parent , "false", createdGID);
@@ -604,6 +606,7 @@ public class AssignGid {
 
 
 		if(!lastDeriv_parent.contains("/") && !lastDeriv_parent.contains("*")){
+			System.out.println("last deriv parent no / and *");
 			for(int i=0; i<parents.size(); i++){
 				if(parents.get(i).get(0).contains("-")){
 					index_derivative=i;	// get the index
@@ -619,10 +622,11 @@ public class AssignGid {
 					ArrayList<String> pedigreeList_der = new ArrayList<String>();
 					pedigreeList_der = saveToArray(pedigreeList_der, tokens2);
 					for(int j=0; j<pedigreeList_der.size();j++){
-						//						System.out.println("pedigreeList: "+ pedigreeList_der.get(j) +" chooseNVAL: "+lastDeriv_parent);
+						System.out.println("pedigreeList: "+ pedigreeList_der.get(j) +" chooseNVAL: "+lastDeriv_parent);
 
 						if(pedigreeList_der.get(j).equals(lastDeriv_parent)){	// if the chosen GID is a derivative in one of the parents
 							//if derivative, get derivative line
+							System.out.println("if derivative, get derivative line");
 							index_derivative=j;	// get the index
 							createdGID=getDerivativeLine( index_derivative, pedigreeList_der, gid_local, gpid1_local, gpid2_local, gid, gpid1, gpid2, parent1ID, parent1, createdGID);
 
@@ -639,7 +643,14 @@ public class AssignGid {
 					}
 				}else{
 					if(lastDeriv_parent.equals(parents.get(i).get(0))){
+						System.out.println("no -");
 						parents.get(i).set(1,""+gid_local );
+						System.out.println("gid: "+gid_local);
+						System.out.println("theParent: "+theParent);
+						System.out.println("term: "+parents.get(i).get(0));
+						createdGID=updateFile_createdGID(""+gid_local, parent1ID, parents.get(i).get(0), "false", theParent);	//update the createdGID file
+						
+						createdGID_local=createdGID;
 					}index_derivative=i;	// get the index
 
 				}
@@ -2371,7 +2382,7 @@ public class AssignGid {
 			gid_local = (int) addGID( pedigreeList.get(i), gpid1_local, gpid2_local,
 					methodID,5,false);
 			Germplasm g=manager.getGermplasmByGID(gid_local);
-			gpid2_local=g.getGpid2();
+			gpid2_local=g.getGid();
 			gpid1_local=g.getGpid1();
 			g=null;
 
@@ -2897,7 +2908,7 @@ public class AssignGid {
 
 								g=new Germplasm();
 
-								if (i == 0) {
+								if (k == 0) {
 
 									int methodID=selectMethodType_DER(pedigreeList_der.get(k), theParent);
 									gid = (int) addGID( pedigreeList_der.get(k), gpid1, gpid2,
@@ -2912,6 +2923,7 @@ public class AssignGid {
 											methodID,2,false);
 									g=manager.getGermplasmByGID(gid);
 									gpid2 = gid;
+									gpid1=g.getGpid1();
 								}
 								//pedigreeList_GID.add(gid);
 
@@ -4547,6 +4559,7 @@ public class AssignGid {
 			}else{
 				//
 				for(int k=0;k<temp.size();k++){
+					System.out.println(""+temp.get(k));
 					createdGID_local.add(temp.get(k));
 				}//temp.clear();
 			}
@@ -5250,10 +5263,11 @@ public class AssignGid {
 
 	public  JSONObject getPedigreeLine(String parent,String id, List<List<String>> temp_fin, String parent2, int GID) throws MiddlewareQueryException,
 	IOException {
-		Pattern p = Pattern.compile("IR");
+		Pattern p = Pattern.compile("^IR");
 		Matcher m1 = p.matcher(parent);
 		String[] tokens={""};
 		if (m1.lookingAt()) {
+			System.out.println("starts at IR @ getPedLine");
 			tokens = new Tokenize().tokenize(parent);
 		}else{
 			tokens[0]=parent;
@@ -5262,6 +5276,8 @@ public class AssignGid {
 		ArrayList<String> pedigreeList = new ArrayList<String>();
 
 		pedigreeList = saveToArray(pedigreeList, tokens); // pedigreeList[0] is the most recent pedigree, pedigreeList[size] is the root
+		System.out.println("ped list @ get Ped line: "+pedigreeList);
+		System.out.println("parent @ get Ped line: "+parent);
 
 		Boolean flag = true;
 		Boolean single_hit=false;
@@ -5389,7 +5405,7 @@ public class AssignGid {
 					System.out.println("\t "+pedigree);
 
 					//no germplasm name in the list's location
-					if(i==pedigreeList.size()-1){	//if root assign GID from the root
+					if(i==pedigreeList.size()-1){	//if root, assign GID from the root
 						JSONObject output2=createPedigreeLine_CrossOp( pedigreeList, id, pedigreeList.get(i),parent2,temp_fin,GID);
 						GID=(Integer) output2.get("GID");
 						temp_fin=(List<List<String>>) output2.get("temp_fin");
@@ -5553,8 +5569,10 @@ public class AssignGid {
 			for(int i=0; i< germplasm_fin.size(); i++){
 				List<Name> name_female=manager.getNamesByGID(germplasm_fin.get(i).getGpid1(), 0, null);
 				List<Name> name_male=manager.getNamesByGID(germplasm_fin.get(i).getGpid2(), 0, null);
+				if(name_female.size()>0 && name_male.size()>0){
 				if(name_female.get(0).getNval().equals(female_nval) && name_male.get(0).getNval().equals(male_nval)){
 					germplasm_list.add(germplasm_fin.get(i));
+				}
 				}
 
 			}
@@ -6087,11 +6105,17 @@ public class AssignGid {
 						yr="0000";
 						day="00";
 						mo="00";
+						//row.add(yr.concat(day).concat(mo));	//date of creation
+						row.add("0");	//date of creation
+					}else if((date.charAt(3)=='0' && date.charAt(4)=='0') || (date.charAt(6)=='0' && date.charAt(7)=='0')){
+						yr=date.charAt(0)+""+date.charAt(1)+""+date.charAt(2)+""+date.charAt(3);
+						row.add(yr.concat("-00").concat("-00"));	//date of creation
 					}else{
 						//System.out.println(date.charAt(0));
-						yr=date.charAt(0)+""+date.charAt(1)+""+date.charAt(2)+""+date.charAt(3);
-						day=date.charAt(4)+""+date.charAt(5);
-						mo=date.charAt(6)+""+date.charAt(7)+"";
+						yr=date.charAt(0)+""+date.charAt(1)+""+date.charAt(2)+""+date.charAt(3)+"-";
+						mo=date.charAt(4)+""+date.charAt(5)+"-";
+						day=date.charAt(6)+""+date.charAt(7)+"";
+						row.add(yr.concat(mo).concat(day));	//date of creation
 					}
 
 					//System.out.println("date: "+yr.concat(day).concat(mo));
@@ -6187,24 +6211,26 @@ public class AssignGid {
 						row.add(loc); // location
 						row.add(cross); // pedigree name
 
-						/*String date=germplasm_all.get(i).getGdate().toString();
+						String date=germplasm_all.get(i).getGdate().toString();
 
 						String yr,day,mo;
-						//System.out.println("date: "+date);
+						System.out.println("date: "+date);
 						if(date.equals("0")){
 							yr="0000";
 							day="00";
 							mo="00";
+							//row.add(yr.concat(day).concat(mo));	//date of creation
+							row.add("0");	//date of creation
+						}else if((date.charAt(3)=='0' && date.charAt(4)=='0') || (date.charAt(6)=='0' && date.charAt(7)=='0')){
+							yr=date.charAt(0)+""+date.charAt(1)+""+date.charAt(2)+""+date.charAt(3);
+							row.add(yr.concat("-00").concat("-00"));	//date of creation
 						}else{
 							//System.out.println(date.charAt(0));
-							yr=date.charAt(0)+""+date.charAt(1)+""+date.charAt(2)+""+date.charAt(3);
-							day=date.charAt(4)+""+date.charAt(5);
-							mo=date.charAt(6)+""+date.charAt(7)+"";
+							yr=date.charAt(0)+""+date.charAt(1)+""+date.charAt(2)+""+date.charAt(3)+"-";
+							mo=date.charAt(4)+""+date.charAt(5)+"-";
+							day=date.charAt(6)+""+date.charAt(7)+"";
+							row.add(yr.concat(mo).concat(day));	//date of creation
 						}
-						 */
-
-						//System.out.println("date: "+yr.concat(day).concat(mo));
-						row.add(""+germplasm_all.get(i).getGdate());	//date of creation
 						row.add(cross_date);	//date of creation
 
 						//clearing memory
@@ -6432,7 +6458,7 @@ public class AssignGid {
 					//no germplasm name in the list's location
 					if(i==pedigreeList.size()-1){	//if root assign GID from the root
 						System.out.println("\t "+pedigree+ "is the root");
-						int fid=-1;
+						/*int fid=-1;
 
 						if(Integer.valueOf(id)%2==0){
 							fid=Integer.valueOf(id);
@@ -6441,13 +6467,14 @@ public class AssignGid {
 						}
 						System.out.println("\t fid: "+fid);
 
-						Boolean isExisting=false;
+						Boolean isExisting=true;
 						for(int j=0; j<list_local.size();j++){
 
 							System.out.println("\t 0: "+list_local.get(j).get(2));
 							if(Integer.valueOf(list_local.get(j).get(2))<fid){
 								System.out.println("\t here @ "+list_local.get(j).get(0));
-								if(list_local.get(j).get(1).equals(parent) && list_local.get(j).get(0).equals("N/A")){
+								if(list_local.get(j).get(1).equals(pedigree) && !list_local.get(j).get(0).equals("N/A")){
+									System.out.println("\t here @ "+list_local.get(j).get(1)+" "+pedigree);
 									isExisting=true;
 								}
 
@@ -6456,10 +6483,10 @@ public class AssignGid {
 						if(isExisting){
 							printNotSet(pedigree, parent, id);
 							result=false;
-						}else{
+						}else{*/
 							createPedigreeLine2( pedigreeList, id, parent);
 							result=true;
-						}
+						//}
 						//checks if it is a parent in earlier entries
 						//if yes print NOT SET
 						//if no create pedigreeLine
@@ -7087,15 +7114,21 @@ public class AssignGid {
 				yr="0000";
 				day="00";
 				mo="00";
+				//row.add(yr.concat(day).concat(mo));	//date of creation
+				row.add("0");	//date of creation
+			}else if((date.charAt(3)=='0' && date.charAt(4)=='0') || (date.charAt(6)=='0' && date.charAt(7)=='0')){
+				yr=date.charAt(0)+""+date.charAt(1)+""+date.charAt(2)+""+date.charAt(3);
+				row.add(yr.concat("-00").concat("-00"));	//date of creation
 			}else{
 				//System.out.println(date.charAt(0));
 				yr=date.charAt(0)+""+date.charAt(1)+""+date.charAt(2)+""+date.charAt(3)+"-";
-				day=date.charAt(4)+""+date.charAt(5)+"-";
-				mo=date.charAt(6)+""+date.charAt(7)+"";
+				mo=date.charAt(4)+""+date.charAt(5)+"-";
+				day=date.charAt(6)+""+date.charAt(7)+"";
+				row.add(yr.concat(mo).concat(day));	//date of creation
 			}
 
 			//System.out.println("date: "+yr.concat(day).concat(mo));
-			row.add(yr.concat(day).concat(mo));	//date of creation
+			
 			row.add(cross_date);	//date of creation
 
 			//clearing memory
@@ -7422,7 +7455,7 @@ public class AssignGid {
 		}
 		Collections.reverse(array);
 		System.out.println("PEDLIST: "+array);
-		tokens=null;
+		//tokens=null;
 		return array;
 	}
 	public  int countGermplasmByName(
@@ -7469,17 +7502,45 @@ public class AssignGid {
 		Integer gdate;
 		//SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		if(newCross){
+			String yr="";
+			String day="";
+			String mo="";
 			if(cross_date.equals("not specified")){
 				gdate=0;
 			}else{
 				String cross_date_l = "";
 				if(cross_date.length()==10){
+					
 					if(cross_date.contains("/")){
 						cross_date_l=cross_date.replace("/", "");
 					}else if(cross_date.contains("-")){
 						cross_date_l=cross_date.replace("-", "");
 					}
-				}	else{
+					yr=cross_date_l.charAt(4)+""+cross_date_l.charAt(5)+""+cross_date_l.charAt(6)+""+cross_date_l.charAt(7);
+					day=cross_date_l.charAt(2)+""+cross_date_l.charAt(3);
+					mo=cross_date_l.charAt(0)+""+cross_date_l.charAt(1)+"";
+					
+					cross_date_l=yr.concat(mo).concat(day);
+				}else if(cross_date.length()==9){
+					
+					if(cross_date.contains("/")){
+						cross_date_l=cross_date.replace("/", "");
+					}else if(cross_date.contains("-")){
+						cross_date_l=cross_date.replace("-", "");
+					}
+					yr=cross_date_l.charAt(3)+""+cross_date_l.charAt(4)+""+cross_date_l.charAt(5)+""+cross_date_l.charAt(7);
+					day=cross_date_l.charAt(1)+""+cross_date_l.charAt(2);
+					mo=cross_date_l.charAt(0)+"";
+					
+					cross_date_l=yr.concat(mo).concat(day);
+				}else if(cross_date.length()==8){
+					
+					yr=cross_date.charAt(4)+""+cross_date.charAt(5)+""+cross_date.charAt(6)+""+cross_date.charAt(7);
+					day=cross_date.charAt(2)+""+cross_date.charAt(3);
+					mo=cross_date.charAt(0)+""+cross_date.charAt(1)+"";
+					
+					cross_date_l=yr.concat(mo).concat(day);
+				}else{
 					cross_date_l ="0";
 				}
 				gdate=Integer.valueOf(cross_date_l);	

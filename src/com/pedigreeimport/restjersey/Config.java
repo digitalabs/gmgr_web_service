@@ -32,7 +32,7 @@ public class Config {
 	public ManagerFactory configDB(List<String> db_details){
 		
 		System.out.println("db_details:"+db_details);
-	
+
 	    if(db_details.contains( "undefined") || db_details.get(0)=="" || db_details.get(0) == null){
 	    	db_details.clear();
 	    }
@@ -41,16 +41,16 @@ public class Config {
 					db_details.get(0), db_details.get(2), db_details.get(1), db_details.get(3), db_details.get(4));
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
 					db_details.get(5), db_details.get(7), db_details.get(6), db_details.get(8), db_details.get(9));
+
 			
-			/*ManagerFactory factory = new ManagerFactory(local, central);
-			
-			/*DatabaseConnectionParameters local = new DatabaseConnectionParameters(
-					"localhost", "3306", "local", "datasourceuser", "ici$rule$");
-			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
-					"localhost", "3306", "iris_mysiam_20121002", "datasourceuser", "ici$rule$");
-			*/
 			ManagerFactory factory = new ManagerFactory(local, central);
-            
+            /*
+			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
+					"localhost", "3306", "local3", "root", "");
+			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
+					"localhost", "3306", "central", "root", "");
+			ManagerFactory factory = new ManagerFactory(local, central);
+			*/
 			return factory;
 			
 		}else{
@@ -61,12 +61,12 @@ public class Config {
 					"localhost", "3306", "iris_mysiam_20121002", "datasourceuser", "ici$rule$");
 			ManagerFactory factory = new ManagerFactory(local, central);
 			*/
+
 			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
 					"localhost", "3306", "gmgr_local", "gmgruser", "gmgrpass");
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
 					"localhost", "3306", "gmgr_local", "gmgruser", "gmgrpass");
 			ManagerFactory factory = new ManagerFactory(local, central);
-			
 
 			return factory;
 			
