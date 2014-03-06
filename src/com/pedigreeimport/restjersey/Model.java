@@ -76,21 +76,30 @@ public class Model {
 		db_details.clear();
 
 		//list = (List<String>) json_array.get("output");
+		String local_db_host = (String) json_array.get("local_db_host");
 		String local_db_name = (String) json_array.get("local_db_name");
 		String local_db_port = (String) json_array.get("local_db_port");
 		String local_db_username = (String) json_array.get("local_db_username");
-
+		String local_db_password = (String) json_array.get("local_db_password");
+		
+		String central_db_host = (String) json_array.get("central_db_host");
 		String central_db_name = (String) json_array.get("central_db_name");
 		String central_db_port = (String) json_array.get("central_db_port");
 		String central_db_username = (String) json_array.get("central_db_username");
+		String central_db_password = (String) json_array.get("central_db_password");
 
 		//add db details to array
+		db_details.add(local_db_host);
 		db_details.add(local_db_name);
 		db_details.add(local_db_port);
 		db_details.add(local_db_username);
+		db_details.add(local_db_password);
+		
+		db_details.add(central_db_host);
 		db_details.add(central_db_name);
 		db_details.add(central_db_port);
 		db_details.add(central_db_username);
+		db_details.add(central_db_password);
 
 		ManagerFactory factory = new Config().configDB(db_details);
 		//output=test.chooseGID(data,factory);
@@ -142,21 +151,30 @@ public class Model {
 		db_details.clear();
 
 		//list = (List<String>) json_array.get("output");
+		String local_db_host = (String) json_array.get("local_db_host");
 		String local_db_name = (String) json_array.get("local_db_name");
 		String local_db_port = (String) json_array.get("local_db_port");
 		String local_db_username = (String) json_array.get("local_db_username");
-
+		String local_db_password = (String) json_array.get("local_db_password");
+		
+		String central_db_host = (String) json_array.get("central_db_host");
 		String central_db_name = (String) json_array.get("central_db_name");
 		String central_db_port = (String) json_array.get("central_db_port");
 		String central_db_username = (String) json_array.get("central_db_username");
+		String central_db_password = (String) json_array.get("central_db_password");
 
 		//add db details to array
+		db_details.add(local_db_host);
 		db_details.add(local_db_name);
 		db_details.add(local_db_port);
 		db_details.add(local_db_username);
+		db_details.add(local_db_password);
+		
+		db_details.add(central_db_host);
 		db_details.add(central_db_name);
 		db_details.add(central_db_port);
 		db_details.add(central_db_username);
+		db_details.add(central_db_password);
 
 		ManagerFactory factory = new Config().configDB(db_details);
 		output=new AssignGid().chooseGID(data,factory);
@@ -181,22 +199,31 @@ public class Model {
 		db_details.clear();
 
 		//list = (List<String>) json_array.get("output");
+		String local_db_host = (String) json_array.get("local_db_host");
 		String local_db_name = (String) json_array.get("local_db_name");
 		String local_db_port = (String) json_array.get("local_db_port");
 		String local_db_username = (String) json_array.get("local_db_username");
-
+		String local_db_password = (String) json_array.get("local_db_password");
+		
+		String central_db_host = (String) json_array.get("central_db_host");
 		String central_db_name = (String) json_array.get("central_db_name");
 		String central_db_port = (String) json_array.get("central_db_port");
 		String central_db_username = (String) json_array.get("central_db_username");
+		String central_db_password = (String) json_array.get("central_db_password");
 
 		//add db details to array
+		db_details.add(local_db_host);
 		db_details.add(local_db_name);
 		db_details.add(local_db_port);
 		db_details.add(local_db_username);
+		db_details.add(local_db_password);
+		
+		db_details.add(central_db_host);
 		db_details.add(central_db_name);
 		db_details.add(central_db_port);
 		db_details.add(central_db_username);
-
+		db_details.add(central_db_password);
+		
 		ManagerFactory factory = new Config().configDB(db_details);
 
 		output=new AssignGid().chooseGID_cross(data,factory);
@@ -230,21 +257,30 @@ public class Model {
 		existingTerm = (List<List<String>>) json_array.get("existing");
 		String userID = (String) json_array.get("userID");
 
+		String local_db_host = (String) json_array.get("local_db_host");
 		String local_db_name = (String) json_array.get("local_db_name");
 		String local_db_port = (String) json_array.get("local_db_port");
 		String local_db_username = (String) json_array.get("local_db_username");
-
+		String local_db_password = (String) json_array.get("local_db_password");
+		
+		String central_db_host = (String) json_array.get("central_db_host");
 		String central_db_name = (String) json_array.get("central_db_name");
 		String central_db_port = (String) json_array.get("central_db_port");
 		String central_db_username = (String) json_array.get("central_db_username");
+		String central_db_password = (String) json_array.get("central_db_password");
 
 		//add db details to array
+		db_details.add(local_db_host);
 		db_details.add(local_db_name);
 		db_details.add(local_db_port);
 		db_details.add(local_db_username);
+		db_details.add(local_db_password);
+		
+		db_details.add(central_db_host);
 		db_details.add(central_db_name);
 		db_details.add(central_db_port);
 		db_details.add(central_db_username);
+		db_details.add(central_db_password);
 
 		//System.out.println("\t createdGID @ Model: "+createdGID.size()+"\t"+createdGID);
 		//System.out.println("\t existing: \t"+existingTerm);
@@ -291,22 +327,30 @@ public class Model {
 		existingTerm = (List<List<String>>) json_array.get("existingTerm");
 		String userID = (String) json_array.get("userID");
 
+				String local_db_host = (String) json_array.get("local_db_host");
 		String local_db_name = (String) json_array.get("local_db_name");
 		String local_db_port = (String) json_array.get("local_db_port");
 		String local_db_username = (String) json_array.get("local_db_username");
-
+		String local_db_password = (String) json_array.get("local_db_password");
+		
+		String central_db_host = (String) json_array.get("central_db_host");
 		String central_db_name = (String) json_array.get("central_db_name");
 		String central_db_port = (String) json_array.get("central_db_port");
 		String central_db_username = (String) json_array.get("central_db_username");
+		String central_db_password = (String) json_array.get("central_db_password");
 
 		//add db details to array
+		db_details.add(local_db_host);
 		db_details.add(local_db_name);
 		db_details.add(local_db_port);
 		db_details.add(local_db_username);
+		db_details.add(local_db_password);
+		
+		db_details.add(central_db_host);
 		db_details.add(central_db_name);
 		db_details.add(central_db_port);
 		db_details.add(central_db_username);
-
+		db_details.add(central_db_password);
 
 		JSONObject output=new JSONObject();
 		//System.out.println();
@@ -652,7 +696,7 @@ public class Model {
 		List<String> gu_obj=(List<String>) json_array.get("list");
 		System.out.println("list: "+ gu_obj);
 
-		gu_obj=new SortList().algo(gu_obj);
+		gu_obj=new sortList().algo(gu_obj);
 
 		List<List<String>> output = new ArrayList<List<String>>();
 		int k=0;
@@ -783,21 +827,30 @@ public class Model {
 		List<String> db_details = new ArrayList<String>();
 		JSONObject json_array = (JSONObject) data;
 
+		String local_db_host = (String) json_array.get("local_db_host");
 		String local_db_name = (String) json_array.get("local_db_name");
 		String local_db_port = (String) json_array.get("local_db_port");
 		String local_db_username = (String) json_array.get("local_db_username");
-
+		String local_db_password = (String) json_array.get("local_db_password");
+		
+		String central_db_host = (String) json_array.get("central_db_host");
 		String central_db_name = (String) json_array.get("central_db_name");
 		String central_db_port = (String) json_array.get("central_db_port");
 		String central_db_username = (String) json_array.get("central_db_username");
+		String central_db_password = (String) json_array.get("central_db_password");
 
 		//add db details to array
+		db_details.add(local_db_host);
 		db_details.add(local_db_name);
 		db_details.add(local_db_port);
 		db_details.add(local_db_username);
+		db_details.add(local_db_password);
+		
+		db_details.add(central_db_host);
 		db_details.add(central_db_name);
 		db_details.add(central_db_port);
 		db_details.add(central_db_username);
+		db_details.add(central_db_password);
 
 		JSONObject output=new JSONObject();
 		//System.out.println();
@@ -1132,21 +1185,30 @@ public class Model {
 		JSONObject json_array = (JSONObject) data;
 
 
+		String local_db_host = (String) json_array.get("local_db_host");
 		String local_db_name = (String) json_array.get("local_db_name");
 		String local_db_port = (String) json_array.get("local_db_port");
 		String local_db_username = (String) json_array.get("local_db_username");
-
+		String local_db_password = (String) json_array.get("local_db_password");
+		
+		String central_db_host = (String) json_array.get("central_db_host");
 		String central_db_name = (String) json_array.get("central_db_name");
 		String central_db_port = (String) json_array.get("central_db_port");
 		String central_db_username = (String) json_array.get("central_db_username");
+		String central_db_password = (String) json_array.get("central_db_password");
 
 		//add db details to array
+		db_details.add(local_db_host);
 		db_details.add(local_db_name);
 		db_details.add(local_db_port);
 		db_details.add(local_db_username);
+		db_details.add(local_db_password);
+		
+		db_details.add(central_db_host);
 		db_details.add(central_db_name);
 		db_details.add(central_db_port);
 		db_details.add(central_db_username);
+		db_details.add(central_db_password);
 
 		ManagerFactory factory = new Config().configDB(db_details);
 		GermplasmDataManager man = factory.getGermplasmDataManager();
