@@ -11,7 +11,7 @@ public class Main {
 
     public String checkString(String line) {
         
-        String list = "";
+        String list = "list \n";
         
         //System.out.println("\n starting CheckString method...");
 
@@ -25,17 +25,18 @@ public class Main {
         */
             Pattern p = Pattern.compile("IR");
             Matcher m = p.matcher(line);
-            
+
             if (m.lookingAt()) {    // Breeding Line is IRRI
             	if(line.contains("(")){
-            		list+="";
+            		list="";
             	}else{
-            		list+= new IRRI().standardIRRI(line);
+            		list= new IRRI().standardIRRI(line);
             	}
                 //list = new IRRI().getListErrorsIRRI();
                 
+            }else{
+            	list="";
             }
-            
 //            Pattern p1 = Pattern.compile("WA");
 //            Matcher m1 = p1.matcher(line);
 //
