@@ -7511,7 +7511,7 @@ public class AssignGid {
 						printSuccess(cross, female_nval + "/" + male_nval,
 								female_id + "/" + male_id, germplasm1, "new");
 
-						// list_local=update_list(germplasm1, female_id, cross);
+						 list_local=update_list(germplasm1, female_id, cross);
 						// //System.out.println("\t id: "+fid + "/" + mid);
 						// //System.out.println("\t id: "+ cross);
 						germplasm1 = null;
