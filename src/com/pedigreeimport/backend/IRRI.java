@@ -19,7 +19,7 @@ public class IRRI {
     private static String A_SEL_NO = "(\\d+)"; //selection number
     private static String A_DASH = "(-)";  //dash
     private static String A_MP = "(\\d+MP)";   //mapping population followed by the plant number
-    private static String A_BM = "((\\d{0,4}B)|R|AC|(C\\d+))"; // breeding methods: “B�? - bulk, “R�? - rapid generation advance or single seed descent, “AC�? - anther culture. “C�? - for composite populations; a succeeding number indicates the specific cycle of composite
+    private static String A_BM = "((\\d{0,4}B)|\\d*R|AC|(C\\d+))"; // breeding methods: “B�? - bulk, “R�? - rapid generation advance or single seed descent, “AC�? - anther culture. “C�? - for composite populations; a succeeding number indicates the specific cycle of composite
     private String line;
     IRRISegGen sg = new IRRISegGen();
     Tokenize t = new Tokenize();
@@ -173,11 +173,11 @@ public class IRRI {
             //System.out.println("\n>>String not properly formatted.. ");
             spacingFixedLine();
             //errorPatternFixedLine();
-            Pattern p1 = Pattern.compile("IR\\d{2}(N|F|L|T|U|K|W|H|J|D|A|M|C)\\d{3,}((H|R|A|B|S)?)");
+            Pattern p1 = Pattern.compile("IR\\d{2}(N|F|L|T|U|K|W|H|J|D|A|M|C)?\\d{3,}((H|R|A|B|S)?)");
             Matcher m1 = p1.matcher(line);
             if (!m1.matches()) {
             	//System.out.println(line + "\t;string pattern not recognized ");
-                listErrorsFixed += line + "\t;string pattern not recognized " + "#";
+                listErrorsFixed += line + "\t;fixed line string pattern not recognized " + "#";
             }
         }setListErrorsIRRI(listErrorsFixed);
     }
