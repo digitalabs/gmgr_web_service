@@ -967,6 +967,12 @@ public class Model {
         if(!node.getLinkedNodes().isEmpty()){
         	Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\",");
         	
+			String cn = "";
+        	if(cnty.getIsoabbr() != null)
+        	{
+        		cn = cnty.getIsoabbr();
+        	}
+			
         	outputString = outputString + "\n "+ tabs.toString() + tabs.toString() +"\"gid\" : \"" + node.getGermplasm().getGid() +"\",\n"
                     + tabs.toString() +"    \"name\" : \"" + name +"\",\n"
                     + tabs.toString() +"    \"date\" : \"" + node.getGermplasm().getGdate() +"\",\n"
@@ -975,7 +981,7 @@ public class Model {
                     + tabs.toString() +"    \"methodname\" : \"" + meth.getMname() +"\",\n"
                     + tabs.toString() +"    \"methodtype\" : \"" + meth.getMtype() +"\",\n"
                     + tabs.toString() +"    \"location\" : \"" + loc.getLname() +"\",\n"
-                    + tabs.toString() +"    \"country\" : \"" + cnty.getIsoabbr() +"\",\n"
+                    + tabs.toString() +"    \"country\" : \"" + cn +"\",\n"
                     + tabs.toString() +"    \"ref\" : \"" + descBibref +"\",\n";
         		
         		if(meth.getMtype().equals("GEN"))
@@ -1046,7 +1052,13 @@ public class Model {
         else{
         
         	Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\"");
-        
+        	
+			String cn = "";
+        	if(cnty.getIsoabbr() != null)
+        	{
+        		cn = cnty.getIsoabbr();
+        	}
+			
         	outputString = outputString + "\n "+ tabs.toString() + tabs.toString() + "\"gid\" : \"" + node.getGermplasm().getGid() +"\",\n"
                     + tabs.toString() +"    \"name\" : \"" + name +"\",\n"
                     + tabs.toString() +"    \"date\" : \"" + node.getGermplasm().getGdate() +"\",\n"
@@ -1055,7 +1067,7 @@ public class Model {
                     + tabs.toString() +"    \"methodname\" : \"" + meth.getMname() +"\",\n"
                     + tabs.toString() +"    \"methodtype\" : \"" + meth.getMtype() +"\",\n"
                     + tabs.toString() +"    \"location\" : \"" + loc.getLname() +"\",\n"
-                    + tabs.toString() +"    \"country\" : \"" + cnty.getIsoabbr() +"\",\n"
+                    + tabs.toString() +"    \"country\" : \"" + cn +"\",\n"
                     + tabs.toString() +"    \"ref\" : \"" + descBibref +"\",\n";
             
         	if(meth.getMtype().equals("GEN"))
