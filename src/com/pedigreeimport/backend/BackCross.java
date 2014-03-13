@@ -361,11 +361,13 @@ public class BackCross {
 		String[] tokens=line.split("\\*",2);
 		print(tokens);
 		int slash1=0;
+		String temp3="";
+		if(tokens.length==2){
 		int count = 0, end = tokens[1].length()-1, start=0;
 
 		print(tokens);
 		String temp2="";
-		String temp3="";
+		
 
 		int temp_slash=slash1;
 		char currChar;
@@ -373,7 +375,7 @@ public class BackCross {
 		String chart="";
 		int next=0;
 
-		if(!tokens[1].equals("")){
+		
 			while (start < end) {
 
 				currChar = tokens[1].charAt(start);

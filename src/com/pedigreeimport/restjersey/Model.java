@@ -565,7 +565,7 @@ public class Model {
 				//for (int j = 1; j < 3; j++) {
 				if(i==5 || i==9){
 
-
+					gid = "";
 					// object.get(count);
 					// count++;
 					correctedTerm = row_object.get(i).toString();
@@ -696,7 +696,7 @@ public class Model {
 		List<String> gu_obj=(List<String>) json_array.get("list");
 		System.out.println("list: "+ gu_obj);
 
-		gu_obj=new sortList().algo(gu_obj);
+		gu_obj=new SortList().algo(gu_obj);
 
 		List<List<String>> output = new ArrayList<List<String>>();
 		int k=0;
@@ -719,8 +719,9 @@ public class Model {
 
 			for (int i = 1; i <= 2; i++) {
 				j++;
+				
 				if(j< gu_obj.size()){
-
+					
 					//System.out.println(j+" :: "+gu_obj.get(j).toString());
 					// //System.out.print(gu_obj.get(j).toString() + "\t");
 
@@ -728,7 +729,7 @@ public class Model {
 					System.out.print("[2] "+gu_obj.get(j).toString() + ","); // pedigree term
 					parse=new JSONObject();
 
-					if(gu_obj.get(j).toString().contains("/")||gu_obj.get(j).toString().contains("*")){
+					if(gu_obj.get(j).toString().contains("/") && gu_obj.get(j).toString().contains("*")){
 						parse=new CrossOp().main(gu_obj.get(j).toString(), false);	// not to standardize the parent
 						JSONObject parse_array = (JSONObject) parse;
 						correctedList= new ArrayList<String>();
@@ -758,9 +759,9 @@ public class Model {
 						// //System.out.print(" in standardized format,");
 						// //remarks
 
-						if(gu_obj.get(j).toString().contains("/")||gu_obj.get(j).toString().contains("*")){
+						if(gu_obj.get(j).toString().contains("/") && gu_obj.get(j).toString().contains("*")){
 
-
+							gid = "";
 							System.out.println("tokens: "+ gid);
 							for(int n=1; n<correctedList.size(); n++){
 								gid =  gid + "#"+ correctedList.get(n);

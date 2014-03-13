@@ -24,7 +24,7 @@ import org.json.simple.JSONObject;
 public class CrossOp {
 
 
-/*
+	/*
 	//static String line;
 	public static void main(String[] args) throws MiddlewareQueryException, IOException  {
 		String line;
@@ -57,8 +57,8 @@ public class CrossOp {
 		//method(line, max,true);
 		method2(line, list);
 	}
-*/
-	
+	 */
+
 	public JSONObject main(String line, Boolean standardize) throws MiddlewareQueryException, IOException{
 		int max =0;
 		max=maxCross(max,line);
@@ -66,7 +66,7 @@ public class CrossOp {
 		return method(line, max, standardize); 
 
 	}
-	 
+
 
 
 	/**
@@ -101,7 +101,7 @@ public class CrossOp {
 		correctedList=(List<String>) output.get("correctedList");
 
 		// add the parsed  backcrosses
-		if(line.contains("*")){
+		if(line.contains("*") && line.contains("/")){
 			dose=0;
 			Pattern p2 = Pattern.compile("\\*\\d"); // backcross to female
 			Matcher m2 = p2.matcher(line);
@@ -123,11 +123,11 @@ public class CrossOp {
 			//parsed[1]=parsed[1].replace();
 			//System.out.println("ADD ***");
 			new BackCross();
-			//System.out.println("------");
+			System.out.println("------");
 			for(int j=0; j<list.size();j++){
-				//System.out.println("::"+list.get(j));
+				System.out.println("::"+list.get(j));
 			}
-			//System.out.println("------");
+			System.out.println("------");
 
 			while(m2.find()){
 				//System.out.println("BackCross to Female");
@@ -272,11 +272,11 @@ public class CrossOp {
 			parsed = line.split("\\d\\*", 2);
 			parsed2 = correctedList.get(0).split("\\d\\*", 2);
 			////System.out.println("group: "+ m1.group(0));
-			//System.out.println("------");
+			System.out.println("------");
 			for(int j=0; j<list.size();j++){
-				//System.out.println("::"+list.get(j));
+				System.out.println("::"+list.get(j));
 			}
-			//System.out.println("------");
+			System.out.println("------");
 			while(m1.find()){
 				//System.out.println("BackCross to Male");
 
@@ -285,8 +285,8 @@ public class CrossOp {
 				right_list=BackCross.getRight_toMale(list.get(0));
 				left_list=BackCross.getLeft_toMale(list.get(0));
 
-				//System.out.println("right:"+ right_list);
-				//System.out.println("left:"+ left_list);
+				System.out.println("right:"+ right_list);
+				System.out.println("left:"+ left_list);
 
 
 				for(int j=0; j< list.size();j++){
@@ -294,8 +294,23 @@ public class CrossOp {
 					//m2 = p2.matcher(m1.group(i));
 					////System.out.println("group: "+ m2.group(i));
 					//if(m1.group(i).equals(dose+"*"+parsed[0])){
+					System.out.println("list:: "+list.get(j));
 					if(list.get(j).contains("*") && !list.get(j).contains("/")){
-						String dose_s=""+list.get(j).charAt(0);
+						String slash="";
+						//max = new CrossOp().maxCross(max, list.get(j));
+						//slash = new BackCross().printSlash(max);
+						//String tokens_slash[] = list.get(j).split("\\" + slash, 2);
+						
+						String tokens_dose[] = list.get(j).split("\\*", 2);
+						System.out.println("tokens_dose: "+Arrays.toString(tokens_dose));
+						Boolean not_IR=true;
+						if(tokens_dose[1].startsWith("IR")){
+							not_IR=false;
+						}
+						System.out.println("tokens_dose[1]: "+tokens_dose[1]);
+						if(not_IR==false){
+							
+						String dose_s=""+tokens_dose[0].charAt(0);
 						dose=Integer.valueOf(dose_s);
 						//System.out.println("group male: "+ list.get(j));
 						//System.out.println("dose: "+ dose);
@@ -423,7 +438,7 @@ public class CrossOp {
 									//System.out.println("index: "+index);
 									//System.out.println("list@index: "+list.get(index));
 									//index=Integer.valueOf(dose_s)-1;
-									
+
 									temp=correctedList.get(index+1).replace(dose_s+"*", "");
 									temp=right_corrected+temp;
 									correctedList.add(index+1, temp);
@@ -479,6 +494,7 @@ public class CrossOp {
 						//list=sort(list,parsed[0]+"/"+parsed[0]);
 						//break;
 					}
+					}
 					//i++;
 				}
 			}
@@ -491,11 +507,11 @@ public class CrossOp {
 			//System.out.println("------");
 		}
 
-		//System.out.println("\n------ F I N A L");
+		System.out.println("\n------ F I N A L");
 		for(int j=0; j<correctedList.size();j++){
-			//System.out.println("::"+correctedList.get(j));
+			System.out.println("::"+correctedList.get(j));
 		}
-		//System.out.println("------");
+		System.out.println("------");
 		output.remove("list");
 		output.remove("correctedList");
 		output.put("list", list);
@@ -533,7 +549,7 @@ public class CrossOp {
 		//System.out.println("\t    : "+ pedList);
 
 		// add the parsed  backcrosses
-		if(line.contains("*")){
+		if(line.contains("*") && line.contains("/")){
 			dose=0;
 			Pattern p2 = Pattern.compile("\\*\\d"); // backcross to female
 			Matcher m2 = p2.matcher(line);
@@ -542,7 +558,7 @@ public class CrossOp {
 			String left_list="";
 			int k=0;
 
-			String[] parsed=line.split("\\*");
+			String[] parsed=line.split("\\*",2);
 
 			//System.out.println("parsed: ");
 			print(parsed);
@@ -551,154 +567,168 @@ public class CrossOp {
 			//System.out.println("ADD ***");
 			new BackCross();
 			//System.out.println("------");
-			for(int j=0; j<list.size();j++){
-				//System.out.println("::"+list.get(j));
-			}
+			//for(int j=0; j<list.size();j++){
+			//System.out.println("::"+list.get(j));
+			//}
 			//System.out.println("------");
 
 			while(m2.find()){
+
 				//System.out.println("BackCross to Female");
 				right_list=BackCross.getRight(pedList.get(0));
 				left_list=BackCross.getLeft(pedList.get(0));
-				//System.out.println("right:"+ right_list);
-				//System.out.println("left:"+ left_list);
+				System.out.println("right:"+ right_list);
+				System.out.println("left:"+ left_list);
+				if(parsed[0].startsWith("IR")){
+					for(int j=0; j< pedList.size();j++){
+						//System.out.println("\tLIST: "+pedList.get(j));
+						//System.out.println("\t    : "+ pedList);
+						if(pedList.get(j).contains("*") && !pedList.get(j).contains("/")){
 
-				for(int j=0; j< pedList.size();j++){
-					//System.out.println("\tLIST: "+pedList.get(j));
-					//System.out.println("\t    : "+ pedList);
-					if(pedList.get(j).contains("*") && !pedList.get(j).contains("/")){
+							String dose_s=""+pedList.get(j).charAt(pedList.get(j).length()-1);
+							dose=Integer.valueOf(dose_s);
+							//System.out.println("group: "+ pedList.get(j));
+							//System.out.println("dose: "+ dose);
+							k=j;
+							while(dose>2){
+								temp="";
+								dose--;
+								//System.out.println("dose= "+dose);
 
-						String dose_s=""+pedList.get(j).charAt(pedList.get(j).length()-1);
-						dose=Integer.valueOf(dose_s);
-						//System.out.println("group: "+ pedList.get(j));
-						//System.out.println("dose: "+ dose);
-						k=j;
-						while(dose>2){
-							temp="";
-							dose--;
-							//System.out.println("dose= "+dose);
+								if(right_list.equals("") && left_list.equals("")){
+									temp=parsed[0]+"*"+dose;
+									k++;
+								}else if(right_list.equals("") && !left_list.equals("")){
+									parsed[1]=parsed[1].replace(""+parsed[1].charAt(0),"");
+									temp=parsed[0]+"*"+dose+left_list;
 
-							if(right_list.equals("") && left_list.equals("")){
-								temp=parsed[0]+"*"+dose;
+								}else if(!right_list.equals("") && !left_list.equals("")){
+									temp=right_list+"*"+dose+left_list;
+								}
+
+								//System.out.println("temp: "+temp);
+
+								////System.out.println("temp2: "+temp2);
+
+								list.add(k, temp);
+								row=new ArrayList<String>();
+								row.add(temp);
+								row.add("0");
+								backcrosses.add(row);
+
 								k++;
-							}else if(right_list.equals("") && !left_list.equals("")){
-								parsed[1]=parsed[1].replace(""+parsed[1].charAt(0),"");
-								temp=parsed[0]+"*"+dose+left_list;
-
-							}else if(!right_list.equals("") && !left_list.equals("")){
-								temp=right_list+"*"+dose+left_list;
 							}
-
-							//System.out.println("temp: "+temp);
-
-							////System.out.println("temp2: "+temp2);
-
-							list.add(k, temp);
 							row=new ArrayList<String>();
-							row.add(temp);
-							row.add("0");
-							backcrosses.add(row);
-
-							k++;
-						}
-						row=new ArrayList<String>();
-						if(right_list.equals("") && left_list.equals("")){
-							/*temp=parsed[0]+"/"+parsed[0];
+							if(right_list.equals("") && left_list.equals("")){
+								/*temp=parsed[0]+"/"+parsed[0];
 						temp2=parsed2[0]+"/"+parsed2[0];
 						correctedList.add(k+1, temp);
 						list.add(k+1, temp2);
-							 */
-							parents.add(list.get(j));
-							list.add(parsed[0]+"/"+parsed[0]);
-							row.add(parsed[0]+"/"+parsed[0]);
-							row.add("0");
-							backcrosses.add(row);
+								 */
+								parents.add(list.get(j));
+								list.add(parsed[0]+"/"+parsed[0]);
+								row.add(parsed[0]+"/"+parsed[0]);
+								row.add("0");
+								backcrosses.add(row);
 
-						}else if(right_list.equals("") && !left_list.equals("")){
-							parsed[1]=parsed[1].replace(""+parsed[1].charAt(0),"");
-							temp=parsed[0]+left_list;
-							//System.out.println("list: "+list.get(k+1));
-							//list.remove(k+1);
-							list.add(k, temp);
+							}else if(right_list.equals("") && !left_list.equals("")){
+								parsed[1]=parsed[1].replace(""+parsed[1].charAt(0),"");
+								temp=parsed[0]+left_list;
+								//System.out.println("list: "+list.get(k+1));
+								//list.remove(k+1);
+								list.add(k, temp);
 
-							list.set(k+1, list.get(k+1).replace("*"+dose_s, ""));
-							parents.add( list.get(k+1).replace("*"+dose_s, ""));
-							row.add(temp);
-							row.add("0");
-							backcrosses.add(row);
-						}else if(!right_list.equals("") && !left_list.equals("")){
-							int index=0;
+								list.set(k+1, list.get(k+1).replace("*"+dose_s, ""));
+								parents.add( list.get(k+1).replace("*"+dose_s, ""));
+								row.add(temp);
+								row.add("0");
+								backcrosses.add(row);
+							}else if(!right_list.equals("") && !left_list.equals("")){
+								int index=0;
 
-							for(int l=0;l<list.size();l++){
-								//System.out.println("**list: "+list.get(l));
-								if(list.get(l).equals(temp)){
-									index=l;
+								for(int l=0;l<list.size();l++){
+									//System.out.println("**list: "+list.get(l));
+									if(list.get(l).equals(temp)){
+										index=l;
+									}
 								}
-							}
-							if(Integer.valueOf(dose_s)==2){
-								k=k-1;
-								temp=right_list+left_list;
-								//System.out.println("last: "+temp);
+								if(Integer.valueOf(dose_s)==2){
+									k=k-1;
+									temp=right_list+left_list;
+									//System.out.println("last: "+temp);
 
-								list.add(k+1, temp);
+									list.add(k+1, temp);
 
-								list.set(k+2, list.get(k+2).replace("*"+dose_s, ""));
+									list.set(k+2, list.get(k+2).replace("*"+dose_s, ""));
 
-								parents.add(list.get(k+2).replace("*"+dose_s, ""));
-								row.add(temp);
-								row.add("0");
-								backcrosses.add(row);
+									parents.add(list.get(k+2).replace("*"+dose_s, ""));
+									row.add(temp);
+									row.add("0");
+									backcrosses.add(row);
 
+								}else{
+									//System.out.println("last list: "+temp);
+									temp=right_list+left_list;
+
+									//System.out.println("list: "+list.get(index));
+									//System.out.println("index: "+index);
+
+									list.add(index+1, temp);
+
+									list.set(index+2, list.get(index+2).replace("*"+dose_s, ""));
+
+									parents.add(list.get(index+2).replace("*"+dose_s, ""));
+
+									row.add(temp);
+									row.add("0");
+									backcrosses.add(row);
+								}
+
+								break;
 							}else{
-								//System.out.println("last list: "+temp);
+								row=new ArrayList<String>();
 								temp=right_list+left_list;
-
-								//System.out.println("list: "+list.get(index));
-								//System.out.println("index: "+index);
-
-								list.add(index+1, temp);
-
-								list.set(index+2, list.get(index+2).replace("*"+dose_s, ""));
-
-								parents.add(list.get(index+2).replace("*"+dose_s, ""));
+								list.add(k+1, temp);
+								list.remove(k+2);
 
 								row.add(temp);
 								row.add("0");
 								backcrosses.add(row);
 							}
 
-							break;
-						}else{
-							row=new ArrayList<String>();
-							temp=right_list+left_list;
-							list.add(k+1, temp);
-							list.remove(k+2);
 
-							row.add(temp);
-							row.add("0");
-							backcrosses.add(row);
-						}
-
-
-						/*
+							/*
 					temp=correctedpedList.get(j).replace(dose+"*", "");
 					//System.out.println("temp: "+temp);
 					correctedList.add(j+1, temp);
 					temp=pedList.get(j).replace(dose+"*", "");
 					//System.out.println("temp: "+temp);
 					list.add(j+1, temp);
-						 */
-						//break;
-					}else if(pedList.get(j).contains("*") && pedList.get(j).contains("/")){
-						row=new ArrayList<String>();
-						row.add(pedList.get(j));
-						row.add("0");
-						crosses.add(row);
-						//System.out.println("\tCROSSES: "+crosses);
-					}else{
-						parents.add(pedList.get(j));
+							 */
+							//break;
+						}else if(pedList.get(j).contains("*") && pedList.get(j).contains("/")){
+							row=new ArrayList<String>();
+							row.add(pedList.get(j));
+							row.add("0");
+							crosses.add(row);
+							//System.out.println("\tCROSSES: "+crosses);
+						}else{
+							parents.add(pedList.get(j));
+						}
+						k++;
 					}
-					k++;
+				}else{
+					row=new ArrayList<String>();
+					row.add(list.get(0));
+					row.add("0");
+					crosses.add(row);
+					
+					for(int j=0; j< pedList.size();j++){
+						if(pedList.get(j).contains("*") && !pedList.get(j).contains("/")){
+							
+							parents.add(pedList.get(j));
+						}
+					}
 				}
 			}
 
@@ -720,177 +750,196 @@ public class CrossOp {
 			}
 			//System.out.println("------");
 			while(m1.find()){
-				//System.out.println("BackCross to Male");
+				if(parsed[1].startsWith("IR")){
 
-				right_list=BackCross.getRight_toMale(pedList.get(0));
-				left_list=BackCross.getLeft_toMale(pedList.get(0));
+					//System.out.println("BackCross to Male");
 
-				//System.out.println("right:"+ right_list);
-				//System.out.println("left:"+ left_list);
+					right_list=BackCross.getRight_toMale(pedList.get(0));
+					left_list=BackCross.getLeft_toMale(pedList.get(0));
+
+					//System.out.println("right:"+ right_list);
+					//System.out.println("left:"+ left_list);
 
 
-				for(int j=0; j< pedList.size();j++){
-					//p2 = Pattern.compile("\\I"); // backcross to male
-					//m2 = p2.matcher(m1.group(i));
-					//System.out.println("\tLIST: "+ pedList.get(j));
-					//System.out.println("\t    : "+ list);
-					//if(m1.group(i).equals(dose+"*"+parsed[0])){
-					if(pedList.get(j).contains("*") && !pedList.get(j).contains("/")){
-						String dose_s=""+pedList.get(j).charAt(0);
-						dose=Integer.valueOf(dose_s);
-						//System.out.println("group male: "+ pedList.get(j));
-						//System.out.println("dose: "+ dose);
-						k=j;
-						temp=pedList.get(j);
+					for(int j=0; j< pedList.size();j++){
+						//p2 = Pattern.compile("\\I"); // backcross to male
+						//m2 = p2.matcher(m1.group(i));
+						//System.out.println("\tLIST: "+ pedList.get(j));
+						//System.out.println("\t    : "+ list);
+						//if(m1.group(i).equals(dose+"*"+parsed[0])){
+						if(pedList.get(j).contains("*") && !pedList.get(j).contains("/")){
+							String dose_s=""+pedList.get(j).charAt(0);
+							dose=Integer.valueOf(dose_s);
+							//System.out.println("group male: "+ pedList.get(j));
+							//System.out.println("dose: "+ dose);
+							k=j;
+							temp=pedList.get(j);
 
-						while(dose>2){
-							temp="";
-							dose--;
-							//System.out.println("dose= "+dose);
-							String d=""+(dose);
-							//temp=temp.concat(parsed[1].concat("*".concat(d)));
-							//print(parsed2);
-							if(right_list.equals("") && !left_list.equals("")){
-								temp=parsed[0].concat(d.concat("*").concat(parsed[1]));
-								k++;
-								//System.out.println("temp: "+temp);
+							while(dose>2){
+								temp="";
+								dose--;
+								//System.out.println("dose= "+dose);
+								String d=""+(dose);
+								//temp=temp.concat(parsed[1].concat("*".concat(d)));
+								//print(parsed2);
+								if(right_list.equals("") && !left_list.equals("")){
+									temp=parsed[0].concat(d.concat("*").concat(parsed[1]));
+									k++;
+									//System.out.println("temp: "+temp);
 
-							}else if(!right_list.equals("") && !left_list.equals("")){
-								temp=right_list+d+"*"+left_list;
+								}else if(!right_list.equals("") && !left_list.equals("")){
+									temp=right_list+d+"*"+left_list;
 
-								//System.out.println("temp: "+temp);
-							}
-							else if(!right_list.equals("") && left_list.equals("")){
-								//System.out.println("lllll: "+list.get(j));
-								temp=right_list+d+"*"+pedList.get(j).replace(dose_s+"*", "");
-								//System.out.println("right meron left walatemp: "+temp);
-
-							}
-							else if (right_list.equals("") && left_list.equals("")){
-								temp=parsed[0].concat(d.concat("*").concat(parsed[1]));
-								//System.out.println("temp: "+temp);
-
-							}
-							//System.out.println("last: "+temp);
-							list.add(k, temp);
-							row=new ArrayList<String>();
-							row.add(temp);
-							row.add("0");
-							backcrosses.add(row);
-
-							k++;
-						}
-						row=new ArrayList<String>();
-						if((!right_list.equals("") && !left_list.equals("")) || (!right_list.equals("") && left_list.equals(""))){
-							int index=0;
-
-							for(int l=0;l<list.size();l++){
-								if(list.get(l).equals(temp)){
-									index=l;
+									//System.out.println("temp: "+temp);
 								}
+								else if(!right_list.equals("") && left_list.equals("")){
+									//System.out.println("lllll: "+list.get(j));
+									temp=right_list+d+"*"+pedList.get(j).replace(dose_s+"*", "");
+									//System.out.println("right meron left walatemp: "+temp);
+
+								}
+								else if (right_list.equals("") && left_list.equals("")){
+									temp=parsed[0].concat(d.concat("*").concat(parsed[1]));
+									//System.out.println("temp: "+temp);
+
+								}
+								//System.out.println("last: "+temp);
+								list.add(k, temp);
+								row=new ArrayList<String>();
+								row.add(temp);
+								row.add("0");
+								backcrosses.add(row);
+
+								k++;
 							}
-							if(!right_list.equals("") && !left_list.equals("")){
-								if(Integer.valueOf(dose_s)==2){
-									//System.out.println("DOSE ==2 Right==Left=0");
-									//System.out.println("***temp: "+temp);
+							row=new ArrayList<String>();
+							if((!right_list.equals("") && !left_list.equals("")) || (!right_list.equals("") && left_list.equals(""))){
+								int index=0;
 
-									temp=right_list+left_list;
+								for(int l=0;l<list.size();l++){
+									if(list.get(l).equals(temp)){
+										index=l;
+									}
+								}
+								if(!right_list.equals("") && !left_list.equals("")){
+									if(Integer.valueOf(dose_s)==2){
+										//System.out.println("DOSE ==2 Right==Left=0");
+										//System.out.println("***temp: "+temp);
 
-									//System.out.println("index: "+index);
+										temp=right_list+left_list;
 
-									list.add(index, temp);
+										//System.out.println("index: "+index);
 
-									//System.out.println("yeah temp2: "+temp);
-									//System.out.println("yeah: "+list.get(index+2));
-									//System.out.println("yeah: "+list.get(index+1));
+										list.add(index, temp);
 
-									list.set(index+1, list.get(index+1).replace(dose_s+"*", ""));
+										//System.out.println("yeah temp2: "+temp);
+										//System.out.println("yeah: "+list.get(index+2));
+										//System.out.println("yeah: "+list.get(index+1));
 
-									parents.add(list.get(index+1).replace(dose_s+"*", ""));
+										list.set(index+1, list.get(index+1).replace(dose_s+"*", ""));
+
+										parents.add(list.get(index+1).replace(dose_s+"*", ""));
+
+									}else{
+										temp=right_list+left_list;
+										list.add(index+1, temp);
+										//System.out.println("yeah temp2: "+temp);
+										//System.out.println("yeah: "+list.get(index+2));
+										//System.out.println("yeah: "+list.get(index+2));
+
+										list.set(index+2, list.get(index+2).replace(dose_s+"*", ""));
+
+										parents.add(list.get(index+2).replace(dose_s+"*", ""));
+
+									}
 
 								}else{
-									temp=right_list+left_list;
+									//index=Integer.valueOf(dose_s)-1;
+									//System.out.println("list: "+list.get(index+1));
+									temp=right_list+temp;
+
+									temp=list.get(index+1).replace(Integer.valueOf(dose_s)+"*", "");
+									temp=right_list+temp;
+
 									list.add(index+1, temp);
-									//System.out.println("yeah temp2: "+temp);
-									//System.out.println("yeah: "+list.get(index+2));
-									//System.out.println("yeah: "+list.get(index+2));
 
-									list.set(index+2, list.get(index+2).replace(dose_s+"*", ""));
+									//System.out.println("last: "+temp);
+									//System.out.println("here: "+list.get(Integer.valueOf(dose_s)));
+									//System.out.println("here: "+list.get(index+1));
+									index=Integer.valueOf(dose_s);
 
-									parents.add(list.get(index+2).replace(dose_s+"*", ""));
+									list.set(Integer.valueOf(dose_s), list.get(Integer.valueOf(dose_s)).replace(dose_s+"*", ""));
+
+									parents.add(list.get(Integer.valueOf(dose_s)).replace(dose_s+"*", ""));
 
 								}
+								row.add(temp);
+								row.add("0");
+								backcrosses.add(row);
 
-							}else{
-								//index=Integer.valueOf(dose_s)-1;
-								//System.out.println("list: "+list.get(index+1));
-								temp=right_list+temp;
+							}else if(right_list.equals("") && !left_list.equals("")){
+								int index=0;
+								//System.out.println("list: "+list.get(index));
 
-								temp=list.get(index+1).replace(Integer.valueOf(dose_s)+"*", "");
-								temp=right_list+temp;
+								temp=temp+"/"+temp;
+								temp=list.get(index).replace(Integer.valueOf(dose_s)+"*", "");
+								temp=temp+"/"+temp;
+								list.add(temp);
 
-								list.add(index+1, temp);
-
+								list.add(list.get(index).replace(Integer.valueOf(dose_s)+"*", ""));
 								//System.out.println("last: "+temp);
-								//System.out.println("here: "+list.get(Integer.valueOf(dose_s)));
-								//System.out.println("here: "+list.get(index+1));
-								index=Integer.valueOf(dose_s);
 
-								list.set(Integer.valueOf(dose_s), list.get(Integer.valueOf(dose_s)).replace(dose_s+"*", ""));
+								parents.add(list.get(index).replace(Integer.valueOf(dose_s)+"*", ""));
 
-								parents.add(list.get(Integer.valueOf(dose_s)).replace(dose_s+"*", ""));
+								row.add(temp);
+								row.add("0");
+								backcrosses.add(row);
+							}else if (right_list.equals("") && left_list.equals("")){
+								int index=0;
+								temp=temp+"/"+temp;
+								temp=list.get(0).replace(Integer.valueOf(dose_s)+"*", "");
+								temp=temp+"/"+temp;
+								list.add(temp);
 
+								list.add(list.get(index).replace(Integer.valueOf(dose_s)+"*", ""));
+								//System.out.println("last: "+temp);
+
+								parents.add(list.get(index).replace(Integer.valueOf(dose_s)+"*", ""));
+
+								row.add(temp);
+								row.add("0");
+								backcrosses.add(row);;
 							}
-							row.add(temp);
+
+							break;
+
+						}else if(pedList.get(j).contains("*") && pedList.get(j).contains("/")){
+							row=new ArrayList<String>();
+							row.add(pedList.get(j));
 							row.add("0");
-							backcrosses.add(row);
 
-						}else if(right_list.equals("") && !left_list.equals("")){
-							int index=0;
-							//System.out.println("list: "+list.get(index));
-
-							temp=temp+"/"+temp;
-							temp=list.get(index).replace(Integer.valueOf(dose_s)+"*", "");
-							temp=temp+"/"+temp;
-							list.add(temp);
-
-							list.add(list.get(index).replace(Integer.valueOf(dose_s)+"*", ""));
-							//System.out.println("last: "+temp);
-
-							parents.add(list.get(index).replace(Integer.valueOf(dose_s)+"*", ""));
-
-							row.add(temp);
-							row.add("0");
-							backcrosses.add(row);
-						}else if (right_list.equals("") && left_list.equals("")){
-							int index=0;
-							temp=temp+"/"+temp;
-							temp=list.get(0).replace(Integer.valueOf(dose_s)+"*", "");
-							temp=temp+"/"+temp;
-							list.add(temp);
-
-							list.add(list.get(index).replace(Integer.valueOf(dose_s)+"*", ""));
-							//System.out.println("last: "+temp);
-
-							parents.add(list.get(index).replace(Integer.valueOf(dose_s)+"*", ""));
-
-							row.add(temp);
-							row.add("0");
-							backcrosses.add(row);;
+							crosses.add(row);
+							//System.out.println("\tCROSSES: "+crosses);
+						}else{
+							parents.add(pedList.get(j));
 						}
-
-						break;
-
-					}else if(pedList.get(j).contains("*") && pedList.get(j).contains("/")){
-						row=new ArrayList<String>();
-						row.add(pedList.get(j));
-						row.add("0");
-
-						crosses.add(row);
-						//System.out.println("\tCROSSES: "+crosses);
-					}else{
-						parents.add(pedList.get(j));
+						
 					}
+				}else{
+					System.out.println("does not start with IR");
+					row=new ArrayList<String>();
+					row.add(list.get(0));
+					row.add("0");
+					crosses.add(row);
+					
+					for(int j=0; j< pedList.size();j++){
+						if(pedList.get(j).contains("*") && !pedList.get(j).contains("/")){
+							
+							parents.add(pedList.get(j));
+						}
+					}
+					System.out.println("\t@method2 CROSSES: "+crosses);
+					System.out.println("\t@method2 parents: "+parents);
 				}
 			}
 
@@ -898,7 +947,7 @@ public class CrossOp {
 			////System.out.println("2: "+list);
 			//System.out.println("PEDLIST: "+pedList);
 			//System.out.println("LIST------");
-/*
+			/*
 			for(int j=0; j<list.size();j++){
 				//System.out.println("::"+list.get(j));
 			}
@@ -915,7 +964,7 @@ public class CrossOp {
 			for(int j=0; j<parents.size();j++){
 				//System.out.println("::"+parents.get(j));
 			}
-			*/
+			 */
 
 		}		//System.out.println("LIST: "+list);
 

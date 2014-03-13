@@ -240,7 +240,7 @@ public class ParseCrossOp {
 										}
 									}
 									if(!temp2[k].contains("/")){	
-										//System.out.println("does not contains '/'");
+										System.out.println("does not contain '/'");
 										if(standardize){
 											String correctedTerm ;
 											
@@ -252,7 +252,15 @@ public class ParseCrossOp {
 													correctedTerm = new FixString().checkString(parsed[1]);
 													result = new Main().checkString(correctedTerm);
 													//correctedTerm=parsed[0].concat("*".concat(correctedTerm));
-													temp2[k]=parsed[1];
+													if(parsed[1].startsWith("IR")){
+														//temp2[k]=parsed[1];
+														//temp2[k]=parsed[0]+"*"+temp2[k];
+														correctedTerm=parsed[0]+"*"+correctedTerm;
+													}else{
+														//temp2[k]=parsed[0]+"*"+temp2[k];
+														correctedTerm=parsed[0]+"*"+correctedTerm;
+													}
+													
 												}else{
 													p2 = Pattern.compile("(\\d+)(\\*)(\\d)(.+)"); // backcross to female
 													m2 = p2.matcher(temp2[k]);
@@ -260,7 +268,16 @@ public class ParseCrossOp {
 													correctedTerm = new FixString().checkString(parsed[0]);
 													result = new Main().checkString(correctedTerm);
 													//=correctedTerm.concat("*".concat(parsed[1]));
-													temp2[k]=parsed[0];
+													if(parsed[0].startsWith("IR")){
+														//temp2[k]=parsed[0];
+														//temp2[k]=parsed[0]+"*"+correctedTerm;
+														correctedTerm=correctedTerm+"*"+parsed[1];
+													}else{
+														
+														correctedTerm=correctedTerm+"*"+parsed[1];
+															//temp2[k]=correctedTerm+"*"+parsed[1];
+														
+													}
 												}
 												
 											}else{
@@ -306,7 +323,7 @@ public class ParseCrossOp {
 
 
 												//if(temp2[k].contains("-")){
-													if(temp2[k].contains("-") && !temp2[k].contains("*") && !temp2[k].contains("/")){
+													if(temp2[k].contains("-") || temp2[k].contains("*") && !temp2[k].contains("/")){
 												
 													System.out.println("correctedTermz; "+correctedTerm);
 													Pattern p = Pattern.compile("IR");
@@ -354,17 +371,19 @@ public class ParseCrossOp {
 												Matcher m2 = p2.matcher(temp2[k]);
 												if(m2.matches()){
 													String[] parsed=temp2[k].split("\\*");
-													correctedTerm = new FixString().checkString(parsed[1]);
-													result = new Main().checkString(correctedTerm);
-													correctedTerm=parsed[0].concat("*".concat(correctedTerm));
+													//correctedTerm = new FixString().checkString(parsed[1]);
+													//result = new Main().checkString(correctedTerm);
+													result = new Main().checkString(parsed[1]);
+													//correctedTerm=parsed[0].concat("*".concat(correctedTerm));
 													temp2[k]=parsed[1];
 												}else{
 													p2 = Pattern.compile("(\\d+)(\\*)(\\d)(.+)"); // backcross to female
 													m2 = p2.matcher(temp2[k]);
 													String[] parsed=temp2[k].split("\\*");
-													correctedTerm = new FixString().checkString(parsed[0]);
-													result = new Main().checkString(correctedTerm);
-													correctedTerm=correctedTerm.concat("*".concat(parsed[1]));
+													//correctedTerm = new FixString().checkString(parsed[0]);
+													//result = new Main().checkString(correctedTerm);
+													result = new Main().checkString(parsed[0]);
+													//correctedTerm=correctedTerm.concat("*".concat(parsed[1]));
 													temp2[k]=parsed[0];
 												}
 												
@@ -376,7 +395,7 @@ public class ParseCrossOp {
 												//correctedTerm = new FixString().checkString(temp2[k]);
 												//result = new Main().checkString(temp2[k]);
 												System.out.println("result:" +result);
-												System.out.println("correctedTerm::" +correctedTerm);
+												//System.out.println("correctedTerm::" +correctedTerm);
 												
 												
 											if(!result.equals("")){
@@ -387,7 +406,7 @@ public class ParseCrossOp {
 												correctedList=sort(correctedList,temp2[k]);
 												list=sort(list,temp2[k]);
 												
-												if(temp2[k].contains("-") && !temp2[k].contains("*") && !temp2[k].contains("/")){
+												if(temp2[k].contains("-") || temp2[k].contains("*") && !temp2[k].contains("/")){
 													System.out.println("NO / and *");
 													
 													Pattern p = Pattern.compile("IR.");
