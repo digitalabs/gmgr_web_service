@@ -194,7 +194,7 @@ public class AssignGid {
 
 			}	
 
-			if (theParent.contains("/") || theParent.contains("*") ) {
+			if (theParent.contains("/") || theParent.contains("*") && not_IR) {
 				System.out.println("create_nval has cross operators");
 				System.out.println("chosenID: " + chosenID);
 				System.out.println("createnval: " + create_nval);
@@ -214,7 +214,7 @@ public class AssignGid {
 
 				} else {
 					
-					if (theParent.contains("*") && theParent.contains("/") && not_IR) {
+					if (theParent.contains("*") && theParent.contains("/")&& not_IR ) {
 						System.out.println("Create NEW with backcross");
 						createNew_crossOP_parent_bc(chosenID, create_nval,
 								theParent, create_nval, createdGID_local);
@@ -489,7 +489,7 @@ public class AssignGid {
 		System.out.println("parent1ID: " + parent1ID);
 		System.out.println("parent2ID: " + parent2ID);
 
-		if (theParent.contains("/") || theParent.contains("*")) {
+		if (theParent.contains("/") && theParent.contains("*")) {
 			// The Parent has cross operators
 			System.out.println("The parent has cross operators");
 			System.out.println("parent q");
@@ -512,16 +512,29 @@ public class AssignGid {
 			System.out.println("\n ***** END******* \n ");
 		} else {
 			System.out.println("term " + theParent + " has no cross operators");
-			Pattern p = Pattern.compile("IR");
-			Matcher m1 = p.matcher(parent1);
+			Pattern p;
+			Matcher m1;
 			String[] tokens = { "" };
-			if (m1.lookingAt()) {
-				tokens = new Tokenize().tokenize(parent1);
+			
+			if(parent1.contains("*")){
+				String tokens_dose[] = parent1.split("\\*", 2);
+				if(tokens_dose[0].contains("*")){
+					tokens[0] = tokens_dose[1];
+				}else{
+					tokens[0] = tokens_dose[0];
+				}
+			}else{
+				p = Pattern.compile("IR");
+				m1 = p.matcher(parent1);
+				if (m1.lookingAt()) {
+					tokens = new Tokenize().tokenize(parent1);
 
-			} else {
-				tokens[0] = parent1;
+				} else {
+					tokens[0] = parent1;
+				}
+
 			}
-
+			
 			System.out.println("tokens: " + tokens.length);
 			ArrayList<String> pedigreeList = new ArrayList<String>();
 			pedigreeList = saveToArray(pedigreeList, tokens); // pedigreeList[0]
@@ -929,9 +942,9 @@ public class AssignGid {
 		int fgid = 0, mgid = 0;
 		int new_gid = 0;
 		int methodID = 0;
-		System.out.println("cross 0: " + crosses.get(0).get(0));
-		System.out.println("cross last: "
-				+ crosses.get(crosses.size() - 1).get(0));
+		//System.out.println("cross 0: " + crosses.get(0).get(0));
+		//System.out.println("cross last: "
+			//	+ crosses.get(crosses.size() - 1).get(0));
 		String tokens_dose[];
 		String dose = "";
 
@@ -4618,7 +4631,7 @@ public class AssignGid {
 
 		int max = 0;
 		max = maxCross(max, line);
-
+if(line.contains("/") && line.contains("*")){
 		while (m.find()) {
 			String[] tokens = temp.split("\\*\\d", 2);
 			// print(tokens);
@@ -4680,6 +4693,7 @@ public class AssignGid {
 				}
 			}
 		}
+}
 		JSONObject output = new JSONObject();
 		output.put("max", max);
 		output.put("line", temp);
@@ -7373,19 +7387,23 @@ public class AssignGid {
 						row.add("0"); // date of creation
 					} else if ((date.charAt(3) == '0' && date.charAt(4) == '0')
 							|| (date.charAt(6) == '0' && date.charAt(7) == '0')) {
-						if(date.charAt(6) == '0' && date.charAt(7) == '0'){
+						if((date.charAt(6) == '0' && date.charAt(7) == '0') && !(date.charAt(3) == '0' && date.charAt(4) == '0')){
 
 							yr = date.charAt(0) + "" + date.charAt(1) + ""
 							+ date.charAt(2) + "" + date.charAt(3)+"-"
 							+ date.charAt(4) + "" + date.charAt(5);
 							row.add(yr.concat("-01")); // date of
 							// creation
-						}else{
+						}else if(!(date.charAt(6) == '0' && date.charAt(7) == '0') && (date.charAt(3) == '0' && date.charAt(4) == '0')){
 							yr = date.charAt(0) + "" + date.charAt(1) + ""
 							+ date.charAt(2) + "" + date.charAt(3)+"-01-"
 							+ date.charAt(6) + "" + date.charAt(7);
 							row.add(yr); // date of creation
 
+						}else{//both true
+							yr = date.charAt(0) + "" + date.charAt(1) + ""
+							+ date.charAt(2) + "" + date.charAt(3)+"-01-01";
+							row.add(yr);
 						}
 					} else {
 						// System.out.println(date.charAt(0));
@@ -9025,7 +9043,9 @@ public class AssignGid {
 					mo = cross_date.charAt(0) + "" + cross_date.charAt(1) + "";
 
 					cross_date_l = yr.concat(mo).concat(day);
-				} else {
+				} else if (cross_date.length() == 4) {
+					cross_date_l=cross_date+"0000";
+				}else {
 					cross_date_l = "0";
 				}
 				gdate = Integer.valueOf(cross_date_l);
