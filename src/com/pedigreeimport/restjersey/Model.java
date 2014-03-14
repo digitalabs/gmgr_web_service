@@ -965,17 +965,27 @@ public class Model {
         counterArray.set(level-1, 0);
         String name = node.getGermplasm().getPreferredName() != null ? node.getGermplasm().getPreferredName().getNval() : null;
         
+        String name2 = node.getGermplasm().getPreferredName() != null ? node.getGermplasm().getPreferredName().getNval() : null;
+        
         if(!node.getLinkedNodes().isEmpty()){
         	Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\",");
         	
-			String cn = "";
-        	if(cnty.getIsoabbr() != null)
+        	if(name != null){
+        		if(name.trim().toString().length() > 5)
+	            {
+	            	name2 = name.substring(0, Math.min(name.length(),6)) + "...";
+	            }
+        	}
+        	
+			String cn = "---";
+			if(cnty != null)
         	{
         		cn = cnty.getIsoabbr();
         	}
 			
         	outputString = outputString + "\n "+ tabs.toString() + tabs.toString() +"\"gid\" : \"" + node.getGermplasm().getGid() +"\",\n"
                     + tabs.toString() +"    \"name\" : \"" + name +"\",\n"
+                    + tabs.toString() +"    \"name2\" : \"" + name2 +"\",\n"
                     + tabs.toString() +"    \"date\" : \"" + node.getGermplasm().getGdate() +"\",\n"
                     + tabs.toString() +"    \"id\" : \"" + node.getGermplasm().getGid() +"\",\n"
                     + tabs.toString() +"    \"layer\" : \"" + (level-1) +"\",\n"
@@ -1054,14 +1064,23 @@ public class Model {
         
         	Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\"");
         	
-			String cn = "";
-        	if(cnty.getIsoabbr() != null)
+        	if(name != null){
+        		if(name.trim().toString().length() > 5)
+	            {
+	            	name2 = name.substring(0, Math.min(name.length(),6)) + "...";
+	            }
+        	}
+        	
+        	
+			String cn = "---";
+        	if(cnty != null)
         	{
         		cn = cnty.getIsoabbr();
         	}
 			
         	outputString = outputString + "\n "+ tabs.toString() + tabs.toString() + "\"gid\" : \"" + node.getGermplasm().getGid() +"\",\n"
                     + tabs.toString() +"    \"name\" : \"" + name +"\",\n"
+                    + tabs.toString() +"    \"name2\" : \"" + name2 +"\",\n"
                     + tabs.toString() +"    \"date\" : \"" + node.getGermplasm().getGdate() +"\",\n"
                     + tabs.toString() +"    \"id\" : \"" + node.getGermplasm().getGid() +"\",\n"
                     + tabs.toString() +"    \"layer\" : \"" + (level-1) +"\",\n"
