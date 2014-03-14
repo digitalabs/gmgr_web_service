@@ -327,7 +327,7 @@ public class Model {
 		existingTerm = (List<List<String>>) json_array.get("existingTerm");
 		String userID = (String) json_array.get("userID");
 
-				String local_db_host = (String) json_array.get("local_db_host");
+		String local_db_host = (String) json_array.get("local_db_host");
 		String local_db_name = (String) json_array.get("local_db_name");
 		String local_db_port = (String) json_array.get("local_db_port");
 		String local_db_username = (String) json_array.get("local_db_username");
