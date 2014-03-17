@@ -696,7 +696,7 @@ public class Model {
 		List<String> gu_obj=(List<String>) json_array.get("list");
 		System.out.println("list: "+ gu_obj);
 
-		gu_obj=new SortList().algo(gu_obj);
+		gu_obj=new sortList().algo(gu_obj);
 
 		List<List<String>> output = new ArrayList<List<String>>();
 		int k=0;

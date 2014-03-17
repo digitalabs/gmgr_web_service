@@ -131,40 +131,10 @@ public class AssignGid {
 			mgid = GID;
 			System.out.println("female: " + isFound_female);
 			System.out.println("male: " + isFound_male);
-			/*
-			 * if(isFound_female && isFound_male){
-			 * System.out.println("createdGID for cross "+ cross); int
-			 * methodID=selectMethodType(fgid,mgid,female_nval,male_nval,cross);
-			 * 
-			 * 
-			 * int cross_gid = (int) addGID( cross,fgid,mgid,methodID,2,true);
-			 * 
-			 * Germplasm germplasm1 = manager.getGermplasmByGID(cross_gid);
-			 * 
-			 * //printSuccess(cross,female_nval + "/" + male_nval, fid + "/" +
-			 * mid, germplasm1, "new"); updateCreatedGID(""+germplasm1.getGid(),
-			 * fid + "/" + mid, cross, "new", createdGID_local);
-			 * 
-			 * //list_local=update_list(germplasm1, female_id, cross);
-			 * ////System.out.println("\t id: "+fid + "/" + mid);
-			 * ////System.out.println("\t id: "+ cross); List<Germplasm>
-			 * glist=new ArrayList<Germplasm>(); glist.add(germplasm1); for(int
-			 * i=0;i<createdGID_local.size();i++){
-			 * if(createdGID_local.get(i).get
-			 * (1).equals(createdGID_local.get(i).get(2)) &&
-			 * createdGID_local.get(i).get(2).equals(cross)){
-			 * multipleHits_inLocation(glist, createdGID_local.get(i).get(2),
-			 * createdGID_local.get(i).get(0), createdGID_local.get(i).get(1));
-			 * createdGID_local=updateCreatedGID("CHOOSE GID",
-			 * createdGID_local.get(i).get(0), createdGID_local.get(i).get(2),
-			 * "false", createdGID); createdGID=createdGID_local; } }
-			 * glist.clear(); germplasm1=null; //germplasm=null;
-			 * 
-			 * } System.out.println("existingTerm: "+existingTerm_local);
-			 */
-		} else {
 			
-			Boolean not_IR=false;
+		} else {
+
+			Boolean not_IR=true;
 			if (theParent.contains("/") && theParent.contains("*")) {
 				int max=0;
 				String slash="";
@@ -174,12 +144,15 @@ public class AssignGid {
 				String tokens[] = theParent.split("\\" + slash, 2);
 				String tokens_dose[];
 				String dose;
+				System.out.println("tokens: "+Arrays.toString(tokens));
 				if (tokens[0].contains("*")) {
 					tokens_dose = tokens[0].split("\\*", 2);
 					dose = tokens_dose[1];
 					System.out.println("dose: " + dose);
 					if(tokens_dose[0].startsWith("IR")){
 						not_IR=true;
+					}else{
+						not_IR=false;
 					}
 					System.out.println("not IR: "+tokens_dose[0]);
 				}else{
@@ -188,13 +161,16 @@ public class AssignGid {
 					System.out.println("dose: " + dose);
 					if(tokens_dose[1].startsWith("IR")){
 						not_IR=true;
+					}else{
+						not_IR=false;
 					}
 					System.out.println("not IR: "+tokens_dose[1]);
 				}
 
 			}	
 
-			if (theParent.contains("/") || theParent.contains("*") && not_IR) {
+			if ((theParent.contains("/") || theParent.contains("*")) ) {
+				System.out.println("starts with IR");
 				System.out.println("create_nval has cross operators");
 				System.out.println("chosenID: " + chosenID);
 				System.out.println("createnval: " + create_nval);
@@ -206,15 +182,15 @@ public class AssignGid {
 				// temp_crossesGID, check, line, max, parent, id)
 				// check if create nval is a parent in the cross
 				// if yes, create the pedigree Line
-				if (create_nval.contains("/") ) {
+				if (create_nval.contains("/") || create_nval.contains("*")) {
 					updateCreatedGID("NOT SET", chosenID, create_nval, "false",
 							createdGID_local);
 					createNew_crossOP(chosenID, create_nval, theParent,
 							create_nval, createdGID_local);
 
 				} else {
-					
-					if (theParent.contains("*") && theParent.contains("/")&& not_IR ) {
+
+					if (theParent.contains("*")  && not_IR) {
 						System.out.println("Create NEW with backcross");
 						createNew_crossOP_parent_bc(chosenID, create_nval,
 								theParent, create_nval, createdGID_local);
@@ -308,28 +284,28 @@ public class AssignGid {
 		}
 		int counter = 0;
 		int counter2 = 0;
-		
+
 		for (int i = 0; i < createdGID_local.size(); i++) {
 
 			if (id.equals(createdGID_local.get(i).get(0))
-					
+
 					&& counter2 == 0 ) {
 				gid2 = createdGID_local.get(i).get(3);
 				parent_id = createdGID_local.get(i).get(1);
 				counter2++;
 				System.out.println("id: "+id +" "+"name value: "+createdGID_local.get(i).get(2));
 				System.out.println("gid2: "+gid2);
-				
+
 			}
 			if (chosenID.equals(createdGID_local.get(i).get(0))
-					
+
 					&& counter == 0 ) {
 				gid1 = createdGID_local.get(i).get(3);
 				//parent_id = createdGID.get(i).get(1);
 				counter++;
 				System.out.println("id: "+chosenID +" "+"name value: "+createdGID_local.get(i).get(2));
 				System.out.println("gid1: "+gid1);
-				
+
 			}
 		}
 		createdGID=createdGID_local;
@@ -346,7 +322,7 @@ public class AssignGid {
 			mgid_s = gid2;
 			fgid_s = gid1;
 		}
-		
+
 		System.out.println("mgid: "+mgid_s);
 		System.out.println("fgid: "+fgid_s);
 		System.out.println("female: "+femaleParent);
@@ -394,7 +370,7 @@ public class AssignGid {
 	public JSONObject chooseGID(JSONObject obj, ManagerFactory factory)
 	throws MiddlewareQueryException, IOException, ParseException,
 	InterruptedException {
-
+System.out.println("CHOOSING GID..");
 		manager = factory.getGermplasmDataManager();
 
 		JSONObject jsonObject = (JSONObject) obj;
@@ -489,7 +465,7 @@ public class AssignGid {
 		System.out.println("parent1ID: " + parent1ID);
 		System.out.println("parent2ID: " + parent2ID);
 
-		if (theParent.contains("/") && theParent.contains("*")) {
+		if (theParent.contains("/") || theParent.contains("*")) {
 			// The Parent has cross operators
 			System.out.println("The parent has cross operators");
 			System.out.println("parent q");
@@ -515,7 +491,7 @@ public class AssignGid {
 			Pattern p;
 			Matcher m1;
 			String[] tokens = { "" };
-			
+
 			if(parent1.contains("*")){
 				String tokens_dose[] = parent1.split("\\*", 2);
 				if(tokens_dose[0].contains("*")){
@@ -534,7 +510,7 @@ public class AssignGid {
 				}
 
 			}
-			
+
 			System.out.println("tokens: " + tokens.length);
 			ArrayList<String> pedigreeList = new ArrayList<String>();
 			pedigreeList = saveToArray(pedigreeList, tokens); // pedigreeList[0]
@@ -545,7 +521,7 @@ public class AssignGid {
 			// is the root
 
 			// Collections.reverse(pedigreeList); // index 0 is the root
-
+			System.out.println("pedigreeList: "+pedigreeList);
 			int index = -1;
 			for (int i = 0; i < pedigreeList.size(); i++) {
 				if (pedigreeList.get(i).equals(lastDeriv_parent)) {
@@ -944,7 +920,7 @@ public class AssignGid {
 		int methodID = 0;
 		//System.out.println("cross 0: " + crosses.get(0).get(0));
 		//System.out.println("cross last: "
-			//	+ crosses.get(crosses.size() - 1).get(0));
+		//	+ crosses.get(crosses.size() - 1).get(0));
 		String tokens_dose[];
 		String dose = "";
 
@@ -2492,19 +2468,19 @@ public class AssignGid {
 				if(backcrosses.size()==0){
 					/*for(int i=0;i<parents.size(); i++){
 						if(parents.get(i).get(0).equals() )){
-							
+
 						}
 					}
-					*/
-				
-					
+					 */
+
+
 					methodID = selectMethodType(new_gid, parent2GID, parents
 							.get(0).get(0), parent2, crosses.get(j).get(0), 0);
 				}else{
-				methodID = selectMethodType(new_gid, parent2GID, backcrosses
-						.get(0).get(0), parent2, crosses.get(j).get(0), 107);
+					methodID = selectMethodType(new_gid, parent2GID, backcrosses
+							.get(0).get(0), parent2, crosses.get(j).get(0), 107);
 				}
-						
+
 				new_gid = addGID(crosses.get(j).get(0), new_gid, parent2GID,
 						methodID, 3, false);
 				// crossesGID=printSuccess_temp(crosses.get(j).get(0), parent,
@@ -2594,9 +2570,11 @@ public class AssignGid {
 				List<Name> name1 = manager
 				.getNamesByGID(g1.getGpid2(), 0, null);
 				methodID = 0;
-				if (name.get(0).getNval().equals(male)
-						|| name1.get(0).getNval().equals(male)) {
-					methodID = 107;
+				if (name.size() > 0 && name1.size() > 0) {
+					if (name.get(0).getNval().equals(male)
+							|| name1.get(0).getNval().equals(male)) {
+						methodID = 107;
+					}
 				}
 				name.clear();
 				name1.clear();
@@ -3511,7 +3489,7 @@ public class AssignGid {
 			System.out.println(":: " + pedigreeList.get(i));
 
 			if (!pedigreeList.get(i).contains("/")
-					/*&& !pedigreeList.get(i).contains("*")*/) {
+					&& !pedigreeList.get(i).contains("*")) {
 				row_parents = new ArrayList<String>();
 				row_parents.add(pedigreeList.get(i));
 
@@ -3525,15 +3503,17 @@ public class AssignGid {
 		parents = checkGID_parents(parent1ID, parents, theParent);
 		System.out.println("PARENTS: " + parents);
 
-		if (!lastDeriv_parent.contains("/") /*&& !lastDeriv_parent.contains("*")*/) {
+		if (!lastDeriv_parent.contains("/") && !lastDeriv_parent.contains("*")) {
+			System.out.println("last deriv ["+lastDeriv_parent+"]: "+ "no /");
 			ArrayList<String> pedigreeList1 = new ArrayList<String>();
 			ArrayList<String> pedigreeList_der;
 			for (int i = 0; i < parents.size(); i++) {
 
 				row_parents = parents.get(i);
+				System.out.println("::parents: "+row_parents.get(0));
 				if (lastDeriv_parent.equals(row_parents.get(0))) {
 					pedigreeList = new ArrayList<String>();
-					// System.out.println("Parse "+row_derivatives.get(0));
+
 					Pattern p = Pattern.compile("IR");
 					Matcher m1 = p.matcher(row_parents.get(0));
 					String[] tokens = { "" };
@@ -3846,7 +3826,7 @@ public class AssignGid {
 						tokens[0] = row_derivatives.get(0);
 					}
 					// create the pedigreeLine
-					
+
 					pedigreeList_der = new ArrayList<String>();
 
 					pedigreeList = saveToArray(pedigreeList_der, tokens); // pedigreeList[0]
@@ -4631,69 +4611,69 @@ public class AssignGid {
 
 		int max = 0;
 		max = maxCross(max, line);
-if(line.contains("/") && line.contains("*")){
-		while (m.find()) {
-			String[] tokens = temp.split("\\*\\d", 2);
-			// print(tokens);
+		if(line.contains("/") && line.contains("*")){
+			while (m.find()) {
+				String[] tokens = temp.split("\\*\\d", 2);
+				// print(tokens);
 
-			String slash = "";
-			max++;
-			for (int j = max; j > 0;) {
-				slash = slash + "/";
-				j--;
-			}
-			if(tokens[0].startsWith("IR")){
-				System.out.println("token: " + tokens[0]);
-				tokens[0] = tokens[0].concat(slash).concat(tokens[0]);
-				temp.replaceFirst("\\*\\d", tokens[0]);
-				temp = tokens[0].concat(tokens[1]);
-				System.out.println("token: " + temp);
-			}
-		}
-
-		System.out.println("\nBackCross to male; ");
-		Pattern p1 = Pattern.compile("\\d\\*\\D"); // backcross to male
-		Matcher m1 = p1.matcher(line);
-
-		while (m1.find()) {
-			System.out.println("slash: " + max);
-			String slash1 = "";
-			for (int j = max; j > 0;) {
-				slash1 = slash1 + "/";
-				j--;
-			}
-			System.out.println("slash: " + slash1);
-			String[] tokens = temp.split("\\" + slash1 + "\\d\\*", 2);
-			// print(tokens);
-			System.out.println(Arrays.toString(tokens));
-			String slash = "";
-
-			max++;
-			for (int j = max; j > 0;) {
-				slash = slash + "/";
-				j--;
-			}
-
-			if(tokens[1].startsWith("IR")){
-				if (tokens.length == 1) {
-
-					tokens = temp.split("\\d\\*", 2);
-					tokens[0] = tokens[0].concat(tokens[1]);
+				String slash = "";
+				max++;
+				for (int j = max; j > 0;) {
+					slash = slash + "/";
+					j--;
+				}
+				if(tokens[0].startsWith("IR")){
+					System.out.println("token: " + tokens[0]);
+					tokens[0] = tokens[0].concat(slash).concat(tokens[0]);
 					temp.replaceFirst("\\*\\d", tokens[0]);
-					System.out.println("token[0]: " + tokens[0]);
-					temp = tokens[0].concat(slash.concat(tokens[1]));
+					temp = tokens[0].concat(tokens[1]);
 					System.out.println("token: " + temp);
-				} else {
-					tokens[0] = tokens[0].concat(slash.concat(tokens[1]));
-					temp.replaceFirst("\\*\\d", tokens[0]);
-					System.out.println("token[0]: " + tokens[0]);
-					temp = tokens[0].concat(slash1.concat(tokens[1]));
-					System.out.println("token: " + temp);	
+				}
+			}
 
+			System.out.println("\nBackCross to male; ");
+			Pattern p1 = Pattern.compile("\\d\\*\\D"); // backcross to male
+			Matcher m1 = p1.matcher(line);
+
+			while (m1.find()) {
+				System.out.println("slash: " + max);
+				String slash1 = "";
+				for (int j = max; j > 0;) {
+					slash1 = slash1 + "/";
+					j--;
+				}
+				System.out.println("slash: " + slash1);
+				String[] tokens = temp.split("\\d\\*", 2);
+
+				System.out.println(Arrays.toString(tokens));
+				String slash = "";
+
+				max++;
+				for (int j = max; j > 0;) {
+					slash = slash + "/";
+					j--;
+				}
+
+				if(tokens[1].startsWith("IR")){
+					if (tokens.length == 1) {
+
+						tokens = temp.split("\\d\\*", 2);
+						tokens[0] = tokens[0].concat(tokens[1]);
+						temp.replaceFirst("\\*\\d", tokens[0]);
+						System.out.println("token[0]: " + tokens[0]);
+						temp = tokens[0].concat(slash.concat(tokens[1]));
+						System.out.println("token: " + temp);
+					} else {
+						tokens[0] = tokens[0].concat(slash.concat(tokens[1]));
+						temp.replaceFirst("\\*\\d", tokens[0]);
+						System.out.println("token[0]: " + tokens[0]);
+						temp = tokens[0].concat(slash1.concat(tokens[1]));
+						System.out.println("token: " + temp);	
+
+					}
 				}
 			}
 		}
-}
 		JSONObject output = new JSONObject();
 		output.put("max", max);
 		output.put("line", temp);
@@ -5337,7 +5317,7 @@ if(line.contains("/") && line.contains("*")){
 											printSuccess(
 													pedigreeList_der.get(n),
 													parent, id, germplasm2,
-													"false");
+											"false");
 										}
 									}
 								}
@@ -7563,13 +7543,17 @@ if(line.contains("/") && line.contains("*")){
 							}
 
 						} else {
-							// System.out.println(date.charAt(0));
-							yr = date.charAt(0) + "" + date.charAt(1) + ""
-							+ date.charAt(2) + "" + date.charAt(3)
-							+ "-";
-							mo = date.charAt(4) + "" + date.charAt(5) + "-";
-							day = date.charAt(6) + "" + date.charAt(7) + "";
-							row.add(yr.concat(mo).concat(day)); // date of
+							if(date.length()==7){
+								row.add("0".concat(date)); // date of
+							}else{
+								// System.out.println(date.charAt(0));
+								yr = date.charAt(0) + "" + date.charAt(1) + ""
+								+ date.charAt(2) + "" + date.charAt(3)
+								+ "-";
+								mo = date.charAt(4) + "" + date.charAt(5) + "-";
+								day = date.charAt(6) + "" + date.charAt(7) + "";
+								row.add(yr.concat(mo).concat(day)); // date of
+							}
 							// creation
 						}
 						row.add(cross_date); // date of creation
@@ -8566,11 +8550,13 @@ if(line.contains("/") && line.contains("*")){
 							0, null);
 					nval_gpid1 = name.get(0).getNval();
 					nval_gpid2 = "Source unknown";
+
 				} else {
 					nval_gpid1 = "Source unknown";
 					nval_gpid2 = "Source unknown";
 				}
 			}
+			name.clear();
 			Location location = manager.getLocationByID(germplasm.get(i)
 					.getLocationId());
 			Method method = manager.getMethodByID(germplasm.get(i)
@@ -8643,7 +8629,7 @@ if(line.contains("/") && line.contains("*")){
 		System.out.println("existingTerm:" + existingTerm_local);
 		//
 		germplasm.clear();
-		name.clear();
+
 	}
 
 	private void createPedigreeLine2(ArrayList<String> pedigreeList, String id,
@@ -9095,7 +9081,7 @@ if(line.contains("/") && line.contains("*")){
 		if (methodID == 107) {
 			methodType = methodID;
 			methodDesc = "Backcross";
-		} else {
+		} else if(female_germplasm!=null ||  male_germplasm!=null){
 			if ((female_germplasm.getMethodId() == 101 && male_germplasm
 					.getMethodId() == 101)) {
 				methodType = 103; // if (AXB)X(CXD); double cross
