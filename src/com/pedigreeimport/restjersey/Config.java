@@ -42,13 +42,15 @@ public class Config {
 	    }
 		if(db_details.size() != 0){
 			
-			if( (db_details.get(4).equals(null) || db_details.get(4).equals("")) || (db_details.get(9).equals(null) || db_details.get(9).equals(""))){
+			if( (db_details.get(4).equals(null) || db_details.get(4).equals("")) ){
 				System.out.println("enter here");
 				db_details.set(4, "");
-				db_details.set(9, "");
 			
 			}
 			
+			if((db_details.get(9).equals(null) || db_details.get(9).equals(""))){
+				db_details.set(9, "");
+			}
 			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
 					db_details.get(0), db_details.get(2), db_details.get(1), db_details.get(3), db_details.get(4));
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
@@ -67,27 +69,27 @@ public class Config {
 			
 		}else{
 			
-			/*
-			 * DatabaseConnectionParameters local = new DatabaseConnectionParameters(
+			
+		 /*	 DatabaseConnectionParameters local = new DatabaseConnectionParameters(
 					"localhost", "3306", "local", "datasourceuser", "ici$rule$");
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
 					"localhost", "3306", "iris_mysiam_20121002", "datasourceuser", "ici$rule$");
 			ManagerFactory factory = new ManagerFactory(local, central);
-			
-            */
-			/*DatabaseConnectionParameters local = new DatabaseConnectionParameters(
+			*/
+            
+			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
 					"localhost", "3306", "local2", "root","");
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
 					"localhost", "3306", "central6", "root","");
 			ManagerFactory factory = new ManagerFactory(local, central);
-            */
-			DatabaseConnectionParameters local = new DatabaseConnectionParameters(
-					"localhost", "3306", "gmgr_local", "gmgr_user", "gmgrpass");
+            
+			/*DatabaseConnectionParameters local = new DatabaseConnectionParameters(
+					"localhost", "3306", "gmgr_local", "gmgruser", "gmgrpass");
 			DatabaseConnectionParameters central = new DatabaseConnectionParameters(
-					"localhost", "3306", "gmgr_local", "gmgr_user", "gmgrpass");
+					"localhost", "3306", "gmgr_local", "gmgruser", "gmgrpass");
 			
 			ManagerFactory factory = new ManagerFactory(local, central);
-			
+			*/
 			return factory;
 			
 			
