@@ -65,19 +65,19 @@ public class Model {
 	public List<String> getDbDetails(List<String> db_details,
 			JSONObject json_array) {
 
-		String local_db_host = (String) json_array.get("local_db_host");
-		String local_db_name = (String) json_array.get("local_db_name");
-		String local_db_port = (String) json_array.get("local_db_port");
-		String local_db_username = (String) json_array.get("local_db_username");
-		String local_db_password = (String) json_array.get("local_db_password");
+		String local_db_host = (String) json_array.get("local_db_host");		// host
+		String local_db_name = (String) json_array.get("local_db_name");	// local datase name
+		String local_db_port = (String) json_array.get("local_db_port");	// local port	
+		String local_db_username = (String) json_array.get("local_db_username");	// username of the local database
+		String local_db_password = (String) json_array.get("local_db_password");	// password of the local database
 
-		String central_db_host = (String) json_array.get("central_db_host");
-		String central_db_name = (String) json_array.get("central_db_name");
-		String central_db_port = (String) json_array.get("central_db_port");
+		String central_db_host = (String) json_array.get("central_db_host");	// host of the central database
+		String central_db_name = (String) json_array.get("central_db_name");	//central database name
+		String central_db_port = (String) json_array.get("central_db_port");	// central port
 		String central_db_username = (String) json_array
-		.get("central_db_username");
-		String central_db_password = (String) json_array
-		.get("central_db_password");
+		.get("central_db_username");// username of the central database
+		String central_db_password = (String) json_array	
+		.get("central_db_password");	// password of the central database
 
 		// add db details to array
 		db_details.add(local_db_host);
@@ -96,7 +96,7 @@ public class Model {
 	}
 
 	/**
-	 * JSON Object data will be passed to method 'createNew'
+	 * Entry point in creating New GID
 	 * 
 	 * @param data
 	 * @return JSON object output that contains the Lists createdGID, list, and
@@ -112,18 +112,18 @@ public class Model {
 	public Response CreateNew(JSONObject data) throws IOException,
 	MiddlewareQueryException, InterruptedException {
 
-		JSONObject output = new JSONObject();
-
-		JSONObject json_array = (JSONObject) data;
+		JSONObject output = new JSONObject();		// holds the output of the method
 		List<String> db_details = new ArrayList<String>();
 
-		db_details = getDbDetails(db_details, json_array); // get db
-		// configuraton
+		JSONObject json_array = (JSONObject) data;
+		
+		db_details = getDbDetails(db_details, json_array); // get db configuraton
 
-		ManagerFactory factory = new Config().configDB(db_details);
-		output = new AssignGid().createNew(data, factory);
+		ManagerFactory factory = new Config().configDB(db_details);	// connects to the database
+		
+		output = new AssignGid().createNew(data, factory);	// calls  the method in creating New GID
 
-		System.out.println("existingTerm: " + output.get("existingTerm"));
+		db_details.clear();
 		factory.close();
 		return Response.status(200).entity(output).build();
 
@@ -174,17 +174,16 @@ public class Model {
 	public Response chooseGID2(JSONObject data) throws IOException,
 	MiddlewareQueryException, InterruptedException, ParseException {
 
-		new AssignGid();
-		// System.out.println("HERE!");
 		JSONObject output = new JSONObject();
 		JSONObject json_array = (JSONObject) data;
 		List<String> db_details = new ArrayList<String>();
 
-		db_details = getDbDetails(db_details, json_array); // get db
-		// configuraton
+		db_details = getDbDetails(db_details, json_array); // get db configuraton
 
-		ManagerFactory factory = new Config().configDB(db_details);
-		output = new AssignGid().chooseGID(data, factory);
+		ManagerFactory factory = new Config().configDB(db_details);	// connects to database
+		output = new AssignGid().chooseGID(data, factory);	// calls the method to assign the chosen GID to the pedigree line of the femlae/ male parent
+		
+		db_details.clear();
 		factory.close();
 		return Response.status(200).entity(output).build();
 
@@ -210,27 +209,24 @@ public class Model {
 	public Response chooseGID_cross(JSONObject data) throws IOException,
 	MiddlewareQueryException, InterruptedException, ParseException {
 
-		new AssignGid();
-		// System.out.println("HERE!");
 		JSONObject output = new JSONObject();
-
 		JSONObject json_array = (JSONObject) data;
 		List<String> db_details = new ArrayList<String>();
 
-		db_details = getDbDetails(db_details, json_array); // get db
-		// configuraton
+		db_details = getDbDetails(db_details, json_array); // get db configuraton
 
-		ManagerFactory factory = new Config().configDB(db_details);
+		ManagerFactory factory = new Config().configDB(db_details);	// connects to database
 
-		output = new AssignGid().chooseGID_cross(data, factory);
-
+		output = new AssignGid().chooseGID_cross(data, factory);	// calls method to assign the chosen GID to the pedigree line
+		
+		db_details.clear();
 		factory.close();
 		return Response.status(200).entity(output).build();
 
 	}
 
 	/**
-	 * Entry point for assigning GID of Unchecked rows from the list
+	 * Entry point in assigning GID of unchecked rows from the list
 	 * 
 	 * @param data
 	 * @return output that contains the Lists createdGID,list and existingTerm
@@ -257,38 +253,26 @@ public class Model {
 		List<List<String>> createdGID = new ArrayList<List<String>>();
 		List<List<String>> existingTerm = new ArrayList<List<String>>();
 		List<String> db_details = new ArrayList<String>();
+		JSONObject output = new JSONObject();
 
 		JSONObject json_array = (JSONObject) data;
+		
+		// Start: extract Lists and user ID to the JSON Object
 		String locationID = (String) json_array.get("locationID");
 		checked = (List<String>) json_array.get("checked");
 		list = (List<List<String>>) json_array.get("list");
 		createdGID = (List<List<String>>) json_array.get("createdGID");
 		existingTerm = (List<List<String>>) json_array.get("existing");
 		String userID = (String) json_array.get("userID");
+		// END extract Lists and user ID to the JSON Object
 
-		db_details = getDbDetails(db_details, json_array); // get db
-		// configuraton
+		db_details = getDbDetails(db_details, json_array); // get db configuraton
 
-		// System.out.println("\t createdGID @ Model: "+createdGID.size()+"\t"+createdGID);
-		// System.out.println("\t existing: \t"+existingTerm);
-		// System.out.println("\t list: "+list.size()+"\t"+list);
-		// System.out.println("\t checked: "+checked.size()+"\t"+checked);
-		// System.out.println("\t locationID: \t"+locationID);
-		// System.out.println("\t userID: \t"+userID);
-
-		JSONObject output = new JSONObject();
-		// System.out.println();
-
-		ManagerFactory factory = new Config().configDB(db_details);
+		ManagerFactory factory = new Config().configDB(db_details); // connects to database
 		output = new AssignGid().bulk_createGID2(createdGID, list, checked,
-				Integer.parseInt(locationID), existingTerm, userID, factory);
+				Integer.parseInt(locationID), existingTerm, userID, factory);	//calls method in searching the Germplasm Name in the database
 
 		factory.close();
-
-		// //System.out.println("list: "+ json_array.get("list"));
-		// //System.out.println("createdGID: "+ json_array.get("createdGID"));
-
-		// //System.out.println("SINGLE CREATE GID ");
 
 		return Response.status(200).entity(output).build();
 	}
@@ -320,19 +304,21 @@ public class Model {
 		List<String> db_details = new ArrayList<String>();
 
 		JSONObject json_array = (JSONObject) data;
+		// START: extract Lists and user ID to the JSON Object
 		String locationID = (String) json_array.get("locationID");
 		checked = (List<String>) json_array.get("checked");
 		list = (List<List<String>>) json_array.get("list");
 		existingTerm = (List<List<String>>) json_array.get("existingTerm");
 		String userID = (String) json_array.get("userID");
+		// END: extract Lists and user ID to the JSON Object
 
 		db_details = getDbDetails(db_details, json_array); // get db
 		// configuraton
 
 		JSONObject output = new JSONObject();
-		ManagerFactory factory = new Config().configDB(db_details);
+		ManagerFactory factory = new Config().configDB(db_details);	// connects to database
 		output = new AssignGid().bulk_createGID(list, checked,
-				Integer.parseInt(locationID), existingTerm, userID, factory);
+				Integer.parseInt(locationID), existingTerm, userID, factory);	//calls method in searching the Germplasm Name in the database
 		db_details.clear();
 		factory.close();
 
@@ -357,74 +343,67 @@ public class Model {
 	public Response updateGermplasmName(JSONObject data)
 	throws MiddlewareQueryException, IOException {
 
-		System.out.println("UPDATING GERMPLASM NAME");
-		List<String> newString = new ArrayList<String>();
+		List<String> newString = new ArrayList<String>();	// contains the indices [0]GID  [1] new name 2. remarks 3. parsed new name (if correct)
+		List<String> correctedList = new ArrayList<String>();	// holds the corrected parsed germplasm name
+		List<List<String>> output = new ArrayList<List<String>>();	// holds the updated list
+		JSONObject data_output = new JSONObject();	// holds the output of the method
+		JSONObject parse_array = new JSONObject();	// holds the output of the method that checks germplasm names with cross operators if it conforms to the standard format or not
+		String error = "";
 
+		// start extracting the newname, old name, list 
 		JSONObject json_array = (JSONObject) data;
 		String newName = (String) json_array.get("new");
 		String old = (String) json_array.get("old");
-		// System.out.println("new: "+newName);
-		String error = "";
-		JSONObject parse = new JSONObject();
-		List<String> correctedList = new ArrayList<String>();
-		if (newName.contains("/") || newName.contains("*")) {
-			parse = new CrossOp().main(newName.toString(), false); // not to
-			// standardize
-			// the
-			// parent
-			JSONObject parse_array = (JSONObject) parse;
-			correctedList = new ArrayList<String>();
+		List<List<String>> list = (List<List<String>>) json_array.get("list");
+		// end extracting the newname, old name, list
+		
+		
+		if (newName.contains("/") || newName.contains("*")) {	// if the input germplasm name has cross operators
+			
+			parse_array = new CrossOp().main(newName.toString(), false); // false= not to standardize the germplasm name, just return the remarks if it conforms to the standard format or not
 			correctedList = (List<String>) parse_array.get("correctedList");
-			// System.out.println("***ERROR: "+ error);
-			System.out.println("***JSON STRING: " + parse_array.toJSONString());
-			System.out.println("\n------ @ MODEL.java");
-			for (int l = 0; l < correctedList.size(); l++) {
-				System.out.println("::" + correctedList.get(l));
-			}
-			System.out.println("------");
 			error = (String) parse_array.get("error");
 
-		} else {
-			error = new Main().checkString(newName);
+		} else {	// no cross operators
+			error = new Main().checkString(newName);	
 		}
 
-		List<List<String>> object = (List<List<String>>) json_array.get("list");
+		
+		
 		newString.add("N/A");
 		newString.add(newName);
 
-		JSONObject data_output = new JSONObject();
-		if (error.equals("")) {
-			List<List<String>> output = new ArrayList<List<String>>();
-
-			for (int i = 0; i < object.size(); i++) {
+		
+		if (error.equals("")) {	// if the germplasm name conforms to the standard format
+			
+			// Start updating the list with the new name
+			
+			for (int i = 0; i < list.size(); i++) {	// loops through all rows in the list
 				List<String> row_output = new ArrayList<String>();
 
 				// String row=output.get(i) ;
-				List<String> row = object.get(i);
+				List<String> row = list.get(i);
 
 				row_output.add(row.get(0));
 				row_output.add(row.get(1));
 				row_output.add(row.get(2));
 
-				// System.out.print(":: "+ row.get(3));
-				// System.out.println(" \t:: "+ row.get(9));
-
-				if (row.get(5).equals(old)) {
+				if (row.get(5).equals(old)) {	// if female equals the old name, update the female germplasm name
 
 					// System.out.println("female edited");
 					// //System.out.println("New:: "+ row.get(2));
 
-					row_output.add("in standardized format");
+					row_output.add("in standardized format");	
 					// String[] tokens = new Tokenize().tokenize(newName);
 					// String gid = new Tokenize().stringTokens(tokens);
 					String gid = "";
 
-					if (newName.contains("/") || newName.contains("*")) {
-						System.out.println("tokens: " + gid);
+					if (newName.contains("/") || newName.contains("*")) { // if it has cross operators
+						//System.out.println("tokens: " + gid);
 						for (int n = 1; n < correctedList.size(); n++) {
 							gid = gid + "#" + correctedList.get(n);
 
-							System.out.println("tokens: " + gid);
+							//System.out.println("tokens: " + gid);
 						}
 						System.out.println("tokens: " + gid);
 					} else {
@@ -495,9 +474,9 @@ public class Model {
 			data_output.put("old", old);
 			data_output.put("updated", true);
 
-		} else {
+		} else {	// if the germplasm name does not conform to the standard format it will return remarks
 
-			data_output.put("list", object);
+			data_output.put("list", list);
 			data_output.put("new", newName);
 			data_output.put("old", error);
 			data_output.put("updated", false);
@@ -505,9 +484,8 @@ public class Model {
 			newString.add("N/A");
 			data_output.put("newString", newString);
 		}
-		// System.out.println("list: "+data_output.get("list"));
-		System.out.println("" + newString);
-
+		
+		parse_array.clear();
 		return Response.status(200).entity(data_output).build();
 	}
 
