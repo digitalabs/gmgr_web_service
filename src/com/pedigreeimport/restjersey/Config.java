@@ -1,4 +1,4 @@
-package restjersey.gmgr;
+package com.pedigreeimport.restjersey;
 
 import java.util.ArrayList;
 import java.util.List;

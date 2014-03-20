@@ -1,4 +1,4 @@
-package backend.pedigreeimport;
+package com.pedigreeimport.backend;
 
 
 import java.io.IOException;
@@ -10,10 +10,8 @@ import java.util.regex.Pattern;
 import org.generationcp.middleware.exceptions.MiddlewareQueryException;
 import org.json.simple.JSONObject;
 
-import restjersey.gmgr.AssignGid;
-
-import backend.pedigreeimport.Tokenize;
-
+import com.pedigreeimport.restjersey.AssignGid;
+import com.pedigreeimport.backend.Tokenize;
 
 
 /*
