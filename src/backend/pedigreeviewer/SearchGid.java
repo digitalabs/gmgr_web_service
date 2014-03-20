@@ -5,20 +5,108 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.generationcp.middleware.exceptions.MiddlewareQueryException;
+import org.generationcp.middleware.manager.ManagerFactory;
 import org.generationcp.middleware.manager.api.GermplasmDataManager;
+import org.generationcp.middleware.manager.api.PedigreeDataManager;
 import org.generationcp.middleware.pojos.Attribute;
 import org.generationcp.middleware.pojos.Bibref;
 import org.generationcp.middleware.pojos.Country;
+import org.generationcp.middleware.pojos.GermplasmPedigreeTree;
 import org.generationcp.middleware.pojos.GermplasmPedigreeTreeNode;
 import org.generationcp.middleware.pojos.Location;
 import org.generationcp.middleware.pojos.Method;
 import org.generationcp.middleware.pojos.Name;
 import org.generationcp.middleware.pojos.UserDefinedField;
 import org.generationcp.middleware.util.Debug;
+import org.json.simple.JSONObject;
 
 public class SearchGid {
-	
+	private static int counter = 0;
+	private int cnt;
 	private static List<Integer> counterArray = new ArrayList<Integer>();
+	
+	public JSONObject main(ManagerFactory factory,JSONObject json_array, JSONObject outputTree) throws NumberFormatException, MiddlewareQueryException, IOException{
+		GermplasmDataManager man = factory.getGermplasmDataManager();
+		List<Name> names = new ArrayList<Name>();// null;//man.getNamesByGID(node.getGermplasm().getGid(),
+													// null, null);
+		Location loc2 = new Location();
+		List<Attribute> attributes = new ArrayList<Attribute>();// man.getAttributesByGID(node.getGermplasm().getGid());
+		Method meth = new Method();// man.getMethodByID(node.getGermplasm().getMethodId());
+		Location loc = new Location();// man.getLocationByID(node.getGermplasm().getLocationId());
+		Bibref bibref = new Bibref();// man.getBibliographicReferenceByID(node.getGermplasm().getReferenceId());
+
+		Integer cid = 0;// loc.getCntryid();
+		Country cnty = new Country();// man.getCountryById(cid);a
+
+		// JSONObject json_array = (JSONObject) data;
+		String gid = (String) json_array.get("GID");
+		String level = (String) json_array.get("LEVEL");
+		String sel = (String) json_array.get("SEL");
+		
+
+		String outputString = "";
+
+		// ManagerFactory factory = new Config().configDB();
+		System.out.println("gid: " + gid);
+		System.out.println("level: " + level);
+		System.out.println("sel: " + sel);
+		cnt = counter++;
+		Boolean bool;
+		if (Integer.parseInt(sel) == 1) {
+			bool = true;
+		} else
+			bool = false;
+
+		if (cnt % 2 == 1) {
+
+			PedigreeDataManager pedigreeManager = factory
+					.getPedigreeDataManager();
+
+			Debug.println(10, "GID = " + Integer.parseInt(gid) + ", level = "
+					+ Integer.parseInt(level) + ":");
+			GermplasmPedigreeTree tree = pedigreeManager.generatePedigreeTree(
+					Integer.parseInt(gid), Integer.parseInt(level), bool);
+
+			for (int i = 0; i < Integer.parseInt(level); i++) {
+				counterArray.add(0);
+			}
+
+			if (tree != null) {
+				outputString = outputString + "{";
+				System.out.println("{");
+				outputString = new SearchGid().printNode(outputString,
+						tree.getRoot(), 1, names, loc2, attributes, cid, cnty,
+						man, meth, bibref, loc);
+				outputString = outputString + "\n}";
+				System.out.println("}");
+			}
+
+			tree = null;
+			pedigreeManager = null;
+
+		}
+		String found = "0";
+		if (outputString.equals("")) {
+			found = "1";
+		}
+
+		outputTree.put("tree", outputString);
+		outputTree.put("found", found);
+
+		System.out.println("Output: " + outputTree.get("tree"));
+
+		counterArray.clear();
+		names = null;
+		loc2 = null;
+		attributes = null;
+		cid = null;
+		cnty = null;
+		meth = null;
+		bibref = null;
+		loc = null;
+		
+		return outputTree;
+	}
 
 	public String printNode(String outputString,GermplasmPedigreeTreeNode node, int level, List <Name> names, Location loc2, List <Attribute> attributes, int cid, Country cnty, GermplasmDataManager man, Method meth, Bibref bibref, Location loc) throws IOException, MiddlewareQueryException {
 		
