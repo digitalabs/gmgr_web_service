@@ -1,4 +1,4 @@
-package com.pedigreeimport.backend;
+package backend.pedigreeimport;
 
 import java.util.Scanner;
 import java.util.regex.Matcher;
