@@ -1,4 +1,4 @@
-package com.pedigreeimport.restjersey;
+package restjersey.gmgr;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -23,9 +23,9 @@ import org.generationcp.middleware.pojos.Name;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
-import com.pedigreeimport.backend.BackCross;
-import com.pedigreeimport.backend.CrossOp;
-import com.pedigreeimport.backend.Tokenize;
+import backend.pedigreeimport.BackCross;
+import backend.pedigreeimport.CrossOp;
+import backend.pedigreeimport.Tokenize;
 
 public class AssignGid {
 

@@ -1,4 +1,4 @@
-package com.pedigreeimport.backend;
+package backend.pedigreeimport;
 
 import java.io.FileWriter;
 import java.io.IOException;
