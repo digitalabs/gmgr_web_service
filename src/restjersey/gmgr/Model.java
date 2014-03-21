@@ -357,7 +357,6 @@ public class Model {
 		List<List<String>> list = (List<List<String>>) json_array.get("list");
 		// end extracting the newname, old name, list
 		
-		
 		if (newName.contains("/") || newName.contains("*")) {	// if the input germplasm name has cross operators
 			
 			parse_array = new CrossOp().main(newName.toString(), false); // false= not to standardize the germplasm name, just return the remarks if it conforms to the standard format or not
@@ -367,8 +366,6 @@ public class Model {
 		} else {	// no cross operators
 			error = new Main().checkString(newName);	
 		}
-
-		
 		
 		newString.add("N/A");
 		newString.add(newName);
@@ -377,16 +374,16 @@ public class Model {
 		if (error.equals("")) {	// if the germplasm name conforms to the standard format
 			
 			// Start updating the list with the new name
-			
+			System.out.println("New Name: "+ newName);
 			for (int i = 0; i < list.size(); i++) {	// loops through all rows in the list
 				List<String> row_output = new ArrayList<String>();
-
-				// String row=output.get(i) ;
 				List<String> row = list.get(i);
 
 				row_output.add(row.get(0));
 				row_output.add(row.get(1));
 				row_output.add(row.get(2));
+				
+				System.out.println("List: "+ list.get(i));
 
 				if (row.get(5).equals(old)) {	// if female equals the old name, update the female germplasm name
 
