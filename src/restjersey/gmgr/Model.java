@@ -345,7 +345,6 @@ public class Model {
 
 		List<String> newString = new ArrayList<String>();	// contains the indices [0]GID  [1] new name 2. remarks 3. parsed new name (if correct)
 		List<String> correctedList = new ArrayList<String>();	// holds the corrected parsed germplasm name
-		List<List<String>> output = new ArrayList<List<String>>();	// holds the updated list
 		JSONObject data_output = new JSONObject();	// holds the output of the method
 		JSONObject parse_array = new JSONObject();	// holds the output of the method that checks germplasm names with cross operators if it conforms to the standard format or not
 		String error = "";
@@ -359,7 +358,7 @@ public class Model {
 		
 		if (newName.contains("/") || newName.contains("*")) {	// if the input germplasm name has cross operators
 			
-			parse_array = new CrossOp().main(newName.toString(), false); // false= not to standardize the germplasm name, just return the remarks if it conforms to the standard format or not
+			parse_array = new CrossOp().main(newName.toString(), true); // false= not to standardize the germplasm name, just return the remarks if it conforms to the standard format or not
 			correctedList = (List<String>) parse_array.get("correctedList");
 			error = (String) parse_array.get("error");
 
@@ -367,119 +366,80 @@ public class Model {
 			error = new Main().checkString(newName);	
 		}
 		
-		newString.add("N/A");
-		newString.add(newName);
+		newString.add("N/A");	// GID of the cross
+		newString.add(newName);	// new name of the germplasm name
 
-		
 		if (error.equals("")) {	// if the germplasm name conforms to the standard format
 			
 			// Start updating the list with the new name
-			System.out.println("New Name: "+ newName);
 			for (int i = 0; i < list.size(); i++) {	// loops through all rows in the list
-				List<String> row_output = new ArrayList<String>();
-				List<String> row = list.get(i);
+				if (list.get(i).get(5).equals(old)) {	// if female equals the old name, update the female germplasm name
 
-				row_output.add(row.get(0));
-				row_output.add(row.get(1));
-				row_output.add(row.get(2));
-				
-				System.out.println("List: "+ list.get(i));
-
-				if (row.get(5).equals(old)) {	// if female equals the old name, update the female germplasm name
-
-					// System.out.println("female edited");
-					// //System.out.println("New:: "+ row.get(2));
-
-					row_output.add("in standardized format");	
-					// String[] tokens = new Tokenize().tokenize(newName);
-					// String gid = new Tokenize().stringTokens(tokens);
 					String gid = "";
 
 					if (newName.contains("/") || newName.contains("*")) { // if it has cross operators
-						//System.out.println("tokens: " + gid);
 						for (int n = 1; n < correctedList.size(); n++) {
 							gid = gid + "#" + correctedList.get(n);
-
-							//System.out.println("tokens: " + gid);
 						}
 						System.out.println("tokens: " + gid);
 					} else {
-
 						String[] tokens = new Tokenize().tokenize(newName);
 						gid = new Tokenize().stringTokens(tokens);
-
 					}
 
-					row_output.add(gid);
-					row_output.add(newName);
-
+					//start update list
+					list.get(i).set(3,"in standardized format");	//remarks
+					list.get(i).set(4,gid);	// parsed germplasm name
+					list.get(i).set(5,newName);	// female name
+					// end update list
+					
 					newString.add("in standardized format");
 					newString.add(gid);
 
-				} else {
+				} 
 
-					row_output.add(row.get(3));
-					row_output.add(row.get(4));
-					row_output.add(row.get(5));
+				if (list.get(i).get(9).equals(old)) {
 
-				}
-
-				if (row.get(9).equals(old)) {
-					// System.out.println("male edited");
-
-					row_output.add(row.get(6));
-					row_output.add("in standardized format");
-
-					// String[] tokens = new Tokenize().tokenize(newName);
-					// String gid = new Tokenize().stringTokens(tokens);
 					String gid = "";
 					if (newName.contains("/") || newName.contains("*")) {
 						System.out.println("tokens: " + gid);
 						for (int n = 1; n < correctedList.size(); n++) {
 							gid = gid + "#" + correctedList.get(n);
-
-							// System.out.println("tokens: "+ gid);
 						}
-						// System.out.println("tokens: "+ gid);
 					} else {
-
 						String[] tokens = new Tokenize().tokenize(newName);
 						gid = new Tokenize().stringTokens(tokens);
-
 					}
-
-					row_output.add(gid);
-					row_output.add(newName);
-
-					// //System.out.println(" \t New:: "+ row.get(6));
-
+					
+					// start update list
+					list.get(i).set(7,"in standardized format");
+					list.get(i).set(8,gid);
+					list.get(i).set(9,newName);
+					//end update list
+					
 					newString.add("in standardized format");
 					newString.add(gid);
-					row_output.add(row.get(10));
-				} else {
-					row_output.add(row.get(6));
-					row_output.add(row.get(7));
-					row_output.add(row.get(8));
-					row_output.add(row.get(9));
-					row_output.add(row.get(10));
 				}
-
-				output.add(row_output);
 			}
-			data_output.put("list", output);
+			//start storing to the output
+			data_output.put("list", list);
 			data_output.put("new", newName);
 			data_output.put("old", old);
 			data_output.put("updated", true);
+			// end start storing to the output
 
 		} else {	// if the germplasm name does not conform to the standard format it will return remarks
 
+			newString.add(error);	// remarks/errors on the newName
+			newString.add("N/A");	// will not be parsed
+			
+			//start storing to the output
 			data_output.put("list", list);
 			data_output.put("new", newName);
 			data_output.put("old", error);
 			data_output.put("updated", false);
-			newString.add(error);
-			newString.add("N/A");
 			data_output.put("newString", newString);
+			//end storing to the output
 		}
 		
 		parse_array.clear();
