@@ -20,11 +20,32 @@ import org.generationcp.middleware.pojos.UserDefinedField;
 import org.generationcp.middleware.util.Debug;
 import org.json.simple.JSONObject;
 
+/*
+ * Class for the methods used in the Pedigree Viewer
+ * SearchGid Class
+ * Kelly John D. Mahipus
+ */
+
 public class SearchGid {
 	private static int counter = 0;
 	private int cnt;
 	private static List<Integer> counterArray = new ArrayList<Integer>();
 	
+        /*
+         * 
+         * Main method
+         * Entry point receiving the GID to be searched
+         * 
+         * Uses the middleware method generatePedigreeTree
+         * to generate the pedigree of the selected Germplasm
+         * 
+         * @returns the Pedigree of a Germplasm
+         * @throws NumberFormatException
+         * @throws MiddlewareQueryException
+         * @throws IOException
+         * 
+         * 
+         */
 	public JSONObject main(ManagerFactory factory,JSONObject json_array, JSONObject outputTree) throws NumberFormatException, MiddlewareQueryException, IOException{
 		GermplasmDataManager man = factory.getGermplasmDataManager();
 		List<Name> names = new ArrayList<Name>();// null;//man.getNamesByGID(node.getGermplasm().getGid(),
@@ -108,6 +129,17 @@ public class SearchGid {
 		return outputTree;
 	}
 
+        /*
+         * 
+         * Recursive method for getting all attributes of every 
+         * Germplasm that belongs to the searched Germplasm (root) up to
+         * the specified level.
+         * 
+         * @returns all Germplasm belonging to the pedigree
+         * with their corresponding attributes
+         * 
+         * 
+         */
 	public String printNode(String outputString,GermplasmPedigreeTreeNode node, int level, List <Name> names, Location loc2, List <Attribute> attributes, int cid, Country cnty, GermplasmDataManager man, Method meth, Bibref bibref, Location loc) throws IOException, MiddlewareQueryException {
 		
 		StringBuffer tabs = new StringBuffer();
@@ -146,7 +178,6 @@ public class SearchGid {
 	            	name2 = name.substring(0, Math.min(name.length(),6)) + "...";
 	            }
         	}
-        	
 			String cn = "---";
 			if(cnty != null)
         	{
