@@ -1,4 +1,4 @@
-package com.pedigreeimport.backend;
+package backend.pedigreeimport;
 
 import java.util.*;
 import java.io.*;
