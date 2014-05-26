@@ -56,10 +56,8 @@ public class Model {
 	 * Extract database configuration from the json Object and store it into a
 	 * List<String>
 	 * 
-	 * @param db_details
-	 *            List<String> to be stored
-	 * @param json_array
-	 *            JSON Object fetched from Apache
+	 * @param db_details database configuration to be stored
+	 * @param json_array object fetched from Apache
 	 * @return db_details List<String>
 	 */
 	public List<String> getDbDetails(List<String> db_details,
@@ -98,7 +96,7 @@ public class Model {
 	/**
 	 * Entry point in creating New GID
 	 * 
-	 * @param data
+	 * @param data object fetched from apache server
 	 * @return JSON object output that contains the Lists createdGID, list, and
 	 *         existingTerm
 	 * @throws IOException
@@ -193,7 +191,7 @@ public class Model {
 	 * This method is for choosing a GID for the cross name JSON Object data
 	 * will be passed to method 'chooseGID_cross'.
 	 * 
-	 * @param data
+	 * @param data object fetched from apache
 	 * @return JSON object output that contains the Lists createdGID, list, and
 	 *         existingTerm
 	 * @throws FileNotFoundException
@@ -228,7 +226,7 @@ public class Model {
 	/**
 	 * Entry point in assigning GID of unchecked rows from the list
 	 * 
-	 * @param data
+	 * @param data obejct feteched from apache
 	 * @return output that contains the Lists createdGID,list and existingTerm
 	 * @throws FileNotFoundException
 	 * @throws IOException
@@ -246,8 +244,7 @@ public class Model {
 	MiddlewareQueryException, ParseException, InterruptedException,
 	java.text.ParseException {
 		new AssignGid();
-		// new AssignGid().createGID();
-		// print_checkedBox();
+
 		List<String> checked = new ArrayList<String>();
 		List<List<String>> list = new ArrayList<List<String>>();
 		List<List<String>> createdGID = new ArrayList<List<String>>();
@@ -280,7 +277,7 @@ public class Model {
 	/**
 	 * Entry point in assigning of GID of checked rows
 	 * 
-	 * @param data
+	 * @param data object fetched from apache
 	 * @return output that contains Lists of createdGID, existingTerm, and list
 	 * @throws IOException
 	 * @throws MiddlewareQueryException
@@ -330,7 +327,7 @@ public class Model {
 	 * updates the list, if not in standard form, returns that the input
 	 * germplasm name's pattern is unrecognized.
 	 * 
-	 * @param data
+	 * @param data object fetched from apache
 	 * @return output that contains the old name, the new name, the list and a
 	 *         boolean if it has been updated
 	 * @throws MiddlewareQueryException
@@ -353,7 +350,10 @@ public class Model {
 		JSONObject json_array = (JSONObject) data;
 		String newName = (String) json_array.get("new");
 		String old = (String) json_array.get("old");
+		
 		List<List<String>> list = (List<List<String>>) json_array.get("list");
+		// format of the list 
+		//[0]GID, [1]nval, [2]fid, [3]fremarks, [4]fgid, [5]female, [6]mid, [7]mremarks, [8]mgid, [9]male, [10]crossdate
 		// end extracting the newname, old name, list
 		
 		if (newName.contains("/") || newName.contains("*")) {	// if the input germplasm name has cross operators
@@ -401,7 +401,7 @@ public class Model {
 				if (list.get(i).get(9).equals(old)) {
 
 					String gid = "";
-					if (newName.contains("/") || newName.contains("*")) {
+					if (newName.contains("/") || newName.contains("*")) {	// if male equals the old name, update the male germplasm name
 						System.out.println("tokens: " + gid);
 						for (int n = 1; n < correctedList.size(); n++) {
 							gid = gid + "#" + correctedList.get(n);
@@ -428,7 +428,7 @@ public class Model {
 			data_output.put("updated", true);
 			// end start storing to the output
 
-		} else {	// if the germplasm name does not conform to the standard format it will return remarks
+		} else {	// if the germplasm name does not conform to the standard format it will return error remarks
 
 			newString.add(error);	// remarks/errors on the newName
 			newString.add("N/A");	// will not be parsed
@@ -447,10 +447,10 @@ public class Model {
 	}
 
 	/**
-	 * Removes unexpected spaces in the germplasm names
+	 * Removes unexpected space(s) and add necessary space(s) in the germplasm name
 	 * 
-	 * @param list
-	 * @return output the updated list is stored in List<List<String>> output
+	 * @param list object that contains the entries of the uploaded list
+	 * @return output the updated list with the assigned GID of the entries
 	 * @throws MiddlewareQueryException
 	 * @throws IOException
 	 */
@@ -460,22 +460,23 @@ public class Model {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response standardize(JSONObject list)
 	throws MiddlewareQueryException, IOException {
-
+		
+		System.out.println("*******S T A R T I N G Standardization");
+		
 		JSONObject json_array = (JSONObject) list;
-
-		// List<String> object=(List<String>) json_array.get("list");
-
-		List<List<String>> object = (List<List<String>>) json_array.get("list");
-
 		List<List<String>> output = new ArrayList<List<String>>();
-		int k = 0;
-		String correctedTerm, error, gid = "";
 		List<String> row_object = new ArrayList<String>();
 		List<String> row = new ArrayList<String>();
 		List<String> correctedList = new ArrayList<String>();
+		List<List<String>> object = (List<List<String>>) json_array.get("list");
+		// format of the list 
+		//[0]GID, [1]nval, [2]fid, [3]fremarks, [4]fgid, [5]female, [6]mid, [7]mremarks, [8]mgid, [9]male, [10]crossdate
+		
+		int k = 0;
+		String correctedTerm, error, gid = "";
 		String line = "";
 
-		System.out.println("*******S T A R T I N G Standardization");
+		
 		for (int m = 0; m < object.size(); m++) {
 
 			row_object = object.get(m);
@@ -495,7 +496,7 @@ public class Model {
 					// count++;
 					correctedTerm = row_object.get(i).toString();
 					System.out.println("" + correctedTerm);
-					row.add("" + k);
+					row.add("" + k);	//2
 					// System.out.print(k+ ",");
 					k++;
 					JSONObject parse = new JSONObject();
@@ -503,14 +504,10 @@ public class Model {
 					if (row_object.get(i).toString().contains("/")
 							|| row_object.get(i).toString().contains("*")) {
 						parse = new CrossOp().main(
-								row_object.get(i).toString(), true); // false=
-						// not
-						// to
-						// standardize
+								row_object.get(i).toString(), true); // false= not to standardize
 						JSONObject parse_array = (JSONObject) parse;
 
-						correctedList = (List<String>) parse_array
-						.get("correctedList");
+						correctedList = (List<String>) parse_array.get("correctedList");
 						error = (String) parse_array.get("error");
 						correctedTerm = correctedList.get(0);
 
@@ -521,7 +518,6 @@ public class Model {
 
 					if (error.equals("")) {
 						// //System.out.print("in standardized format");
-						row.add("in standardized format"); // remarks
 
 						if (row_object.get(i).toString().contains("/")
 								|| row_object.get(i).toString().contains("*")) {
@@ -529,8 +525,6 @@ public class Model {
 
 							for (int n = 1; n < correctedList.size(); n++) {
 								gid = gid + "#" + correctedList.get(n);
-
-								// System.out.println("tokens: "+ gid);
 							}
 							// System.out.println("tokens: "+ gid);
 						} else {
@@ -546,7 +540,16 @@ public class Model {
 							}
 
 						}
-
+						System.out.println(""+object.get(m));
+						if (i == 5){
+							//[0]GID, [1]nval, [2]fid, [3]fremarks, [4]fgid, [5]female, [6]mid, [7]mremarks, [8]mgid, [9]male, [10]crossdate
+							object.get(m).set(3,"in standardized format");
+							object.get(m).set(4,gid);
+						}else{
+							object.get(m).set(7,"in standardized format");
+							object.get(m).set(8,gid);
+						}
+						row.add("in standardized format"); // remarks
 						row.add(gid); // GID
 						// System.out.print(gid); // GID
 
@@ -578,6 +581,12 @@ public class Model {
 								System.out.println("tokens: " + gid);
 								correctedTerm = correctedList.get(0);
 							} else {
+								if (i == 5){
+									//[0]GID, [1]nval, [2]fid, [3]fremarks, [4]fgid, [5]female, [6]mid, [7]mremarks, [8]mgid, [9]male, [10]crossdate
+									object.get(m).set(3,"in standardized format");
+								}else{
+									object.get(m).set(7,"in standardized format");
+								}
 								row.add("in standardized format"); // remarks
 
 								Pattern p = Pattern.compile("IR");
@@ -591,6 +600,12 @@ public class Model {
 									gid = "";
 								}
 							}
+							if (i == 5){
+								//[0]GID, [1]nval, [2]fid, [3]fremarks, [4]fgid, [5]female, [6]mid, [7]mremarks, [8]mgid, [9]male, [10]crossdate
+								object.get(m).set(4,gid);
+							}else{
+								object.get(m).set(8,gid);
+							}
 							row.add(gid); // GID
 							// System.out.print("\"" + gid + "\"" + ","); // GID
 						} else {
@@ -601,7 +616,11 @@ public class Model {
 						}
 					}
 					// if (j == 1 || j==2) {
-
+					if (i == 5){
+						object.get(m).set(5,correctedTerm);
+					}else{
+						object.get(m).set(9,correctedTerm);
+					}
 					row.add(correctedTerm); // pedigree term
 					System.out.print("#####" + correctedTerm); // pedigree term
 					// }
@@ -626,10 +645,10 @@ public class Model {
 	}
 
 	/**
-	 * Sorts the entry of the upload list, and checks if the germplsm names is
+	 * Sorts the entry of the upload list, and checks if the germplsm names are
 	 * in standardized format and returns the error
 	 * 
-	 * @param list
+	 * @param list object that contains the entries of the uploaded list
 	 * @return output that stores the sorted and evaluated list
 	 * @throws IOException
 	 * @throws ParseException
@@ -683,12 +702,10 @@ public class Model {
 
 					if (gu_obj.get(j).toString().contains("/")
 							&& gu_obj.get(j).toString().contains("*")) {
-						parse = new CrossOp().main(gu_obj.get(j).toString(),
-								false); // not to standardize the parent
+						parse = new CrossOp().main(gu_obj.get(j).toString(),false); // not to standardize the parent
 						JSONObject parse_array = (JSONObject) parse;
 						correctedList = new ArrayList<String>();
-						correctedList = (List<String>) parse_array
-						.get("correctedList");
+						correctedList = (List<String>) parse_array.get("correctedList");
 						// System.out.println("***ERROR: "+ error);
 						System.out.println("***JSON STRING: "
 								+ parse_array.toJSONString());
