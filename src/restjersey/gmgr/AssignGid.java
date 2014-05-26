@@ -413,7 +413,7 @@ public class AssignGid {
 		String userID = (String) jsonObject.get("userID");
 		userID_local = userID;
 
-		String lastDeriv_parent = (String) jsonObject.get("term");
+		String lastDeriv_parent = (String) jsonObject.get("term");	// the last derivative of the chosen GID
 		String parent1 = (String) jsonObject.get("parent1");		// the parent that had chosen a GID from existing GID's
 		String theParent = (String) jsonObject.get("theParent");		// term refers to the last derivative of parent1 that had already exists
 
@@ -631,17 +631,17 @@ public class AssignGid {
 	/**
 	 * This sets the pedigree line if the chosen GID has backcross operator
 	 * 
-	 * @param parent1ID
-	 * @param parent1
-	 * @param theParent
-	 * @param lastDeriv_parent
-	 * @param gid_local
-	 * @param gpid1_local
-	 * @param gpid2_local
-	 * @param gid
-	 * @param gpid1
-	 * @param gpid2
-	 * @param createdGID
+	 * @param parent1ID  the ID of the chosen GID from existing GID's
+	 * @param parent1 the parent of the chosen GID
+	 * @param theParent	 the last derivative of the 
+	 * @param lastDeriv_parent the last derivative of the chosen GID
+	 * @param gid_local	the chosen GID,constant
+	 * @param gpid1_local the gpid1 of the chosen GID,constant
+	 * @param gpid2_local the gpid2 of the chosen GID, constant
+	 * @param gid GID of the chosen GID
+	 * @param gpid1 gpid1 of the chosen GID
+	 * @param gpid2gpid2 of the chosen GID
+	 * @param createdGID array of all the entries that are with assigned GID's
 	 * @return JSON object output that contains the Lists createdGID, list, and
 	 *         existingTerm
 	 * @throws MiddlewareQueryException
@@ -696,16 +696,14 @@ public class AssignGid {
 		parents_bc = (List<String>) result_method2.get("parents");
 		result_method2.clear();
 
-		int index_derivative = -1; // index of the chosen GID if it is from a
-		// derivative
+		int index_derivative = -1; // index of the chosen GID if it is from a derivative
 
 		System.out.println("PEDIGREELIST: " + pedigreeList);
 		for (int i = 0; i < pedigreeList.size(); i++) {// parents is the list of
 			// parsed strings
 			System.out.println(":: " + pedigreeList.get(i));
 
-			if (!pedigreeList.get(i).contains("/")
-			/* && !pedigreeList.get(i).contains("*") */) {
+			if (!pedigreeList.get(i).contains("/")) {
 				row_parents = new ArrayList<String>();
 				row_parents.add(pedigreeList.get(i));
 
@@ -713,15 +711,12 @@ public class AssignGid {
 				parents.add(row_parents);
 			}
 		}
-		System.out.println("PARENTS: " + parents);
+	/*	System.out.println("PARENTS: " + parents);
 		System.out.println("recurrent par: " + parents_bc);
 		System.out.println("bc: " + backcrosses);
-		System.out.println("crosses: " + crosses);
+		System.out.println("crosses: " + crosses);*/
 
-		if (!lastDeriv_parent.contains("/") /*
-											 * &&
-											 * !lastDeriv_parent.contains("*")
-											 */) {
+		if (!lastDeriv_parent.contains("/") ) {
 			System.out.println("last deriv parent no / and *");
 			for (int i = 0; i < parents.size(); i++) {
 				if (parents.get(i).get(0).contains("-")) {
@@ -743,21 +738,8 @@ public class AssignGid {
 								+ pedigreeList_der.get(j) + " chooseNVAL: "
 								+ lastDeriv_parent);
 
-						if (pedigreeList_der.get(j).equals(lastDeriv_parent)) { // if
-							// the
-							// chosen
-							// GID
-							// is
-							// a
-							// derivative
-							// in
-							// one
-							// of
-							// the
-							// parents
-							// if derivative, get derivative line
-							System.out
-									.println("if derivative, get derivative line");
+						if (pedigreeList_der.get(j).equals(lastDeriv_parent)) { // if the chosen GID is a derivative in one of the parents if derivative, get derivative line
+							System.out.println("if derivative, get derivative line");
 							index_derivative = j; // get the index
 							createdGID = getDerivativeLine(index_derivative,
 									pedigreeList_der, gid_local, gpid1_local,
@@ -893,24 +875,16 @@ public class AssignGid {
 					lastDeriv_parent, parent1ID, parent1, index_bc,
 					gpid1_local, gpid2_local, gid_local);
 			index_bc = (Integer) result_createdGID_bc_backcrosses.get("index");
-			parents = (List<List<String>>) result_createdGID_bc_backcrosses
-					.get("parents");
-			backcrosses = (List<List<String>>) result_createdGID_bc_backcrosses
-					.get("backcrosses");
-			crosses = (List<List<String>>) result_createdGID_bc_backcrosses
-					.get("crosses");
-			parents_bc = (List<String>) result_createdGID_bc_backcrosses
-					.get("parents_bc");
+			parents = (List<List<String>>) result_createdGID_bc_backcrosses.get("parents");
+			backcrosses = (List<List<String>>) result_createdGID_bc_backcrosses.get("backcrosses");
+			crosses = (List<List<String>>) result_createdGID_bc_backcrosses.get("crosses");
+			parents_bc = (List<String>) result_createdGID_bc_backcrosses.get("parents_bc");
 
 		}
 
 		/* Start if chosen GID from crosses */
 		// crosses=checkGID_parents(parent1ID,crosses, theParent);
-		if (index_bc == -1 && index_derivative == -1 /*
-													 * &&
-													 * count_parents_exist==parents
-													 * .size()
-													 */) {
+		if (index_bc == -1 && index_derivative == -1 ) {
 			System.out.println("Chosen is from a CROSSES");
 			JSONObject result_crosses = createGID_bc_crosses(lastDeriv_parent,
 					createdGID, crosses, parents, backcrosses, parent1ID,
@@ -918,8 +892,7 @@ public class AssignGid {
 					parents_bc, theParent);
 
 			parents = (List<List<String>>) result_crosses.get("parents");
-			backcrosses = (List<List<String>>) result_crosses
-					.get("backcrosses");
+			backcrosses = (List<List<String>>) result_crosses.get("backcrosses");
 			crosses = (List<List<String>>) result_crosses.get("crosses");
 			parents_bc = (List<String>) result_crosses.get("parents_bc");
 
@@ -6635,27 +6608,9 @@ public class AssignGid {
 							int count_CENTRAL = countGermplasmByName(pedigree,
 									Database.CENTRAL);
 							germplasmList = getGermplasmList(pedigree,
-									count_LOCAL, count_CENTRAL); // gets lists
-							// of
-							// germplasm
-							// with that
+									count_LOCAL, count_CENTRAL); // gets lists of germplasm with that
 							// name
-							g = getGermplasmByGpid(gpid1, germplasmList); // get
-							// the
-							// germplasm
-							// of
-							// the
-							// same
-							// gpid1,
-							// for
-							// derivative
-							// line,
-							// or
-							// gid
-							// equals
-							// to
-							// the
-							// gpid1
+							g = getGermplasmByGpid(gpid1, germplasmList); // get the germplasm of the same gpid1, for derivative line, or gid equals to the gpid1
 						} else {
 							g = manager.getGermplasmByGID(gpid2);
 							System.out.println("gpid2=" + gpid2);
@@ -7971,22 +7926,7 @@ public class AssignGid {
 							// germplasm
 							// with that
 							// name
-							g = getGermplasmByGpid(gpid1, germplasmList); // get
-							// the
-							// germplasm
-							// of
-							// the
-							// same
-							// gpid1,
-							// for
-							// derivative
-							// line,
-							// or
-							// gid
-							// equals
-							// to
-							// the
-							// gpid1
+							g = getGermplasmByGpid(gpid1, germplasmList); // get the germplasm of the same gpid1,for derivative line, or gid equals to the gpid1
 						} else {
 							g = manager.getGermplasmByGID(gpid2);
 						}
