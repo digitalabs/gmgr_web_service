@@ -1,4 +1,5 @@
-  #### Genealogy Manager Web Service
+  Genealogy Manager Web Service
+  =============================
 		
   **OVERVIEW**
   
