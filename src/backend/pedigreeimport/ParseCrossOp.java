@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import org.generationcp.middleware.exceptions.MiddlewareQueryException;
 import org.json.simple.JSONObject;
 
-import restjersey.gmgr.AssignGid;
 
 import backend.pedigreeimport.Tokenize;
 
@@ -252,7 +251,7 @@ public class ParseCrossOp {
 												if(m2.matches()){
 													String[] parsed=temp2[k].split("\\*");
 													correctedTerm = new FixString().checkString(parsed[1]);
-													result = new Main().checkString(correctedTerm);
+													result = new NomenclatureRules().checkString(correctedTerm);
 													//correctedTerm=parsed[0].concat("*".concat(correctedTerm));
 													if(parsed[1].startsWith("IR")){
 														//temp2[k]=parsed[1];
@@ -268,7 +267,7 @@ public class ParseCrossOp {
 													m2 = p2.matcher(temp2[k]);
 													String[] parsed=temp2[k].split("\\*");
 													correctedTerm = new FixString().checkString(parsed[0]);
-													result = new Main().checkString(correctedTerm);
+													result = new NomenclatureRules().checkString(correctedTerm);
 													//=correctedTerm.concat("*".concat(parsed[1]));
 													if(parsed[0].startsWith("IR")){
 														//temp2[k]=parsed[0];
@@ -284,7 +283,7 @@ public class ParseCrossOp {
 												
 											}else{
 												correctedTerm = new FixString().checkString(temp2[k]);
-												result = new Main().checkString(correctedTerm);
+												result = new NomenclatureRules().checkString(correctedTerm);
 											}
 											//System.out.println("standardize");
 											
@@ -375,7 +374,7 @@ public class ParseCrossOp {
 													String[] parsed=temp2[k].split("\\*");
 													//correctedTerm = new FixString().checkString(parsed[1]);
 													//result = new Main().checkString(correctedTerm);
-													result = new Main().checkString(parsed[1]);
+													result = new NomenclatureRules().checkString(parsed[1]);
 													//correctedTerm=parsed[0].concat("*".concat(correctedTerm));
 													temp2[k]=parsed[1];
 												}else{
@@ -384,14 +383,14 @@ public class ParseCrossOp {
 													String[] parsed=temp2[k].split("\\*");
 													//correctedTerm = new FixString().checkString(parsed[0]);
 													//result = new Main().checkString(correctedTerm);
-													result = new Main().checkString(parsed[0]);
+													result = new NomenclatureRules().checkString(parsed[0]);
 													//correctedTerm=correctedTerm.concat("*".concat(parsed[1]));
 													temp2[k]=parsed[0];
 												}
 												
 											}else{
 												correctedTerm = new FixString().checkString(temp2[k]);
-												result = new Main().checkString(temp2[k]);
+												result = new NomenclatureRules().checkString(temp2[k]);
 											}
 											
 												//correctedTerm = new FixString().checkString(temp2[k]);

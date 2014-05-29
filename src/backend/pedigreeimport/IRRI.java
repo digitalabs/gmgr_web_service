@@ -6,8 +6,8 @@ import java.util.regex.Pattern;
 
 
 /**
- *
- * @author ncarumba
+ *Checks for unrecognized patterns and spacing for IRRI designated germplasm
+ * @author Nikki G. Carumba
  */
 public class IRRI {
     // For IRRI LINES
@@ -23,15 +23,18 @@ public class IRRI {
     private String line;
     IRRISegGen sg = new IRRISegGen();
     Tokenize t = new Tokenize();
-    private String listErrorsIRRI = "";
-    private String listErrorsFixed = "";
+    private String errorsIRRI = "";
+    private String errorsFixed = "";
     //private String listErrorsSegGen = "";
-    private String listErrorsReleased = "";
-    private String listErrorsElite = "";
+    private String errorsReleased = "";
+    private String errorsElite = "";
 
     /**
-     *
-     * @param a_line
+     * Entry point of IRRI breeding line
+     * It can be a segragating, elite, released, or fixed line
+     *  
+     * @param a_line germplasm name
+     * @return errorsIrri list of errors
      */
     public String standardIRRI(String a_line) {
 
@@ -53,39 +56,37 @@ public class IRRI {
             Matcher m1 = p1.matcher(line);
 
             if (m1.lookingAt()) {//String is an IRRI elite line
-                //System.out.println(" (elite line)");
                 eliteLine();
-                //System.exit(0);
-            }else if(m2.matches()) {//String is an IRRI release line
-                //System.out.println(" (released line)");
+            }else if(m2.matches()) {//String is an IRRI released line
                 releasedLine();
             } else {//String is an IRRI fixed line
-                //System.out.println(" (fixed line)");
                 fixedLine();
             }
         }
         
-        //System.out.println("list @standardIRRI(): " + listErrorsIRRI);
-        return listErrorsIRRI;
+        return errorsIRRI;
     }
 
+    /**
+     * Entry point of the Segregating line
+     */
     private void segGen() {
 
         Pattern p = Pattern.compile(A_IR + A_SPACE + A_PLANT_NO + "(" + A_DASH + "(((" + A_LOC + A_SPACE + A_SEL_NO + ")|" + A_SEL_NO + ")|" + A_BM + "|" + A_MP + ")){1,5}");
-        //Pattern p2 = Pattern.compile("IR\\s\\d+(-((((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN)\\s\\d+)|\\d+)|((\\d{0,4}B)|R|AC|(C\\d+))|(\\d+MP))){1,5}");
         Matcher m = p.matcher(line);
         if (m.matches()) {
             //System.out.println(" correct");
-            //String tokens[] = t.tokenize(line);
-            //t.stringTokens(tokens);
         } else {
             //System.out.println("\n>>String not properly formatted.. ");
             sg.checkErrors(line);
             //System.out.println(sg.getListErrors());
-            listErrorsIRRI = sg.getListErrors();
+            errorsIRRI = sg.getListErrors();
         }
     }
 
+    /**
+     * Check errors in naming a released line
+     */
     private void releasedLine() {
         String temp = line;
         Pattern p = Pattern.compile("IR\\s\\d+");
@@ -102,19 +103,22 @@ public class IRRI {
             if (m1.matches()) {
                 temp = temp.replaceAll(m1.group(1), m1.group(1) + "^");
                 System.out.println(temp + "\t;space expected between IR and plant number");
-                listErrorsReleased += temp + "\t;space expected between IR and plant number" + "#";
+                errorsReleased += temp + "\t;space expected between IR and plant number" + "#";
             }
             Pattern p2 = Pattern.compile("(IR)(\\d+)(\\s+)");
             Matcher m2 = p2.matcher(line);
             if (m2.matches()) {
                 temp = temp.replaceAll(m2.group(3), m2.group(3) + "^");
                 //System.out.println(temp + "\t;unexpected space/s found");
-                listErrorsReleased += temp + "\t;unexpected space/s found" + "#";
+                errorsReleased += temp + "\t;unexpected space/s found" + "#";
             }
-            setListErrorsIRRI(listErrorsReleased);
+            setListErrorsIRRI(errorsReleased);
         }
     }
 
+    /**
+     * Check errors in naming a elite line
+     */
     private void eliteLine() {
         String temp = line;
         Pattern pp = Pattern.compile("IRRI\\s\\d{3,}\\s(.+)");
@@ -132,7 +136,7 @@ public class IRRI {
             if (m2.find()) {
                 temp = temp.replaceAll(m2.group(1), m2.group(1) + "^");
                 //System.out.println(temp + "\t;space expected between IRRI and plant number");
-                listErrorsElite += temp + "\t;space expected between IRRI and plant number" + "#";
+                errorsElite += temp + "\t;space expected between IRRI and plant number" + "#";
             }
 
             Pattern p1 = Pattern.compile("(\\d{3,})(\\s+)");
@@ -143,7 +147,7 @@ public class IRRI {
                 //System.out.println("m: " + m5);
                 temp = temp.replaceAll(m1.group(0), m1.group(1) + "^");
                 //System.out.println(temp + "\t;unexpected space is found at the end of the token");
-                listErrorsElite += temp + "\t;unexpected space is found at the end of the token" + "#";
+                errorsElite += temp + "\t;unexpected space is found at the end of the token" + "#";
             }
             Pattern p3 = Pattern.compile("(IRRI)(\\d{3,})(\\s(.+))");
             Matcher m3 = p3.matcher(line);
@@ -151,11 +155,14 @@ public class IRRI {
             if (m3.find()) {
                 temp = temp.replaceAll(m2.group(2), m2.group(2) + "^");
                 //System.out.println(temp + "\t;space expected between plant number and popular name/descriptor");
-                listErrorsElite += temp + "\t;space expected between plant number and popular name/descriptor" + "#";
+                errorsElite += temp + "\t;space expected between plant number and popular name/descriptor" + "#";
             }
-            setListErrorsIRRI(listErrorsElite);
+            setListErrorsIRRI(errorsElite);
         }
     }
+    /**
+     * Checks unrecognized patterns in naming a fixed line
+     */
     private void fixedLine() {
     	
         Pattern p = Pattern.compile("IR\\d{2}(N|F|L|T|U|K|W|H|J|D|A|C|M)\\d{3,}((H|R|A|B|S)?)");
@@ -177,13 +184,13 @@ public class IRRI {
             Matcher m1 = p1.matcher(line);
             if (!m1.matches()) {
             	//System.out.println(line + "\t;string pattern not recognized ");
-                listErrorsFixed += line + "\t;fixed line string pattern not recognized " + "#";
+                errorsFixed += line + "\t;fixed line string pattern not recognized " + "#";
             }
-        }setListErrorsIRRI(listErrorsFixed);
+        }setListErrorsIRRI(errorsFixed);
     }
 
     /**
-     *
+     * Check errors in spacing in a released line
      */
     public void spacingFixedLine() {
         String temp = line;
@@ -194,7 +201,7 @@ public class IRRI {
             //printGroup(m);
             temp = temp.replaceAll(m.group(0), m.group(1) + m.group(2) + "^" + m.group(3));
             //System.out.println(temp + "\t;unexpected space is found");
-            listErrorsFixed += temp + "\t;unexpected space is found" + "#";
+            errorsFixed += temp + "\t;unexpected space is found" + "#";
         }
         // Error Trapping: space is found at the end of the string
         temp = line;
@@ -204,96 +211,22 @@ public class IRRI {
             //printGroup(m1);
             temp = temp.replaceAll(m1.group(0), m1.group(1) + m1.group(2) + "^" + m1.group(3));
             //System.out.println(temp + "\t;unexpected space is found");
-            listErrorsFixed += temp + "\t;unexpected space is found" + "#";
+            errorsFixed += temp + "\t;unexpected space is found" + "#";
         }
 
     }
-
-    private void printGroup(Matcher m) {
-		for(int i=0; i<m.groupCount();i++){
-			System.out.println("group["+i+"]"+m.group(i)); // remarks
-		}
-		
-	}
-
-	private void errorPatternFixedLine() {
-        String temp = line;
-        Pattern p = Pattern.compile("(IR\\d{2})(.)");
-        //Pattern p = Pattern.compile("(IR\\d{2})|(N|F|L|T|U|K|W|H|J|D)(\\d{3,})|(((H|R|AA|B|S)?)$)");
-        Matcher m = p.matcher(line);
-        //System.out.println(m);
-        if (m.find()) {
-            //System.out.println(" no match found");
-            //System.out.println(" m: " + m.groupCount());
-            //temp = temp.replaceAll(m.group(0), m.group(1) + "^");
-            ///System.out.println(temp + "\t;string pattern not recognized ");
-            listErrorsFixed += temp + "\t;string pattern not recognized " + "#";
-        }
-        temp = line;
-        Pattern p1 = Pattern.compile("(.)(N|F|L|T|U|K|W|H|J|D)(\\d{3,})");
-        Matcher m1 = p1.matcher(line);
-        if (m1.find()) {
-            temp = temp.replaceAll(m1.group(0), m1.group(0) + "^");
-            //System.out.println(temp + "\t;string pattern not recognized ");
-            listErrorsFixed += temp + "\t;string pattern not recognized " + "#";
-        }
-        temp = line;
-        Pattern p2 = Pattern.compile("(\\D)$");
-        Matcher m2 = p2.matcher(line);
-        if (m2.find()) {
-            //System.out.println("there is a character [" + m2.group(0) + "]at the end of the line");
-            Pattern p3 = Pattern.compile("(H|R|A|B|S)");
-            Matcher m3 = p3.matcher(m2.group(0));
-            if (!m3.find()) {
-                temp = temp.replaceAll(m2.group(0), m2.group(0) + "^");
-                //System.out.println(temp + "\t;string pattern not recognized ");
-                listErrorsFixed += temp + "\t;string pattern not recognized " + "#";
-            }
-        }
-        setListErrorsIRRI(listErrorsFixed);
-    }
-
-   /* private void fixFixedLine() {
-        String answer;
-        do {
-            Scanner user_input = new Scanner(System.in);
-            System.out.print("\n>>Fix String? (Y/N) ");
-            answer = user_input.nextLine();
-
-            if (answer.equalsIgnoreCase("Y")) {
-
-                Pattern p = Pattern.compile("(.)(\\s)(.)");
-                Matcher m = p.matcher(line);
-                if (m.find()) {
-                    //printGroup(m);
-                    line = line.replaceAll(m.group(0), m.group(1) + m.group(3));
-                    System.out.println("processed.");
-                    System.out.println("string: " + line + "#");
-                }
-                Pattern p1 = Pattern.compile("(.)(\\s)($)");
-                Matcher m1 = p1.matcher(line);
-                if (m1.find()) {
-                    //printGroup(m1);
-                    line = line.replaceAll(m1.group(0), m1.group(1) + m1.group(3));
-                    System.out.println("processed.");
-                    System.out.println("string: " + line + "#");
-                }
-            }
-        } while (answer.equalsIgnoreCase("Y") == false);
-    }
-    */
 
     /**
      * @return the listErrorsIRRI
      */
     public String getListErrorsIRRI() {
-        return listErrorsIRRI;
+        return errorsIRRI;
     }
 
     /**
      * @param listErrorsIRRI the listErrorsIRRI to set
      */
     public void setListErrorsIRRI(String listErrorsIRRI) {
-        this.listErrorsIRRI = listErrorsIRRI;
+        this.errorsIRRI = listErrorsIRRI;
     }
 }   // end class IRRI

@@ -11,9 +11,10 @@ import java.util.regex.Pattern;
 import org.generationcp.middleware.exceptions.MiddlewareQueryException;
 
 /**
- *
- * @author NCarumba
+ * Corrects all errors in naming IRRI Breeding line
+ * @author Nikki G. Carumba
  */
+
 public class FixString {
 
 	private static String A_IR = "(IR)"; // IRRI Line
@@ -37,18 +38,21 @@ public class FixString {
 	private String tokens[];
 	private String errorPatternList = "";
 
+	/**
+	 * Entry point for IRRI breeding line
+	 * @param line germplasm name
+	 * @return standard corrected germplasm name
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 */
 	public String checkString(String line) throws MiddlewareQueryException, IOException {
 		String standard = line;
 
 		Pattern p1 = Pattern.compile("^\\s");
 		Matcher m1 = p1.matcher(standard);
 		if (m1.find()) {
-			//System.out.println("space/s at the start of the string");
-			//tempToken = tokens[i];
-
 			line = standard.replace(m1.group(0), "");
-			//line = line.replace("-" + tempToken, "-" + tokens[i]);
-			//tokens = t.tokenize(line);
+
 		}
 
 		Pattern p = Pattern.compile("IR");
@@ -57,24 +61,14 @@ public class FixString {
 
 		if (m.lookingAt()) {    // Breeding Line is IRRI
 			standard = standardIRRI(line);
-			//list = new IRRI().getListErrorsIRRI();
-
 		}
-		//            Pattern p1 = Pattern.compile("WA");
-		//            Matcher m1 = p1.matcher(line);
-		//
-		//            if (m1.lookingAt()) {   // Breeding line is WARDA
-		//                System.out.println("WARDA line");
-		//                new WARDA().standardWARDA(line);
-		//            }
 
-		//System.out.println("list @main: " + list);
 		return standard;
 	}
 
 	/**
-	 *
-	 * @param a_line
+	 * Entry point for different IRRI breeding lines 
+	 * @param a_line germplasm name
 	 * @throws IOException 
 	 * @throws MiddlewareQueryException 
 	 */
@@ -112,6 +106,11 @@ public class FixString {
 		return line;
 	}
 
+	/**
+	 * Entry point for released line
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 */
 	private void releasedLine() throws MiddlewareQueryException, IOException {
 		Pattern p = Pattern.compile("IR\\s\\d+");
 		Matcher m = p.matcher(line);
@@ -123,6 +122,9 @@ public class FixString {
 		}
 	}
 
+	/**
+	 * Corrects released line name 
+	 */
 	private void fixReleasedLine() {
 
 		Pattern p1 = Pattern.compile("(IR)(\\d+)");
@@ -142,6 +144,11 @@ public class FixString {
 
 	}
 
+	/**
+	 * Entry point for elite line
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 */
 	private void eliteLine() throws MiddlewareQueryException, IOException {
 		Pattern pp = Pattern.compile("IRRI\\s\\d{3,}\\s(.+)");
 		Matcher m = pp.matcher(line);
@@ -153,6 +160,9 @@ public class FixString {
 		}
 	}
 
+	/**
+	 * Corrects elite line name 
+	 */
 	private void fixEliteLine() {
 
 		Pattern p1 = Pattern.compile("(\\d{3,})(\\s+)");
@@ -179,16 +189,21 @@ public class FixString {
 
 	}
 
+	/**
+	 * Entry point for fixed lines 
+	 */
 	private void fixedLine() {
 		Pattern p = Pattern.compile("IR\\d{2}(N|F|L|T|U|K|W|H|J|D|A|M|C)\\d{3,}((H|R|A|B|S)?)");
 		Matcher m = p.matcher(line);
 
 		if (!m.matches()) {
 			fixFixedLine();
-			//            fixedLine();
 		}
 	}
 
+	/**
+	 * Corrects fixed line name
+	 */
 	private void fixFixedLine() {
 
 		Pattern p = Pattern.compile("(.)(\\s)(.)");
@@ -208,6 +223,9 @@ public class FixString {
 			System.out.println("string: " + line + "\n");
 		}
 	}
+	/**
+	 * Entry point for Segregating line
+	 */
 	private void segGen() {
 
 		Pattern p = Pattern.compile(A_IR + A_SPACE + A_PLANT_NO + "(" + A_DASH + "(((" + A_LOC + A_SPACE + A_SEL_NO + ")|" + A_SEL_NO + ")|" + A_BM + "|" + A_MP + ")){1,5}");
@@ -220,6 +238,12 @@ public class FixString {
 			//sg.correctLine(tokens, line);
 		}
 	}
+	/**
+	 * Corrects segregating line name
+	 * @param tokens parsed germplasm name
+	 * @param line germplasm name to be standardized
+	 * @return line germplasm name in standardized format
+	 */
 	private String fixString(String[] tokens, String line) {  //method to fix all the errors found in the String
 		String tempToken;
 
@@ -292,6 +316,12 @@ public class FixString {
 		return line;
 	}
 
+	/**
+	 * Checks for an error in the pattern after fixing the spacing
+	 * @param tokens parsed germplasm name
+	 * @param line germplasm name to be standardized
+	 * @return
+	 */
 	public String checkErrorPattern(String[] tokens, String line) {
 		//ERROR TRAPPING: pattern/s not recognized, unrecognized codes
 		String temp;

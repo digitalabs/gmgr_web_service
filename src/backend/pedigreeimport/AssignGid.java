@@ -1,4 +1,4 @@
-package restjersey.gmgr;
+package backend.pedigreeimport;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -23,12 +23,11 @@ import org.generationcp.middleware.pojos.Name;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
-import backend.pedigreeimport.BackCross;
-import backend.pedigreeimport.CrossOp;
-import backend.pedigreeimport.Tokenize;
 
 /**
- * @author NCarumba
+ * AssignGID class includes all methods for ensuring that a 
+ * germplasm and its pedigree line has GID
+ * @author Nikki G. Carumba
  *
  */
 public class AssignGid {
@@ -38,7 +37,6 @@ public class AssignGid {
 	int GID;
 	String global_id;
 	int locationID;
-	// List<List<String>> output = new ArrayList<List<String>>();
 	List<List<String>> list_local = new ArrayList<List<String>>();
 	List<List<String>> existingTerm_local = new ArrayList<List<String>>();
 	List<List<String>> createdGID_local = new ArrayList<List<String>>();
@@ -69,78 +67,64 @@ public class AssignGid {
 		manager = factory.getGermplasmDataManager();
 
 		JSONObject jsonObject = (JSONObject) obj;
-		List<List<String>> createdGID = (List<List<String>>) jsonObject
-				.get("createdGID");
+		List<List<String>> createdGID = (List<List<String>>) jsonObject.get("createdGID");
+		List<List<String>> list = (List<List<String>>) jsonObject.get("list");
+		List<List<String>> existingTerm = (List<List<String>>) jsonObject.get("existingTerm");
+		
 		createdGID_local.clear();
 		createdGID_local = createdGID;
 		createdGID = createdGID_local;
-		List<List<String>> list = (List<List<String>>) jsonObject.get("list");
+		
 		list_local = list;
-
-		List<List<String>> existingTerm = (List<List<String>>) jsonObject
-				.get("existingTerm");
 		existingTerm_local = existingTerm;
-		cross_date = (String) jsonObject.get("cdate");
-
-		String userID = (String) jsonObject.get("userID");
-		locationID = Integer.valueOf((String) jsonObject.get("locationID"));
+		
+		cross_date = (String) jsonObject.get("cdate");	// cross date of the entry
+		locationID = Integer.valueOf((String) jsonObject.get("locationID"));	// location of the uploaded file
+		String userID = (String) jsonObject.get("userID");	// user ID
 		userID_local = userID;
 
-		String cross = (String) jsonObject.get("cross");
-		String gpid1_nval = (String) jsonObject.get("gpid1_nval");
-		String gpid2_nval = (String) jsonObject.get("gpid2_nval");
-		String fid = (String) jsonObject.get("fid");
-		String mid = (String) jsonObject.get("mid");
-		String chosenID = (String) jsonObject.get("chosenID");
-		String create_nval = (String) jsonObject.get("term");
-		String theParent = (String) jsonObject.get("theParent");
-		String female_nval = gpid1_nval;
-		String male_nval = gpid2_nval;
+		String cross = (String) jsonObject.get("cross");	// the cross name or the name that will be assigned by new GID
+		String gpid1_nval = (String) jsonObject.get("gpid1_nval");	// the gpid1 name value
+		String gpid2_nval = (String) jsonObject.get("gpid2_nval");	// the gpid2 name value
+		String fid = (String) jsonObject.get("fid");	// the id of the female parent
+		String mid = (String) jsonObject.get("mid");	//the id of the male parent
+		String chosenID = (String) jsonObject.get("chosenID");	// the id of the chosen germplasm to be assigned by new GID
+		String create_nval = (String) jsonObject.get("term"); // the germplasm name that is to be assigned by new GID
+		String theParent = (String) jsonObject.get("theParent"); // the last derivative of the chosen germplasm name to be assigned by new GID
+		
+		String female_nval = gpid1_nval; // the gpid1 name value or the female
+		String male_nval = gpid2_nval;	// the gpid2 name value or the male
 
 		Boolean isFound_female = null, isFound_male = null;
 		int mgid, fgid;
 
-		System.out.println("cross: " + cross);
-		System.out.println("create_nval: " + create_nval);
-		System.out.println("gpid1_nval: " + gpid1_nval);
-		System.out.println("gpid2_nval: " + gpid2_nval);
 
-		if (cross.equals(create_nval)) {
-			System.out.println("CLICK CREATE NEW CROSS");
+		if (cross.equals(create_nval)) {	// if the germplasm name that is to be assigned by new GID is  equal to the the cross name
+			System.out.println("if the germplasm name that is to be assigned by new GID is  equal to the the cross name");
 			updateCreatedGID("NOT SET", fid + "/" + mid, cross, "false",
 					createdGID_local);
 
 			if ((female_nval.contains("/") && female_nval.contains("*"))
-					|| (female_nval.contains("/") && !female_nval.contains("*"))) {
-				System.out.println("female has cross operators");
-				isFound_female = checkParent_crossOp_updateCreatedGID(
+					|| (female_nval.contains("/") && !female_nval.contains("*"))) { // checks if has cross operators
+				isFound_female = checkParent_crossOp_updateCreatedGID(	//checks if female parent has GID 
 						female_nval, fid);
 			} else {
-				System.out.println("Female no cross op");
-				isFound_female = checkParent_updateCreatedGID(female_nval, fid);
+				isFound_female = checkParent_updateCreatedGID(female_nval, fid);	//checks if female parent has GID 
 			}
-			// System.out.println("female: "+female);
 			fgid = GID;
-			// //System.out.println("\nmale:");
-			System.out.println("createdGID: " + createdGID_local);
-			if (male_nval.contains("/") && male_nval.contains("*")) {
-				System.out.println("Male has cross operators");
-				isFound_male = checkParent_crossOp_updateCreatedGID(male_nval,
+			if (male_nval.contains("/") && male_nval.contains("*")) { // checks if has cross operators
+				isFound_male = checkParent_crossOp_updateCreatedGID(male_nval, //checks if male parent has GID 
 						mid);
 			} else {
-				System.out.println("Male no cross op");
-				isFound_male = checkParent_updateCreatedGID(male_nval, mid);
+				isFound_male = checkParent_updateCreatedGID(male_nval, mid);	// checks if male parent has GID
 			}
-			// System.out.println("male: "+male);
-			System.out.println("createdGID: " + createdGID_local);
+			
 			mgid = GID;
-			System.out.println("female: " + isFound_female);
-			System.out.println("male: " + isFound_male);
-
+			
 		} else {
-
-			Boolean not_IR = true;
-			if (theParent.contains("/") && theParent.contains("*")) {
+			System.out.println("----is a parent");
+			Boolean not_IR = true; // flag if name is an IR designated germplasm
+			if (theParent.contains("/") && theParent.contains("*")) {	// if it is the male or female parent that is to be assigned by new GID, and has cross operators
 				int max = 0;
 				String slash = "";
 
@@ -154,7 +138,7 @@ public class AssignGid {
 					tokens_dose = tokens[0].split("\\*", 2);
 					dose = tokens_dose[1];
 					System.out.println("dose: " + dose);
-					if (tokens_dose[0].startsWith("IR")) {
+					if (tokens_dose[0].startsWith("IR")) { // checks if the male parent of the cross is an IR designated germplasm
 						not_IR = true;
 					} else {
 						not_IR = false;
@@ -164,7 +148,7 @@ public class AssignGid {
 					tokens_dose = tokens[1].split("\\*", 2);
 					dose = tokens_dose[0];
 					System.out.println("dose: " + dose);
-					if (tokens_dose[1].startsWith("IR")) {
+					if (tokens_dose[1].startsWith("IR")) { // checks if the female parent of the cross is an IR designated germplasm
 						not_IR = true;
 					} else {
 						not_IR = false;
@@ -174,40 +158,30 @@ public class AssignGid {
 
 			}
 
-			if ((theParent.contains("/") || theParent.contains("*"))) {
-				System.out.println("starts with IR");
-				System.out.println("create_nval has cross operators");
-				System.out.println("chosenID: " + chosenID);
-				System.out.println("createnval: " + create_nval);
-				System.out.println("theParent: " + theParent);
-
-				// isFound_female=checkParent_crossOp_updateCreatedGID(
-				// female_nval, fid);
-				// createGID_crossParents_updateCreatedGID(pedigreeList, index,
-				// temp_crossesGID, check, line, max, parent, id)
-				// check if create nval is a parent in the cross
-				// if yes, create the pedigree Line
-				if (create_nval.contains("/") || create_nval.contains("*")) {
-					updateCreatedGID("NOT SET", chosenID, create_nval, "false",
-							createdGID_local);
-					createNew_crossOP(chosenID, create_nval, theParent,
-							create_nval, createdGID_local);
+			if ((theParent.contains("/") || theParent.contains("*"))) {	// if female/male parent has cross operators
+				
+				if (create_nval.contains("/") || create_nval.contains("*")) { // if the germplasm name to be assigned by new GID has cross operators
+					System.out.println("----create NVAL");
+				
+					updateCreatedGID("NOT SET", chosenID, create_nval, "false", createdGID_local); // update the list
+					createNew_crossOP(chosenID, create_nval, theParent, create_nval, createdGID_local); // checks if the pedigree line has GID, the germplasm name to be assigned by new GID has cross operators
 
 				} else {
+					System.out.println("----the Parent");
 
-					if (theParent.contains("*") && not_IR) {
+					if (theParent.contains("*") && not_IR) { // if the male/female parent of the entry is a backcross and is a IR designated germplasm
 						System.out.println("Create NEW with backcross");
-						createNew_crossOP_parent_bc(chosenID, create_nval,
-								theParent, create_nval, createdGID_local);
+						System.out.println("----the Parent 1");	
+						createNew_crossOP_parent_bc(chosenID, create_nval, theParent, create_nval, createdGID_local); // checks if the pedigree line has GID, the germplasm name to be assigned by new GID is a progeny of a backcross 
 					} else {
 						System.out.println("NOT IR");
-						createNew_crossOP_parent(chosenID, create_nval,
-								theParent, create_nval, createdGID_local);
+						System.out.println("----the Parent 2");
+						createNew_crossOP_parent(chosenID, create_nval,theParent, create_nval, createdGID_local);	// checks if the pedigree line has GIDs, the germplasm name to be assigned by new GID is a progeny of a multiple cross 
 					}
 				}
-				// if no, search for the parents
 
 			} else {
+				// no cross operators
 				Pattern p = Pattern.compile("IR");
 				Matcher m1 = p.matcher(theParent);
 				String[] tokens = { "" };
@@ -219,14 +193,7 @@ public class AssignGid {
 				// String[] tokens = new Tokenize().tokenize(theParent);
 				ArrayList<String> pedigreeList = new ArrayList<String>();
 
-				pedigreeList = saveToArray(pedigreeList, tokens); // pedigreeList[0]
-				// is the
-				// most
-				// recent
-				// pedigree,
-				// pedigreeList[size]
-				// is the
-				// root
+				pedigreeList = saveToArray(pedigreeList, tokens); // pedigreeList[0] is the most recent pedigree, pedigreeList[size] is the root
 				Collections.reverse(pedigreeList);
 				int gpid1 = 0, gpid2 = 0, gid = 0;
 				Germplasm g;
@@ -338,6 +305,7 @@ public class AssignGid {
 		if (!gid1.equals("0") && !gid2.equals("0") && !gid1.equals("NOT SET")
 				&& !gid2.equals("NOT SET") && !gid1.equals("CHOOSE GID")
 				&& !gid2.equals("CHOOSE GID")) {
+			// start assigning new GID to the cross of the entry
 			Germplasm g1 = manager.getGermplasmByGID(Integer.valueOf(gid1));
 			List<Name> name = manager.getNamesByGID(g1.getGpid1(), 0, null);
 			List<Name> name1 = manager.getNamesByGID(g1.getGpid2(), 0, null);
@@ -361,12 +329,11 @@ public class AssignGid {
 
 			Germplasm germplasm1 = manager.getGermplasmByGID(cross_gid);
 
-			createdGID_local = updateCreatedGID("" + germplasm1.getGid(), fid
-					+ "/" + mid, cross, "new", createdGID_local);
+			createdGID_local = updateCreatedGID("" + germplasm1.getGid(), fid + "/" + mid, cross, "new", createdGID_local);
 			createdGID = createdGID_local;
 
 			list_local = update_list(germplasm1, fid, cross);
-
+			// end assigning new GID to the cross of the entry
 		}
 		createdGID = createdGID_local;
 		JSONObject data_output = new JSONObject();
@@ -402,12 +369,13 @@ public class AssignGid {
 
 		JSONObject jsonObject = (JSONObject) obj;
 		List<List<String>> createdGID = (List<List<String>>) jsonObject.get("createdGID");
+		List<List<String>> list = (List<List<String>>) jsonObject.get("list");
+		List<List<String>> existingTerm = (List<List<String>>) jsonObject.get("existingTerm");
+		
 		createdGID_local.clear();
 		createdGID_local = createdGID;
 		createdGID = createdGID_local;
-		List<List<String>> list = (List<List<String>>) jsonObject.get("list");
 		list_local = list;
-		List<List<String>> existingTerm = (List<List<String>>) jsonObject.get("existingTerm");
 		existingTerm_local = existingTerm;
 
 		String userID = (String) jsonObject.get("userID");
@@ -447,50 +415,22 @@ public class AssignGid {
 			maleParent = parent2;
 		}
 
-		String temp;
 		mid = mid.replaceAll("\"", "");
 		fid = fid.replaceAll("\"", "");
-		System.out.println("fid: " + fid);
-		System.out.println("mid: " + mid);
-		int mid2 = Integer.valueOf(mid), fid2 = Integer.valueOf(fid);
-
-		if (Integer.valueOf(mid) < Integer.valueOf(fid)) {
-			temp = mid;
-			mid = fid;
-			fid = temp;
-
-			temp = maleParent;
-			maleParent = femaleParent;
-			femaleParent = temp;
-		}
+				
 		int gid_local = Integer.valueOf(gid);
 		int gpid1_local = gpid1, gpid2_local = gpid2;
 
-		/*System.out.println("theParent: " + theParent);
-		System.out.println("lastDeriv_parent: " + lastDeriv_parent);
-		System.out.println("gid: " + gid);
-		System.out.println("gpid1: " + gpid1);
-		System.out.println("gpid2: " + gpid2);
-		System.out.println("mid: " + mid);
-		System.out.println("fid: " + fid);
-		System.out.println("maleParent: " + maleParent);
-		System.out.println("femaleParent: " + femaleParent);
-
-		System.out.println("parent1ID: " + parent1ID);
-		System.out.println("parent2ID: " + parent2ID);*/
-
-		if (theParent.contains("/") || theParent.contains("*")) {
-			// The Parent has cross operators
-			System.out.println("The parent has cross operators");
-			System.out.println("parent q");
-			if (theParent.contains("*")) {
+		if (theParent.contains("/") || theParent.contains("*")) { // checks if the female/male parent has cross op
+			// The Parent has cross operators			
+			if (theParent.contains("*")) {	// is a back cross
 				createdGID = updateCreatedGID(gid, parent1ID, lastDeriv_parent,
 						"false", createdGID);
 				createdGID_local = createdGID;
 				createdGID = chooseGID_bc(parent1ID, parent1, theParent,
 						lastDeriv_parent, gid_local, gpid1_local, gpid2_local,
 						gid, gpid1, gpid2, createdGID);
-			} else {
+			} else {	// single, double, or multiple cross
 				createdGID = updateCreatedGID(gid, parent1ID, lastDeriv_parent,
 						"false", createdGID);
 				createdGID_local = createdGID;
@@ -499,13 +439,12 @@ public class AssignGid {
 						gid, gpid1, gpid2, createdGID);
 			}
 
-			System.out.println("\n ***** END******* \n ");
-		} else {
-			System.out.println("term " + theParent + " has no cross operators");
+		} else {	//female/male parent has no cross op or the chosen name value has cross operators
+
 			Pattern p;
 			Matcher m1;
 			String[] tokens = { "" };
-
+			// start extracting male and female parent 
 			if (parent1.contains("*")) {
 				String tokens_dose[] = parent1.split("\\*", 2);
 				if (tokens_dose[0].contains("*")) {
@@ -524,8 +463,8 @@ public class AssignGid {
 				}
 
 			}
-
-			System.out.println("tokens: " + tokens.length);
+			//end extracting male and female parent
+			
 			ArrayList<String> pedigreeList = new ArrayList<String>();
 			pedigreeList = saveToArray(pedigreeList, tokens); // pedigreeList[0] is the most recent pedigree, pedigreeList[size] is the root
 
@@ -533,13 +472,11 @@ public class AssignGid {
 			int index = -1;
 			for (int i = 0; i < pedigreeList.size(); i++) {
 				if (pedigreeList.get(i).equals(lastDeriv_parent)) {
-					index = i;
+					index = i;	// index of the chosen GID from the pedigree line
 				}
 			}
 
-			createdGID = getDerivativeLine(index, pedigreeList, gid_local,
-					gpid1_local, gpid2_local, gid, gpid1, gpid2, parent1ID,
-					parent1, createdGID);
+			createdGID = getDerivativeLine(index, pedigreeList, gid_local, gpid1_local, gpid2_local, gid, gpid1, gpid2, parent1ID, parent1, createdGID);	//set the pedigree line of the chosen GID
 		}
 		Germplasm germplasm = new Germplasm();
 		
@@ -547,10 +484,10 @@ public class AssignGid {
 		int fgid = getGID_fromFile(femaleParent, fid);
 
 		if (mgid != 0 && fgid != 0) {
-			System.out.println("cross: " + cross);
-			germplasm = isCross_existing(cross, fgid, mgid);
+			
+			germplasm = isCross_existing(cross, fgid, mgid);	// checks if cross already exists given the female and male GID
 			if (germplasm == null) {
-				System.out.println("Create GID for " + cross);
+
 				Germplasm g1 = manager.getGermplasmByGID(fgid);
 				List<Name> name = manager.getNamesByGID(g1.getGpid1(), 0, null);
 				List<Name> name1 = manager
@@ -566,34 +503,26 @@ public class AssignGid {
 					g1 = null;
 				}
 
-				methodID = selectMethodType(fgid, mgid, femaleParent,
-						maleParent, cross, methodID);
+				methodID = selectMethodType(fgid, mgid, femaleParent, maleParent, cross, methodID);
 
 				int cross_gid = (int) addGID(cross, fgid, mgid, methodID, 2,
 						true);
 
 				Germplasm germplasm1 = manager.getGermplasmByGID(cross_gid);
 
-				createdGID_local = updateCreatedGID("" + germplasm1.getGid(),
-						fid + "/" + mid, cross, "new", createdGID);
+				createdGID_local = updateCreatedGID("" + germplasm1.getGid(), fid + "/" + mid, cross, "new", createdGID);
 				createdGID = createdGID_local;
 
 				list_local = update_list(germplasm1, fid, cross);
-				// //System.out.println("\t id: "+fid + "/" + mid);
-				// //System.out.println("\t id: "+ cross);
+				
 				List<Germplasm> glist = new ArrayList<Germplasm>();
 				glist.add(germplasm1);
+				// set to display choose GID link for the user to have an option to use that GID or create a new one
 				for (int i = 0; i < createdGID_local.size(); i++) {
-					if (createdGID_local.get(i).get(1)
-							.equals(createdGID_local.get(i).get(2))
+					if (createdGID_local.get(i).get(1).equals(createdGID_local.get(i).get(2))
 							&& createdGID_local.get(i).get(2).equals(cross)) {
-						multipleHits_inLocation(glist, createdGID_local.get(i)
-								.get(2), createdGID_local.get(i).get(0),
-								createdGID_local.get(i).get(1));
-						createdGID_local = updateCreatedGID("CHOOSE GID",
-								createdGID_local.get(i).get(0),
-								createdGID_local.get(i).get(2), "false",
-								createdGID);
+						multipleHits_inLocation(glist, createdGID_local.get(i).get(2), createdGID_local.get(i).get(0), createdGID_local.get(i).get(1));
+						createdGID_local = updateCreatedGID("CHOOSE GID", createdGID_local.get(i).get(0), createdGID_local.get(i).get(2), "false", createdGID);
 						createdGID = createdGID_local;
 					}
 				}
@@ -681,15 +610,10 @@ public class AssignGid {
 		List<List<String>> crosses = new ArrayList<List<String>>();
 		List<String> parents_bc = new ArrayList<String>();
 
-		List<List<String>> parents = new ArrayList<List<String>>(); // list of
-		// names
-		// that
-		// ntype=DER
+		List<List<String>> parents = new ArrayList<List<String>>(); // list of names with ntype=DER
 		List<String> row_parents = new ArrayList<String>();
 
-		new CrossOp();
-
-		JSONObject result_method2 = CrossOp.method2(pedigree, pedigreeList);
+		JSONObject result_method2 = new CrossOp().method2(pedigree, pedigreeList);
 		pedigreeList = (List<String>) result_method2.get("list");
 		backcrosses = (List<List<String>>) result_method2.get("backcrosses");
 		crosses = (List<List<String>>) result_method2.get("crosses");
@@ -698,11 +622,8 @@ public class AssignGid {
 
 		int index_derivative = -1; // index of the chosen GID if it is from a derivative
 
-		System.out.println("PEDIGREELIST: " + pedigreeList);
-		for (int i = 0; i < pedigreeList.size(); i++) {// parents is the list of
-			// parsed strings
-			System.out.println(":: " + pedigreeList.get(i));
-
+		for (int i = 0; i < pedigreeList.size(); i++) {// parents is the list of parsed strings
+			
 			if (!pedigreeList.get(i).contains("/")) {
 				row_parents = new ArrayList<String>();
 				row_parents.add(pedigreeList.get(i));
@@ -711,11 +632,7 @@ public class AssignGid {
 				parents.add(row_parents);
 			}
 		}
-	/*	System.out.println("PARENTS: " + parents);
-		System.out.println("recurrent par: " + parents_bc);
-		System.out.println("bc: " + backcrosses);
-		System.out.println("crosses: " + crosses);*/
-
+	
 		if (!lastDeriv_parent.contains("/") ) {
 			System.out.println("last deriv parent no / and *");
 			for (int i = 0; i < parents.size(); i++) {
@@ -725,8 +642,7 @@ public class AssignGid {
 					Matcher m1 = p.matcher(parents.get(i).get(0));
 					String[] tokens2 = { "" };
 					if (m1.lookingAt()) {
-						tokens2 = new Tokenize()
-								.tokenize(parents.get(i).get(0));
+						tokens2 = new Tokenize().tokenize(parents.get(i).get(0));
 
 					} else {
 						tokens2[0] = "";
@@ -810,7 +726,6 @@ public class AssignGid {
 		}
 
 		// check if all bc exists
-
 		int count_bc_exist = 0;
 		for (int j = 0; j < backcrosses.size(); j++) {
 			if (!backcrosses.get(j).get(1).equals("0")
@@ -828,9 +743,6 @@ public class AssignGid {
 		System.out.println("crosses: " + crosses);
 
 		// create GID for back cross and crosses
-		System.out.println("count parents : " + count_parents_exist);
-		System.out.println("count bc: " + count_bc_exist);
-		System.out.println("index deriv: " + index_derivative);
 		if (count_parents_exist == parents.size() && index_derivative > -1
 				&& count_bc_exist != backcrosses.size()) {
 			createGID_bc_backcrosses(parents, backcrosses, crosses, parents_bc,
@@ -1451,6 +1363,13 @@ public class AssignGid {
 		return parents;
 	}
 
+	/**
+	 * Retrieve the GID of the crosses and set it in the cross list
+	 * @param parent1ID id of the parent
+	 * @param crosses list of the crosses
+	 * @param theParent the female/male parent of the cross
+	 * @return crosses updated list
+	 */
 	private List<List<String>> checkGID_crosses(String parent1ID,
 			List<List<String>> crosses, String theParent) {
 		// get GID of crosses
@@ -1472,6 +1391,26 @@ public class AssignGid {
 		return crosses;
 	}
 
+	/**
+	 * SET the GID of the progenies of a backcross
+	 * 
+	 * @param parents list if all the progenies
+	 * @param backcrosses list of all the backcrosses
+	 * @param crosses list of all the crosses (not backcross)
+	 * @param parents_bc list of all the progenies of the backcross
+	 * @param createdGID list of all the entries with assigned GIDs
+	 * @param lastDeriv_parent refers to the last derivative of the parent, if it has
+	 * @param parent1ID id of the evaluating female/male parent
+	 * @param parent1 name value of the evaluating parent
+	 * @param index_bc index of the pedigree in from the backcrosses list
+	 * @param gpid1_local gpid1 of the evaluating parent
+	 * @param gpid2_local gpid2 of the evaluating parent
+	 * @param gid_local gpid of the evaluating parent
+	 * @return result contains index_bc,parents,parents_bc, crosses,backcrosses
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	private JSONObject createGID_bc_backcrosses(List<List<String>> parents,
 			List<List<String>> backcrosses, List<List<String>> crosses,
 			List<String> parents_bc, List<List<String>> createdGID,
@@ -1488,13 +1427,8 @@ public class AssignGid {
 		String male = "";
 		String dose = "";
 		String tokens_dose[];
-		System.out.println("lastDer: " + lastDeriv_parent);
-		/*
-		 * System.out.println("backcrosses.get(i).get(0): " +
-		 * backcrosses.get(0).get(0));
-		 * System.out.println("backcrosses.get(i).get(last): " +
-		 * backcrosses.get(backcrosses.size() - 1).get(0));
-		 */
+		
+		
 		for (int i = 0; i < backcrosses.size(); i++) {
 
 			System.out.println("\t:: " + backcrosses.get(i).get(0));
@@ -1651,13 +1585,11 @@ public class AssignGid {
 			}
 
 			for (int j = index_bc - 1; j >= 0; j--) {
-				System.out
-						.println("::" + j + ":: " + backcrosses.get(j).get(0));
+				System.out.println("::" + j + ":: " + backcrosses.get(j).get(0));
 
 				if (j == backcrosses.size() - 1) {
 					System.out.println();
-					max = new CrossOp()
-							.maxCross(max, backcrosses.get(j).get(0));
+					max = new CrossOp().maxCross(max, backcrosses.get(j).get(0));
 					slash = new BackCross().printSlash(max);
 					tokens2 = backcrosses.get(j).get(0).split("\\" + slash);
 
@@ -1680,21 +1612,16 @@ public class AssignGid {
 
 						}
 					}
-					methodID = selectMethodType(fgid, mgid, female, male,
-							backcrosses.get(j).get(0), 0);
-					new_gid = addGID(backcrosses.get(j).get(0), fgid, mgid,
-							methodID, 3, false);
-					createdGID = updateCreatedGID("" + new_gid, parent1ID,
-							backcrosses.get(j).get(0), "new", createdGID);
+					methodID = selectMethodType(fgid, mgid, female, male, backcrosses.get(j).get(0), 0);
+					new_gid = addGID(backcrosses.get(j).get(0), fgid, mgid, methodID, 3, false);
+					createdGID = updateCreatedGID("" + new_gid, parent1ID, backcrosses.get(j).get(0), "new", createdGID);
 					createdGID_local = createdGID;
 					backcrosses.get(j).set(1, "" + new_gid);
 					backcrosses.set(j, backcrosses.get(j));
 
 				} else {
 					System.out.println();
-					methodID = selectMethodType(new_gid, parent2GID,
-							backcrosses.get(j + 1).get(0), parent2, backcrosses
-									.get(j).get(0), 107);
+					methodID = selectMethodType(new_gid, parent2GID, backcrosses.get(j + 1).get(0), parent2, backcrosses .get(j).get(0), 107);
 					new_gid = addGID(backcrosses.get(j).get(0), new_gid,
 							parent2GID, methodID, 3, false);
 					createdGID = updateCreatedGID("" + new_gid, parent1ID,
@@ -1769,12 +1696,8 @@ public class AssignGid {
 							if (count > 0) { // multiple hits
 								System.out.println("\t Multiple HIT");
 								System.out.println("\t i==0");
-								// printChooseGID(pedigree, parent, id);
-								updateCreatedGID("CHOOSE GID", parent1ID,
-										parents.get(j).get(0), "false",
-										createdGID_local);
-								multipleHits_inLocation(germplasm_fin, parents
-										.get(j).get(0), parent1ID, theParent);
+								updateCreatedGID("CHOOSE GID", parent1ID,parents.get(j).get(0), "false", createdGID_local);
+								multipleHits_inLocation(germplasm_fin, parents .get(j).get(0), parent1ID, theParent);
 							} else {
 								System.out.println("create Pedigree Line");
 								Pattern p = Pattern.compile("IR");
@@ -1797,8 +1720,7 @@ public class AssignGid {
 										pedigreeList_der.get(0), parent1,
 										temp_fin, 0);
 								GID = (Integer) output2.get("GID");
-								pedigreeList_der = (ArrayList<String>) output2
-										.get("pedList");
+								pedigreeList_der = (ArrayList<String>) output2.get("pedList");
 
 								System.out.println();
 								if (GID == 0) {
@@ -1945,6 +1867,25 @@ public class AssignGid {
 
 	}
 
+	/**
+	 * Updates the createdGID with the GID informstion from the backcrosses
+	 * 
+	 * @param createdGID list of all the entries with assigned GIDs
+	 * @param backcrosses list of all the backcrosses
+	 * @param parents list if all the progenies
+	 * @param parents_bc list of all the progenies of the backcross
+	 * @param parent1ID id of the evaluating female/male parent
+	 * @param parent1 name value of the evaluating parent
+	 * @param index_bc index of the pedigree in from the backcrosses list
+	 * @param gpid1_local gpid1 of the evaluating parent
+	 * @param gpid2_local gpid2 of the evaluating parent
+	 * @param gid_local gpid of the evaluating parent
+	 * @return createdGID
+	 * @throws NumberFormatException
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	private List<List<String>> update_backcrosses(
 			List<List<String>> createdGID, List<List<String>> backcrosses,
 			List<List<String>> parents, List<String> parents_bc,
@@ -1961,9 +1902,7 @@ public class AssignGid {
 		String male = "";
 		String dose = "";
 		String tokens_dose[];
-		// System.out.println("@ index: "+backcrosses.get(backcrosses.size()-1)
-		// );
-		// System.out.println("@ index: "+backcrosses.get(index_bc) );
+		
 		for (int i = index_bc; i < backcrosses.size(); i++) {
 			// System.out.println("\t:: "+backcrosses.get(i).get(0) );
 			max = new CrossOp().maxCross(max, backcrosses.get(i).get(0));
@@ -2084,271 +2023,6 @@ public class AssignGid {
 
 		}
 		return createdGID;
-
-	}
-
-	private void createGID_bc_checkBC(List<List<String>> parents,
-			List<List<String>> backcrosses, List<List<String>> crosses,
-			List<String> parents_bc, List<List<String>> createdGID,
-			String lastDeriv_parent, String parent1ID, String theParent)
-			throws MiddlewareQueryException, IOException {
-		int max = 0;
-		String slash = "";
-		String[] tokens2;
-		int parent2GID = 0;
-		String parent2 = "";
-		int fgid = 0, mgid = 0;
-		String female = "";
-		String male = "";
-		String dose = "";
-		String tokens_dose[];
-		System.out.println("@ index: "
-				+ backcrosses.get(backcrosses.size() - 1));
-		System.out.println("@ index: " + backcrosses.get(0));
-		for (int i = 0; i < backcrosses.size(); i++) {
-			if (i == backcrosses.size() - 1) {
-				/*
-				 * for(int j=0; j< parents.size();j++){
-				 * 
-				 * if(parents.get(j).get(0).equals(tokens2[0])){
-				 * parents.get(j).set(1, ""+gpid1_local); }
-				 * 
-				 * if(parents.get(j).get(0).equals(tokens2[1])){
-				 * parents.get(j).set(1, ""+gpid2_local); }
-				 * 
-				 * }
-				 */
-			} else {
-				// female
-				List<Germplasm> germplasm = new ArrayList<Germplasm>();
-				List<Germplasm> germplasm_fin = new ArrayList<Germplasm>();
-
-				int count_LOCAL = countGermplasmByName(backcrosses.get(i + 1)
-						.get(0), Database.LOCAL);
-				int count_CENTRAL = countGermplasmByName(backcrosses.get(i + 1)
-						.get(0), Database.CENTRAL);
-
-				germplasm = getGermplasmList(backcrosses.get(i + 1).get(0),
-						count_LOCAL, count_CENTRAL);
-				System.out.println("gsize: " + germplasm.size());
-
-				for (int j = 0; j < germplasm.size(); j++) {
-					if (germplasm.get(j).getLocationId().equals(locationID)
-							&& germplasm.get(j).getGrplce() == 0) {
-						germplasm_fin.add(germplasm.get(j));
-					}
-				}
-
-				if (germplasm_fin.size() > 0) {
-					updateCreatedGID("CHOOSE GID", parent1ID,
-							backcrosses.get(i + 1).get(0), "false", createdGID);
-					multipleHits_inLocation(germplasm_fin,
-							backcrosses.get(i + 1).get(0), parent1ID, theParent);
-				} else {
-
-				}
-				;
-
-			}
-
-		}
-	}
-
-	private void createGID_bc_checkbackcrosses(List<List<String>> parents,
-			List<List<String>> backcrosses, List<List<String>> crosses,
-			List<String> parents_bc, List<List<String>> createdGID,
-			String lastDeriv_parent, String parent1ID)
-			throws MiddlewareQueryException, IOException {
-		int index_crossOp = 0;
-		String[] tokens2;
-		String female = "", male = "";
-		// Germplasm fgid,mgid;
-		int fgid = 0, mgid = 0;
-		int methodID;
-		int new_gid = 0;
-		int max = 0;
-		int parent2GID = 0;
-		String parent2 = "";
-		String slash = "";
-
-		System.out.println("CREATE BACKCROSS------");
-		System.out.println("PARENTS ------");
-		System.out.println("\t" + parents);
-		System.out.println("PARENTS BC------");
-		System.out.println("\t" + parents_bc);
-		System.out.println("BACKCROSS------");
-		for (int j = backcrosses.size() - 1; j >= 0; j--) {
-			System.out.println("::" + backcrosses.get(j).get(0));
-
-			if (index_crossOp == 0) {
-				max = new CrossOp().maxCross(max, backcrosses.get(j).get(0));
-				slash = new BackCross().printSlash(max);
-				tokens2 = backcrosses.get(j).get(0).split("\\" + slash);
-
-				for (int i = 0; i < parents.size(); i++) {
-					if (parents_bc.get(0).equals(parents.get(i).get(0))) {
-						parent2GID = Integer.valueOf(parents.get(i).get(1));
-						parent2 = parents.get(i).get(0);
-					}
-					if (parents.get(i).get(0).equals(tokens2[0])
-							|| parents.get(i).get(0).equals(tokens2[1])) {
-						if (parents.get(i).get(0).equals(tokens2[0])) {
-							fgid = Integer.valueOf(parents.get(i).get(1));
-							female = tokens2[0];
-							// fgid=manager.getGermplasmByGID(Integer.valueOf(female));
-						} else {
-							mgid = Integer.valueOf(parents.get(i).get(1));
-							male = tokens2[1];
-							// mgid=manager.getGermplasmByGID(Integer.valueOf(male));
-						}
-
-					}
-				}
-				methodID = selectMethodType(fgid, mgid, female, male,
-						backcrosses.get(j).get(0), 0);
-				new_gid = addGID(backcrosses.get(j).get(0), fgid, mgid,
-						methodID, 3, false);
-				// crossesGID=printSuccess_temp(backcrosses.get(j).get(0),
-				// theParent, parent1ID, manager.getGermplasmByGID(new_gid),
-				// "new", crossesGID);
-				updateCreatedGID("" + new_gid, parent1ID, backcrosses.get(j)
-						.get(0), "new", createdGID);
-				backcrosses.get(j).set(1, "" + new_gid);
-				backcrosses.set(j, backcrosses.get(j));
-
-			} else {
-				methodID = selectMethodType(new_gid, parent2GID, backcrosses
-						.get(j + 1).get(0), parent2, backcrosses.get(j).get(0),
-						107);
-				new_gid = addGID(backcrosses.get(j).get(0), new_gid,
-						parent2GID, methodID, 3, false);
-				// crossesGID=printSuccess_temp(backcrosses.get(j).get(0),
-				// theParent, parentID, manager.getGermplasmByGID(new_gid),
-				// "new", crossesGID);
-				updateCreatedGID("" + new_gid, parent1ID, backcrosses.get(j)
-						.get(0), "new", createdGID);
-				backcrosses.get(j).set(1, "" + new_gid);
-				backcrosses.set(j, backcrosses.get(j));
-
-			}
-			index_crossOp++;
-		}
-
-		for (int j = crosses.size() - 1; j >= 0; j--) {
-			if (j == crosses.size() - 1) {
-				methodID = selectMethodType(new_gid, parent2GID, backcrosses
-						.get(0).get(0), parent2, crosses.get(j).get(0), 0);
-				new_gid = addGID(crosses.get(j).get(0), new_gid, parent2GID,
-						methodID, 3, false);
-				// crossesGID=printSuccess_temp(crosses.get(j).get(0), parent,
-				// id, manager.getGermplasmByGID(gid), "new", crossesGID);
-				updateCreatedGID("" + new_gid, parent1ID,
-						crosses.get(j).get(0), "new", createdGID);
-
-				crosses.get(j).set(1, "" + new_gid);
-				crosses.set(j, crosses.get(j));
-			} else {
-				max = new CrossOp().maxCross(max, crosses.get(j).get(0));
-				slash = new BackCross().printSlash(max);
-				tokens2 = crosses.get(j).get(0).split("\\" + slash, 2);
-				System.out.print("tokens2[0]: " + tokens2[0]);
-				System.out.println("\ttokens2[1]: " + tokens2[1]);
-				if (!tokens2[0].contains("/")) {
-					if (tokens2[0].contains("*")) {
-						Pattern p2 = Pattern.compile("\\*\\d"); // backcross to
-						// female
-						Matcher m2 = p2.matcher(tokens2[0]);
-						Boolean female_match = false;
-						while (m2.find()) {
-							female_match = true;
-							tokens2[0] = tokens2[0].replaceAll("\\*\\d", "");
-							System.out.println("new tokens2[0]: " + tokens2[0]);
-						}
-						if (!female_match) {
-							tokens2[0] = tokens2[0].replaceAll("\\d\\*", "");
-							System.out.println("\\d\\*: " + tokens2[0]);
-						}
-					}
-					for (int i = 0; i < parents.size(); i++) {
-
-						if (parents.get(i).get(0).equals(tokens2[0])) {
-							fgid = Integer.parseInt(parents.get(i).get(1));
-							female = tokens2[0];
-						}
-					}
-				} else {
-					for (int i = 0; i < crosses.size(); i++) {
-						if (crosses.get(i).get(0).equals(tokens2[0])) {
-							fgid = Integer.parseInt(crosses.get(i).get(1));
-							female = tokens2[0];
-						}
-					}
-
-				}
-				System.out.println("[1]: " + tokens2[1]);
-				if (!tokens2[1].contains("/")) {
-					if (tokens2[1].contains("*")) {
-						Pattern p2 = Pattern.compile("\\*\\d"); // backcross to
-						// female
-						Matcher m2 = p2.matcher(tokens2[1]);
-						Boolean female_match = false;
-						while (m2.find()) {
-							female_match = true;
-							tokens2[1] = tokens2[1].replaceAll("\\*\\d", "");
-							System.out.println("new tokens2[1]: " + tokens2[1]);
-						}
-						if (!female_match) {
-							tokens2[1] = tokens2[1].replaceAll("\\d\\*", "");
-							System.out.println("\\d\\*: " + tokens2[1]);
-						}
-					}
-					for (int i = 0; i < parents.size(); i++) {
-						if (parents.get(i).get(0).equals(tokens2[1])) {
-							mgid = Integer.parseInt(parents.get(i).get(1));
-							male = tokens2[1];
-						}
-					}
-				} else {
-					for (int i = 0; i < crosses.size(); i++) {
-						System.out.println("crosses: " + crosses.get(i).get(0));
-						if (crosses.get(i).get(0).equals(tokens2[1])) {
-							System.out.println("ditooo "
-									+ crosses.get(i).get(1));
-							mgid = Integer.parseInt(crosses.get(i).get(1));
-							male = tokens2[1];
-						}
-					}
-				}
-				System.out.println("mgid: " + mgid);
-				System.out.println("fgid: " + fgid);
-				Germplasm g1 = manager.getGermplasmByGID(fgid);
-				List<Name> name = manager.getNamesByGID(g1.getGpid1(), 0, null);
-				List<Name> name1 = manager
-						.getNamesByGID(g1.getGpid2(), 0, null);
-				methodID = 0;
-				if (name.get(0).getNval().equals(male)
-						|| name1.get(0).getNval().equals(male)) {
-					methodID = 107;
-				}
-				name.clear();
-				name1.clear();
-				g1 = null;
-
-				methodID = selectMethodType(fgid, mgid, female, male, crosses
-						.get(j).get(0), methodID);
-				new_gid = addGID(crosses.get(j).get(0), fgid, mgid, methodID,
-						3, false);
-				// crossesGID=printSuccess_temp(crosses.get(j).get(0), parent,
-				// id, manager.getGermplasmByGID(gid), "new", crossesGID);
-				updateCreatedGID("" + new_gid, parent1ID,
-						crosses.get(j).get(0), "new", createdGID);
-				crosses.get(j).set(1, "" + new_gid);
-				crosses.set(j, crosses.get(j));
-				if (j == 0) {
-					GID = new_gid;
-				}
-			}
-		}
 
 	}
 
@@ -2803,78 +2477,63 @@ public class AssignGid {
 
 	}
 
+	/**
+	 * Sets the GID of the pedigree line
+	 * 
+	 * @param index the index of the chosen GID
+	 * @param pedigreeList contains the pedigree line, [0] is the most recent pedigree, pedigreeList[size] is the root
+	 * @param gid_local
+	 * @param gpid1_local
+	 * @param gpid2_local
+	 * @param gid gid of the chosen germplasm name, constant
+	 * @param gpid1 gpid1 of the chosen germplasm name, constant
+	 * @param gpid2 gpid2 of the chosen germlasm name, constant
+	 * @param parent1ID id of the chosen GID
+	 * @param parent1 name value of the chosen GID
+	 * @param createdGID contains the list of entries that already been assigned with GIDs
+	 * @return createdGID
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public List<List<String>> getDerivativeLine(int index,
 			List<String> pedigreeList, int gid_local, int gpid1_local,
 			int gpid2_local, String gid, int gpid1, int gpid2,
 			String parent1ID, String parent1, List<List<String>> createdGID)
 			throws MiddlewareQueryException, IOException, InterruptedException {
 		Germplasm germplasm = new Germplasm();
-		System.out.println("Get the pedigree Line...");
 		Boolean error = false;
 
-		System.out.println("1: " + pedigreeList.get(0));
-		System.out
-				.println("last: " + pedigreeList.get(pedigreeList.size() - 1));
-
-		System.out.println("GID: " + gid);
-		System.out.println("GID_L: " + gid_local);
-		System.out.println("GPID1: " + gpid1);
-		System.out.println("GPID1_L:" + gpid1_local);
-		System.out.println("GPID2:" + gpid2);
-		System.out.println("GPID2_L:" + gpid2_local);
 		for (int i = index + 1; i < pedigreeList.size(); i++) {
 			System.out.println(":: " + pedigreeList.get(i));
 			if (error) {
 				List<Germplasm> germplasmList = new ArrayList<Germplasm>();
 
-				int count_LOCAL = countGermplasmByName(pedigreeList.get(i),
-						Database.LOCAL);
-				int count_CENTRAL = countGermplasmByName(pedigreeList.get(i),
-						Database.CENTRAL);
-				germplasmList = getGermplasmList(pedigreeList.get(i),
-						count_LOCAL, count_CENTRAL); // gets lists of germplasm
-				// with that name
-				germplasm = getGermplasmByGpid(gpid1_local, germplasmList); 
-				// get the germplasm of the same gpid1,for derivative line,
-				// or gid equals to the gpid1
+				int count_LOCAL = countGermplasmByName(pedigreeList.get(i), Database.LOCAL);
+				int count_CENTRAL = countGermplasmByName(pedigreeList.get(i), Database.CENTRAL);
+				germplasmList = getGermplasmList(pedigreeList.get(i), count_LOCAL, count_CENTRAL); // gets lists of germplasm with that name
+				germplasm = getGermplasmByGpid(gpid1_local, germplasmList); //get the germplasm of the same gpid1,for derivative line,  or gid equals to the gpid1
 				
 				gpid2_local = germplasm.getGpid2();
 				gpid1_local = germplasm.getGpid1();
 				gid_local = germplasm.getGid();
-				createdGID_local = updateFile_createdGID("" + gid_local,
-						parent1ID, pedigreeList.get(i), "false", parent1); // update
-				// the
-				// createdGID
-				// file
-				// System.out.println(" [1] pedigreeList.get(i): "+
-				// pedigreeList.get(i)+ " gid: "+ gid_local);
+				createdGID_local = updateFile_createdGID("" + gid_local, parent1ID, pedigreeList.get(i), "false", parent1); // update the createdGID
 				createdGID = createdGID_local;
 				germplasmList.clear(); // clearing object
 
 			} else {
 				germplasm = manager.getGermplasmByGID(gpid2_local);
-				if (germplasm == null) { // this is an ERROR, the gid should
-					// exist
+				if (germplasm == null) { // this is an ERROR, the gid should exist
 					error = true;
 					String remarks = "Does not exist";
-					createdGID_local = updateFile_createdGID(remarks,
-							parent1ID, pedigreeList.get(i), "false", parent1); // update
-					// the
-					// createdGID
-					// file
+					createdGID_local = updateFile_createdGID(remarks, parent1ID, pedigreeList.get(i), "false", parent1); 
+					
 					createdGID = createdGID_local;
 				} else {
 					gpid2_local = germplasm.getGpid2();
 					gpid1_local = germplasm.getGpid1();
 					gid_local = germplasm.getGid();
-					createdGID_local = updateFile_createdGID("" + gid_local,
-							parent1ID, pedigreeList.get(i), "false", parent1); // update
-					// the
-					// createdGID
-					// file
-					// System.out.println(" [2] pedigreeList.get(i): "+
-					// pedigreeList.get(i)+ " gid: "+ gid_local+
-					// ""+gpid2_local);
+					createdGID_local = updateFile_createdGID("" + gid_local, parent1ID, pedigreeList.get(i), "false", parent1); // update the createdGID
 					createdGID = createdGID_local;
 					error = false; // set the flag to false
 				}
@@ -2885,12 +2544,10 @@ public class AssignGid {
 		gpid1_local = gpid1;
 		gpid2_local = Integer.valueOf(gid);
 		for (int i = index - 1; i >= 0; i--) {
-			System.out.println("\t create GID: " + pedigreeList.get(i));
-
+			
 			int methodID = selectMethodType_DER(pedigreeList.get(i), parent1);
 
-			gid_local = (int) addGID(pedigreeList.get(i), gpid1_local,
-					gpid2_local, methodID, 5, false);
+			gid_local = (int) addGID(pedigreeList.get(i), gpid1_local, gpid2_local, methodID, 5, false);
 			Germplasm g = manager.getGermplasmByGID(gid_local);
 			gpid2_local = g.getGid();
 			gpid1_local = g.getGpid1();
@@ -2898,17 +2555,12 @@ public class AssignGid {
 
 			if (i == 0) {
 				GID = gid_local;
-				System.out.println("GID of one of the parent (: "
-						+ pedigreeList.get(i) + "): " + GID);
 			}
 
-			createdGID_local = updateFile_createdGID("" + gid_local, parent1ID,
-					pedigreeList.get(i), "new", parent1); // update the
-			// createdGID file
+			createdGID_local = updateFile_createdGID("" + gid_local, parent1ID, pedigreeList.get(i), "new", parent1); // update the createdGID 
 			createdGID = createdGID_local;
 		}
 
-		System.out.println("createdGID: " + createdGID_local);
 		return createdGID;
 
 	}
@@ -3254,6 +2906,20 @@ public class AssignGid {
 		return createdGID;
 	}
 
+	/**
+	 * Assign GID to the pedigree line 
+	 * This assigns GID of the pedigree line of the chosen germplasm name to be assigned by GID
+	 * 
+	 * @param chooseGID_id the Id of the germplasm name to be assigned wih GID
+	 * @param chooseGID_nval the name value of the germplasm name to be assigned wiith GID
+	 * @param theParent	 the parent of the germplasm name to be assigned with GID
+	 * @param lastDeriv_parent	the last derivative of the parent of the germplasm name to be assigned with GID
+	 * @param createdGID	list of the created GID of the entries
+	 * @return createdGID updated list of the created GIDs 
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public List<List<String>> createNew_crossOP(String chooseGID_id,
 			String chooseGID_nval, String theParent, String lastDeriv_parent,
 			List<List<String>> createdGID) throws MiddlewareQueryException,
@@ -3266,19 +2932,18 @@ public class AssignGid {
 		 * dim is the GID)
 		 * 
 		 * check if the GID that has been chosen is a pedigree from the
-		 * "derivatives" if yes, then create the line of the parent and update
+		 * "derivatives" if yes, then create/assign the line of the parent with GIDs and update
 		 * the createdGID_local
 		 * 
 		 * if a cross parents (with cross operators), find what index in the
 		 * "parents" from the index+1 to the "the parent", (for each parent) get
-		 * the female and male parent names and GID search if the parent exists,
+		 * the female and male parent names and GID, search if the parent exists,
 		 * if yes, update the createdGID_local else create GID update the
 		 * createdGID_local
 		 */
+		
 
 		List<List<String>> derivatives = new ArrayList<List<String>>();
-
-		// List<List<String>> temp = new ArrayList<List<String>>();
 		List<String> row_createdGID;
 
 		List<List<String>> parents = new ArrayList<List<String>>();
@@ -3317,19 +2982,11 @@ public class AssignGid {
 		for (int i = 0; i < parents.size(); i++) {
 			row_parents = parents.get(i);
 
-			if ((!row_parents.get(1).contains("/") /*
-													 * && !row_parents.get(1)
-													 * .contains("*")
-													 */)
-					&& !derivatives_temp.contains(row_parents.get(1))) {
+			if (!row_parents.get(1).contains("/") && !derivatives_temp.contains(row_parents.get(1))) {
 				derivatives_temp.add(row_parents.get(1));
 			}
 
-			if ((!row_parents.get(2).contains("/")/*
-												 * && !row_parents.get(2)
-												 * .contains("*")
-												 */)
-					&& !derivatives_temp.contains(row_parents.get(2))) {
+			if (!row_parents.get(2).contains("/") && !derivatives_temp.contains(row_parents.get(2))) {
 				derivatives_temp.add(row_parents.get(2));
 			}
 		}
@@ -3346,8 +3003,7 @@ public class AssignGid {
 				// System.out.println("\t row_createdGID.get(2): "+
 				// row_createdGID.get(2) + " derivtive: "+
 				// derivatives_temp.get(i));
-				if (row_createdGID.get(2).equals(derivatives_temp.get(i))
-						&& row_createdGID.get(0).equals(chooseGID_id)) {
+				if (row_createdGID.get(2).equals(derivatives_temp.get(i)) && row_createdGID.get(0).equals(chooseGID_id)) {
 					row_derivatives.add(row_createdGID.get(3));
 					isFound = true;
 					break;
@@ -3401,6 +3057,19 @@ public class AssignGid {
 		return createdGID;
 	}
 
+	/**
+	 * Assign GID to the pedigree line of the germplasm name that is a progeny of backcross
+	 * 
+	 * @param chooseGID_id the Id of the germplasm name to be assigned wih GID
+	 * @param chooseGID_nval the name value of the germplasm name to be assigned wiith GID
+	 * @param theParent	 the parent of the germplasm name to be assigned with GID
+	 * @param lastDeriv_parent	the last derivative of the parent of the germplasm name to be assigned with GID
+	 * @param createdGID	list of the created GID of the entries
+	 * @return createdGID updated list of the created GIDs 
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public List<List<String>> createNew_crossOP_parent_bc(String chooseGID_id,
 			String chooseGID_nval, String theParent, String lastDeriv_parent,
 			List<List<String>> createdGID) throws MiddlewareQueryException,
@@ -3490,33 +3159,13 @@ public class AssignGid {
 						tokens[0] = row_parents.get(0);
 					}
 					// tokens = new Tokenize().tokenize(row_derivatives.get(0));
-					pedigreeList = saveToArray(pedigreeList1, tokens); // pedigreeList[0]
-					// is
-					// the
-					// most
-					// recent
-					// pedigree,
-					// pedigreeList[size]
-					// is
-					// the
-					// root
+					pedigreeList = saveToArray(pedigreeList1, tokens); // pedigreeList[0] is the most recent pedigree, pedigreeList[size] is the root
 					System.out.println("pedigreeList: " + pedigreeList);
 					for (int j = 0; j < pedigreeList.size(); j++) {
 						System.out.println("pedigreeList: "
 								+ pedigreeList.get(j) + " chooseNVAL: "
 								+ lastDeriv_parent);
-						if (pedigreeList.get(j).equals(lastDeriv_parent)) { // if
-							// the
-							// chosen
-							// GID
-							// is
-							// a
-							// derivative
-							// in
-							// one
-							// of
-							// the
-							// parents
+						if (pedigreeList.get(j).equals(lastDeriv_parent)) { // if the chosen GID is a derivative in one of the parents
 							// if derivative, get derivative line
 							index_derivative = j; // get the index
 
@@ -3524,16 +3173,7 @@ public class AssignGid {
 							tokens = new Tokenize().tokenize(lastDeriv_parent);
 							pedigreeList_der = new ArrayList<String>();
 
-							pedigreeList = saveToArray(pedigreeList_der, tokens); // pedigreeList[0]
-							// is
-							// the
-							// most
-							// recent
-							// pedigree,
-							// pedigreeList[size]
-							// is
-							// the
-							// root
+							pedigreeList = saveToArray(pedigreeList_der, tokens); // pedigreeList[0] is the most recent pedigree, pedigreeList[size] is the root
 							Collections.reverse(pedigreeList_der);
 							int gpid1 = 0, gpid2 = 0, gid = 0;
 							Germplasm g;
@@ -3643,6 +3283,19 @@ public class AssignGid {
 		return createdGID;
 	}
 
+	/**
+	 * Assigns GID if the name is a progeny of a multiple cross
+	 * 
+	 * @param chooseGID_id the Id of the germplasm name to be assigned wih GID
+	 * @param chooseGID_nval the name value of the germplasm name to be assigned wiith GID
+	 * @param theParent	 the parent of the germplasm name to be assigned with GID
+	 * @param lastDeriv_parent	the last derivative of the parent of the germplasm name to be assigned with GID
+	 * @param createdGID	list of the created GID of the entries
+	 * @return createdGID updated list of the created GIDs 
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public List<List<String>> createNew_crossOP_parent(String chooseGID_id,
 			String chooseGID_nval, String theParent, String lastDeriv_parent,
 			List<List<String>> createdGID) throws MiddlewareQueryException,
@@ -3666,8 +3319,6 @@ public class AssignGid {
 		 */
 
 		List<List<String>> derivatives = new ArrayList<List<String>>();
-
-		// List<List<String>> temp = new ArrayList<List<String>>();
 		List<String> row_createdGID;
 
 		List<List<String>> parents = new ArrayList<List<String>>();
@@ -3706,19 +3357,11 @@ public class AssignGid {
 		for (int i = 0; i < parents.size(); i++) {
 			row_parents = parents.get(i);
 
-			if ((!row_parents.get(1).contains("/") /*
-													 * && !row_parents.get(1)
-													 * .contains("*")
-													 */)
-					&& !derivatives_temp.contains(row_parents.get(1))) {
+			if (!row_parents.get(1).contains("/") && !derivatives_temp.contains(row_parents.get(1))) {
 				derivatives_temp.add(row_parents.get(1));
 			}
 
-			if ((!row_parents.get(2).contains("/") /*
-													 * && !row_parents.get(2)
-													 * .contains("*")
-													 */)
-					&& !derivatives_temp.contains(row_parents.get(2))) {
+			if (!row_parents.get(2).contains("/") && !derivatives_temp.contains(row_parents.get(2))) {
 				derivatives_temp.add(row_parents.get(2));
 			}
 		}
@@ -3730,8 +3373,7 @@ public class AssignGid {
 			row_derivatives.add(derivatives_temp.get(i));
 			for (int j = 0; j < createdGID_local.size(); j++) {
 				row_createdGID = createdGID_local.get(j);
-				if (row_createdGID.get(2).equals(derivatives_temp.get(i))
-						&& row_createdGID.get(0).equals(chooseGID_id)) {
+				if (row_createdGID.get(2).equals(derivatives_temp.get(i)) && row_createdGID.get(0).equals(chooseGID_id)) {
 					row_derivatives.add(row_createdGID.get(3));
 					isFound = true;
 					break;
@@ -3768,24 +3410,12 @@ public class AssignGid {
 				tokens[0] = row_derivatives.get(0);
 			}
 			// tokens = new Tokenize().tokenize(row_derivatives.get(0));
-			pedigreeList = saveToArray(pedigreeList, tokens); // pedigreeList[0]
-			// is the most
-			// recent
-			// pedigree,
-			// pedigreeList[size]
-			// is the root
+			pedigreeList = saveToArray(pedigreeList, tokens); // pedigreeList[0] is the most recent pedigree, pedigreeList[size] is the root
 			System.out.println("pedigreeList: " + pedigreeList);
 			for (int j = 0; j < pedigreeList.size(); j++) {
 				System.out.println("pedigreeList: " + pedigreeList.get(j)
 						+ " chooseNVAL: " + lastDeriv_parent);
-				if (pedigreeList.get(j).equals(lastDeriv_parent)) { // if the
-					// chosen
-					// GID is a
-					// derivative
-					// in one of
-					// the
-					// parents
-					// if derivative, get derivative line
+				if (pedigreeList.get(j).equals(lastDeriv_parent)) { // if the chosen GID is a derivative in one of the parents if derivative, get derivative line
 					// index_derivative=j; // get the index
 					System.out.println("HERE");
 					p = Pattern.compile("IR");
@@ -3801,17 +3431,7 @@ public class AssignGid {
 
 					pedigreeList_der = new ArrayList<String>();
 
-					pedigreeList = saveToArray(pedigreeList_der, tokens); // pedigreeList[0]
-					// is
-					// the
-					// most
-					// recent
-					// pedigree,
-					// pedigreeList[size]
-					// is
-					// the
-					// root
-					Collections.reverse(pedigreeList_der);
+					pedigreeList = saveToArray(pedigreeList_der, tokens); // pedigreeList[0] is the most recent pedigree, pedigreeList[size] is the root					Collections.reverse(pedigreeList_der);
 					int gpid1 = 0, gpid2 = 0, gid = 0;
 					Germplasm g;
 					int index = -1;
@@ -3866,21 +3486,12 @@ public class AssignGid {
 											createdGID_local);
 								}
 							} else {
-								updateCreatedGID("NOT SET", chooseGID_id,
-										pedigreeList_der.get(l), "false",
-										createdGID_local);
-								updateCreatedGID("CHOOSE GID", chooseGID_id,
-										pedigreeList_der.get(0), "false",
-										createdGID_local);
-								int count_LOCAL = countGermplasmByName(
-										pedigreeList_der.get(0), Database.LOCAL);
-								int count_CENTRAL = countGermplasmByName(
-										pedigreeList_der.get(0),
-										Database.CENTRAL);
+								updateCreatedGID("NOT SET", chooseGID_id, pedigreeList_der.get(l), "false", createdGID_local);
+								updateCreatedGID("CHOOSE GID", chooseGID_id, pedigreeList_der.get(0), "false", createdGID_local);
+								int count_LOCAL = countGermplasmByName( pedigreeList_der.get(0), Database.LOCAL);
+								int count_CENTRAL = countGermplasmByName( pedigreeList_der.get(0), Database.CENTRAL);
 
-								List<Germplasm> germplasm = getGermplasmList(
-										pedigreeList_der.get(0), count_LOCAL,
-										count_CENTRAL);
+								List<Germplasm> germplasm = getGermplasmList( pedigreeList_der.get(0), count_LOCAL, count_CENTRAL);
 								List<Germplasm> germplasm_fin = new ArrayList<Germplasm>();
 								System.out.println("gcount: " + count_LOCAL);
 								for (int m = 0; m < germplasm.size(); m++) {
@@ -3890,9 +3501,7 @@ public class AssignGid {
 										germplasm_fin.add(germplasm.get(m));
 									}
 								}
-								multipleHits_inLocation(germplasm_fin,
-										pedigreeList_der.get(0), chooseGID_id,
-										theParent);
+								multipleHits_inLocation(germplasm_fin, pedigreeList_der.get(0), chooseGID_id, theParent);
 								germplasm = null;
 							}
 						}
@@ -3911,9 +3520,7 @@ public class AssignGid {
 		int count_allParentsExist = 0;
 		for (int i = 0; i < derivatives.size(); i++) {
 			System.out.println("gid: " + derivatives.get(i).get(1));
-			if (!derivatives.get(i).get(1).equals("0")
-					&& !derivatives.get(i).get(1).equals("NOT SET")
-					&& !derivatives.get(i).get(1).equals("CHOOSE GID")) {
+			if (!derivatives.get(i).get(1).equals("0") && !derivatives.get(i).get(1).equals("NOT SET") && !derivatives.get(i).get(1).equals("CHOOSE GID")) {
 				count_allParentsExist++;
 			}
 		}
@@ -3964,13 +3571,8 @@ public class AssignGid {
 					GID = gid_cross;
 
 				}
-				// String gid, String id,String pedigree, String newGID,String
-				// parent
 				createdGID = updateFile_createdGID("" + gid_cross,
-						chooseGID_id, row_parents.get(0), "new", theParent); // update
-				// the
-				// createdGID
-				// file
+						chooseGID_id, row_parents.get(0), "new", theParent); // update the createdGID
 				createdGID_local = createdGID;
 				row_derivatives = new ArrayList<String>();
 				row_derivatives.add(row_parents.get(0));
@@ -3989,6 +3591,14 @@ public class AssignGid {
 		return createdGID;
 	}
 
+	/**Checks if the cross already exists in the local or central db given the female and male GID
+	 * @param cross name of the cross
+	 * @param fgid GID of the female parent
+	 * @param mgid GID of the male parent 
+	 * @return gerplasm_fin germplasm of the existing germplasm if not null
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 */
 	public Germplasm isCross_existing(String cross, int fgid, int mgid)
 			throws MiddlewareQueryException, IOException {
 		List<Germplasm> germplasm = new ArrayList<Germplasm>();
@@ -4020,11 +3630,16 @@ public class AssignGid {
 		}
 	}
 
+	/**
+	 * Selects the method type with DER as method code of the germplasm to be assigned by new GID 
+	 * @param pedigree name value of the germplasm to be assigned by new GID
+	 * @param parent parent of the pedigree
+	 * @return method ID
+	 */
 	public int selectMethodType_DER(String pedigree, String parent) {
 		int methodID = 31; // unknown
 		String tokens[] = pedigree.split("-");
-		Pattern p = Pattern
-				.compile("(IR\\s\\d+)|(B)|(\\d+B)|(\\d*R)|(\\d*AC)|(C\\d+)|(\\d+MP)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN|SDO)\\s\\d+)");
+		Pattern p = Pattern.compile("(IR\\s\\d+)|(B)|(\\d+B)|(\\d*R)|(\\d*AC)|(C\\d+)|(\\d+MP)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN|SDO)\\s\\d+)");
 		System.out.println("pedigree: " + tokens[tokens.length - 1]);
 		String gen;
 		if (!pedigree.contains("-")) { // if F1
@@ -4310,22 +3925,7 @@ public class AssignGid {
 				germplasmList = getGermplasmList(pedigree, count_LOCAL,
 						count_CENTRAL); // gets lists of germplasm with that
 				// name
-				germplasm = getGermplasmByGpid(gpid1, germplasmList); // get the
-				// germplasm
-				// of
-				// the
-				// same
-				// gpid1,
-				// for
-				// derivative
-				// line,
-				// or
-				// gid
-				// equals
-				// to
-				// the
-				// gpid1
-
+				germplasm = getGermplasmByGpid(gpid1, germplasmList); // get the germplasm of the same gpid1, for derivative line, or gid equals to the gpid1
 				germplasmList.clear(); // clearing object
 			} else {
 				germplasm = manager.getGermplasmByGID(gpid2);
@@ -4334,8 +3934,6 @@ public class AssignGid {
 			if (germplasm == null) { // this is an ERROR, the gid should exist
 				error = true;
 				gid = "Does not exist";
-				// createdGID_local=updateFile_createdGID(gid, id, pedigree,
-				// "false"); //update the createdGID file
 
 			} else {
 				gpid2 = germplasm.getGpid2();
@@ -4343,11 +3941,9 @@ public class AssignGid {
 				gid = "" + germplasm.getGid();
 				error = false; // set the flag to false
 			}
-			createdGID_local = updateCreatedGID(gid, id, pedigree, "false",
-					createdGID_local); // update the createdGID file
+			createdGID_local = updateCreatedGID(gid, id, pedigree, "false", createdGID_local); // update the createdGID file
 
 		}
-
 		// clearing objects
 		germplasm = null;
 
@@ -8458,6 +8054,14 @@ public class AssignGid {
 
 	}
 
+	/**Add germplasm to the list of all same germplasm name in same location
+	 * @param germplasm list of germplasm having same germplasm name in same location
+	 * @param pedigree name of the germplsm
+	 * @param id id of the evaluating entry
+	 * @param root refers to the parent of the entry
+	 * @throws IOException
+	 * @throws MiddlewareQueryException
+	 */
 	public void multipleHits_inLocation(List<Germplasm> germplasm,
 			String pedigree, String id, String root) throws IOException,
 			MiddlewareQueryException {
@@ -8466,20 +8070,12 @@ public class AssignGid {
 		String nval_gpid1, nval_gpid2;
 		List<String> row = new ArrayList<String>();
 
-		// System.out.println("1 existingTerm:"+existingTerm_local);
-
 		for (int i = 0; i < germplasm.size(); i++) {
 
 			row = new ArrayList<String>();
-			// //System.out.println(germplasm.get(i).getGid());
 			row.add(id);
 			row.add(root);
-			/*
-			 * ////System.out.println("\n string: " + root);
-			 * ////System.out.println("GID: " + germplasm.get(i).getGid());
-			 * ////System.out.println("gpid1: " + germplasm.get(i).getGpid1());
-			 * ////System.out.println("gpid2: " + germplasm.get(i).getGpid2());
-			 */
+			
 			name = new ArrayList<Name>();
 			if (germplasm.get(i).getGpid1() != 0
 					&& germplasm.get(i).getGpid2() != 0) {
@@ -8488,12 +8084,10 @@ public class AssignGid {
 						null);
 				nval_gpid1 = name.get(0).getNval();
 
-				// //System.out.println("nval_gpid1: " + nval_gpid1);
 				name = manager.getNamesByGID(germplasm.get(i).getGpid2(), 0,
 						null);
 				nval_gpid2 = name.get(0).getNval();
 
-				// //System.out.println("nval_gpid2: " + nval_gpid2);
 			} else {
 				if (germplasm.get(i).getGpid1() == 0
 						&& germplasm.get(i).getGpid2() != 0) {
@@ -8539,12 +8133,10 @@ public class AssignGid {
 			String date = germplasm.get(i).getGdate().toString();
 
 			String yr, day, mo;
-			// System.out.println("date: "+date);
 			if (date.equals("0")) {
 				yr = "0000";
 				day = "00";
 				mo = "00";
-				// row.add(yr.concat(day).concat(mo)); //date of creation
 				row.add("0"); // date of creation
 			} else if ((date.charAt(3) == '0' && date.charAt(4) == '0')
 					|| (date.charAt(6) == '0' && date.charAt(7) == '0')) {
@@ -8570,8 +8162,6 @@ public class AssignGid {
 				row.add(yr.concat(mo).concat(day)); // date of creation
 			}
 
-			// System.out.println("date: "+yr.concat(day).concat(mo));
-
 			row.add(cross_date); // date of creation
 
 			// clearing memory
@@ -8579,13 +8169,9 @@ public class AssignGid {
 			method = null;
 
 			existingTerm_local.add(row);
-			// System.out.println("row: "+row);
 
 		}
-		// existingTerm_local = existingTerm;
-
 		System.out.println("existingTerm:" + existingTerm_local);
-		//
 		germplasm.clear();
 
 	}
@@ -8731,9 +8317,6 @@ public class AssignGid {
 		row.add(id);
 		row.add(parent); // parent
 		row.add(pedigree); // pedigree
-
-		// //System.out.println("NOT SET");
-
 		row.add("NOT SET"); // gid
 		row.add("N/A"); // method
 		row.add("N/A"); // method
@@ -8746,9 +8329,7 @@ public class AssignGid {
 		row.add("N/A"); // date of the created GID
 
 		createdGID_local.add(row);
-		System.out.println("row: " + row);
-		// ////System.out.println("output: "+createdGID_local);
-		// row.clear();
+
 
 	}
 
@@ -8757,9 +8338,6 @@ public class AssignGid {
 		row.add(id);
 		row.add(parent); // parent
 		row.add(pedigree); // pedigree
-
-		// //System.out.println("CHOOSE GID" );
-
 		row.add("CHOOSE GID"); // gid
 		row.add("N/A"); // method
 		row.add("N/A"); // method
@@ -8772,30 +8350,19 @@ public class AssignGid {
 		row.add("N/A"); // date of the created GID
 
 		createdGID_local.add(row);
-
-		// ////System.out.println("row: "+row);
-		// ////System.out.println("output: "+createdGID_local);
-		// row.clear();
-
 	}
 
 	private void printSuccess(String pedigree, String parent, String id,
 			Germplasm germplasm, String tag) throws MiddlewareQueryException {
 		List<String> row = new ArrayList<String>();
 		row.add(id);
-		// ////System.out.println(id + ",");
 		row.add(parent); // parent
 		row.add(pedigree); // pedigree
 
-		// ////System.out.println("gid: " + germplasm.getGid());
-		// System.out.println("location: " + germplasm.getLocationId());
 		Location location = manager.getLocationByID(germplasm.getLocationId());
 		Method method = manager.getMethodByID(germplasm.getMethodId());
 
 		row.add("" + germplasm.getGid()); // gid
-		// System.out.println("GID: "+germplasm.getGid());
-		// System.out.println("MID: "+germplasm.getMethodId());
-		// System.out.println("MNAME:  "+method.getMname());
 		String meth = method.getMname().replaceAll(",", "#");
 
 		row.add("" + germplasm.getMethodId()); // method
@@ -8803,7 +8370,6 @@ public class AssignGid {
 
 		String loc = location.getLname().replaceAll(",", "#");
 
-		// ////System.out.print("loc "+loc);
 		row.add("" + germplasm.getLocationId()); // location
 		row.add(loc); // location
 		row.add("" + germplasm.getGpid1()); // gpid1
@@ -8812,16 +8378,6 @@ public class AssignGid {
 		row.add(cross_date); // cross' date of creation specified in the list
 		row.add("" + germplasm.getGdate()); // date of the created GID
 
-		/*
-		 * ////System.out.print(id + ","); ////System.out.print(parent + ",");
-		 * // parent ////System.out.print(pedigree + ","); // pedigree
-		 * ////System.out.print(germplasm.getGid() + ","); // gid
-		 * ////System.out.print(germplasm.getMethodId() + "," + meth + ","); //
-		 * method ////System.out.print(germplasm.getLocationId() + "," + loc +
-		 * ","); // location ////System.out.print(germplasm.getGpid1() + ",");
-		 * // gpid1 ////System.out.print(germplasm.getGpid2() + ","); // gpid2
-		 * ////System.out.println(tag + ",\n"); // gpid2
-		 */
 		// clearing memory
 		germplasm = null;
 
@@ -8835,6 +8391,12 @@ public class AssignGid {
 		// row.clear();
 	}
 
+	/**
+	 * Gets the germplasm pojo given the gpid1
+	 * @param gpid1 given gpid1
+	 * @param germplasmList list of all germplasm of the same name
+	 * @return germplasm
+	 */
 	public Germplasm getGermplasmByGpid(int gpid1, List<Germplasm> germplasmList) {
 		for (int i = 0; i < germplasmList.size(); i++) {
 			if (germplasmList.get(i).getGpid1() == gpid1
@@ -8857,6 +8419,15 @@ public class AssignGid {
 		return germplasm;
 	}
 
+	/**
+	 * Gets All instances of the germplasm name
+	 * @param pedigree germplasm name
+	 * @param count_LOCAL count of instance in the local database
+	 * @param count_CENTRAL count of instance in the local database
+	 * @return germplasm list of all germplasm of the same name
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 */
 	public List<Germplasm> getGermplasmList(String pedigree, int count_LOCAL,
 			int count_CENTRAL) throws MiddlewareQueryException, IOException {
 
@@ -8878,6 +8449,12 @@ public class AssignGid {
 		return germplasm;
 	}
 
+	/**
+	 * Stores the pedigree line into an array
+	 * @param array holder of the pedigree line
+	 * @param tokens parsed germplasm name 
+	 * @return array holder of the pedigree line
+	 */
 	public ArrayList<String> saveToArray(ArrayList<String> array,
 			String[] tokens) {
 
@@ -8888,12 +8465,10 @@ public class AssignGid {
 			} else {
 				s = s + "-" + tokens[i];
 			}
-			// ////System.out.println(""+s);
 			array.add(s);
 		}
 		Collections.reverse(array);
-		System.out.println("PEDLIST: " + array);
-		// tokens=null;
+		
 		return array;
 	}
 
@@ -8906,6 +8481,18 @@ public class AssignGid {
 		return count;
 	}
 
+	/**
+	 * Add GID to the local database
+	 * 
+	 * @param pedigree name value of the germplasm
+	 * @param gpid1 gpid1 of the germlasm 
+	 * @param gpid2 gpid2 of the germplasm
+	 * @param methodID method ID of the germplasm
+	 * @param nameType name type of the germplasm 
+	 * @param newCross flag if it is a new cross, the cross of the entry in the list 
+	 * @return GID
+	 * @throws MiddlewareQueryException
+	 */
 	public int addGID(String pedigree, int gpid1, int gpid2, int methodID,
 			int nameType, Boolean newCross) throws MiddlewareQueryException {
 
@@ -8915,33 +8502,20 @@ public class AssignGid {
 		Germplasm germplasm1 = new Germplasm();
 		germplasm1.setMethodId(methodID);
 		int gnpgs = 0;
-		/*
-		 * if(methodID==107){ // 107 = backcross gnpgs=2; //cross nameType=3; //
-		 * unnamed cross }else
-		 */
-		// if(nameType==3){
-		// nameType=3; //unnamed cross
-		// }
+		
 		if (methodID == 205 || methodID == 31 || methodID == 207
 				|| methodID == 206) { // 205=SPS 33=UNKNOWN 207=random bulk
-			// 206=selected bulk
 			gnpgs = -1; // derivative
-			// nameType=5; //derivative
 		} else {
 			gnpgs = 2; // cross
-			// nameType=2; //cross
 		}
 		germplasm1.setGnpgs(gnpgs);
 		germplasm1.setGpid1(gpid1);
-		// int setGpid2=
 		germplasm1.setGpid2(gpid2);
 		germplasm1.setUserId(Integer.valueOf(userID_local));
 		germplasm1.setLgid(-1);
 		germplasm1.setLocationId(locationID);
-		// Date date = new Date();
-		// SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
 		Integer gdate;
-		// SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		if (newCross) {
 			String yr = "";
 			String day = "";
@@ -9013,17 +8587,27 @@ public class AssignGid {
 		name1.setUserId(Integer.valueOf(userID_local));
 		name1.setLocationId(locationID);
 		name1.setNval(pedigree);
-		name1.setTypeId(nameType); // SET THE NAME TYPE 2 for derivative, 5 for
-		// cross name
+		name1.setTypeId(nameType); // SET THE NAME TYPE 2 for derivative, 5 for cross name
 
 		gid = manager.addGermplasm(germplasm1, name1);
-		// //System.out.println("Germplasm" + gid);
 
 		germplasm1 = null;
 		name1 = null;
 		return gid;
 	}
 
+	/**
+	 * Assign a method type to the germplasm with mcode=GEN
+	 * @param femaleGID GID of the female parent
+	 * @param maleGID GID of the male parent 
+	 * @param female_nval name value of the female parent 
+	 * @param male_nval name value of the male parent
+	 * @param nval_created the name value of the newly assigned GID 
+	 * @param methodID default method ID given if backcross, else disregard
+	 * @return methodID
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 */
 	public int selectMethodType(int femaleGID, int maleGID, String female_nval,
 			String male_nval, String nval_created, int methodID)
 			throws MiddlewareQueryException, IOException {
@@ -9105,64 +8689,6 @@ public class AssignGid {
 
 			}
 		}
-
-		/*
-		 * if(methodID==107){ System.out.println("Method is bc 1");
-		 * methodType=107; methodDesc="Backcross"; }else
-		 * if(female_nval.equals(male_nval)){
-		 * System.out.println("Method is bc 2"); methodType=107;
-		 * methodDesc="Backcross"; }else if(female_nval.contains("/") &&
-		 * !male_nval.contains("/")){
-		 * 
-		 * int max=0; max=new CrossOp().maxCross(max, female_nval);
-		 * if(female_nval.contains("*")){ max++; }
-		 * 
-		 * if(max==1 && (male_germplasm.getMethodId()==101 ||
-		 * male_germplasm.getMethodId()==205 ||
-		 * female_germplasm.getMethodId()==33)){ // A/B X C methodType=103; //if
-		 * (AXB)X(CXD); double cross methodDesc=""; }else if(max==1 &&
-		 * (male_germplasm.getMethodId()==103)){ methodType=102; //if
-		 * [(AXB)X(CXD)] X (EXF); 3 way cross methodDesc="Three-way cross"; }
-		 * else if(max==2 && (male_germplasm.getMethodId()==101 ||
-		 * male_germplasm.getMethodId()==205 ||
-		 * female_germplasm.getMethodId()==33)){ methodType=102; //if
-		 * [(AXB)X(CXD)] X (EXF); 3 way cross methodDesc="Three-way cross";
-		 * }else if(max >3){ methodType=106; //Cross between two three-way or
-		 * more complex crosses or 1 3-way and a single cross
-		 * methodDesc="Complex Cross"; }
-		 * 
-		 * }else if(male_nval.contains("/") && !female_nval.contains("/")){ int
-		 * max=0; max=new CrossOp().maxCross(max, male_nval);
-		 * if(male_nval.contains("*")){ max++; } if(max==1 &&
-		 * (female_germplasm.getMethodId()==101 ||
-		 * female_germplasm.getMethodId()==205 ||
-		 * female_germplasm.getMethodId()==33 )){ // A/B X C methodType=103;
-		 * //if (AXB)X(CXD); double cross methodDesc=""; }else if(max==1 &&
-		 * (female_germplasm.getMethodId()==103)){ methodType=102; //if
-		 * [(AXB)X(CXD)] X (EXF); 3 way cross methodDesc="Three-way cross"; }
-		 * else if(max==2 && (female_germplasm.getMethodId()==101 ||
-		 * female_germplasm.getMethodId()==205 ||
-		 * female_germplasm.getMethodId()==33)){ methodType=102; //if
-		 * [(AXB)X(CXD)] X (EXF); 3 way cross methodDesc="Three-way cross";
-		 * }else if(max >3){ methodType=106; //Cross between two three-way or
-		 * more complex crosses or 1 3-way and a single cross
-		 * methodDesc="Complex Cross"; }
-		 * 
-		 * }else if(male_nval.contains("/") && female_nval.contains("/")){ /*int
-		 * max1=0; max1=new CrossOp().maxCross(max1, female_nval); int max2=0;
-		 * max2=new CrossOp().maxCross(max2, male_nval);
-		 * if(female_nval.contains("*")){ max1++; } if(male_nval.contains("*")){
-		 * max2++; } if(max1==1 && max2==1){ methodType=103; //if (AXB)X(CXD);
-		 * double cross methodDesc=""; }else if(max1==1 && max2==2){
-		 * methodType=102; //if [(AXB)X(CXD)] X (EXF); 3 way cross
-		 * methodDesc="Three-way cross"; }else if(max1==2 && max2==1){
-		 * methodType=102; //if [(AXB)X(CXD)] X (EXF); 3 way cross
-		 * methodDesc="Three-way cross"; }else{ methodType=106; //Cross between
-		 * two three-way or more complex crosses or 1 3-way and a single cross
-		 * methodDesc="Complex Cross"; }
-		 * 
-		 * }
-		 */
 
 		// clearing memory
 		female_germplasm = null;
@@ -9248,6 +8774,12 @@ public class AssignGid {
 		return g;
 	}
 
+	/** Get the GID from list of all entries that has been assigned with GIDs,createdGID
+	 * @param pedigree name of the germplasm
+	 * @param id id of the pedigree in the list
+	 * @return GID
+	 * @throws IOException
+	 */
 	private int getGID_fromFile(String pedigree, String id) throws IOException {
 		int gid = 0;
 
@@ -9266,12 +8798,6 @@ public class AssignGid {
 				}
 			}
 		}
-
-		// //System.out.println("get GID from file: "+gid);
-
-		// //System.out.println("  ###END getGID_fromFile \n");
-
-		// clearing memory
 
 		return gid;
 	}
@@ -9372,6 +8898,18 @@ public class AssignGid {
 
 	}
 
+	/**
+	 * Updates the list of all created GIDs
+	 * @param gid GID of the germplasm to be updated
+	 * @param id of the germplasm name in the list
+	 * @param pedigree name value of the germplasm n
+	 * @param newGID flag if it a new GID or not
+	 * @param parent parent of the germplam name to be updated
+	 * @return createdGID
+	 * @throws IOException
+	 * @throws MiddlewareQueryException
+	 * @throws InterruptedException
+	 */
 	public List<List<String>> updateFile_createdGID(String gid, String id,
 			String pedigree, String newGID, String parent) throws IOException,
 			MiddlewareQueryException, InterruptedException {

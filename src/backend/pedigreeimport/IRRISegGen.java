@@ -5,8 +5,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
- * @author NCarumba
+ * Checks for unrecognized patterns and incorrect spacing in names for Segregating line
+ * @author Nikki G. Carumba
  */
 public class IRRISegGen {
 
@@ -51,14 +51,11 @@ public class IRRISegGen {
 				for (int i = 0; i < tokens.length; i++) {
 					checkErrorSpacing(i, m.group(1));
 					checkErrorPattern(i, m.group(1));
-					//System.out.println("here inside the IRRI sel");
 				}
-				//printGroup(m);
 				tokens = t.tokenize(m.group(2));    // WARDA
 				for (int i = 0; i < tokens.length; i++) {
 					new WARDA().checkErrorSpacing(i, m.group(1), m.group(2), tokens);
 				}
-				//toFix();
 			}
 		} else {
 
@@ -66,16 +63,12 @@ public class IRRISegGen {
 				checkErrorSpacing(i, temp);
 				checkErrorPattern(i, temp);
 			}
-			//System.out.println("listErrors:" + listErrors);
-
-			//             toFix(tokens,line);
-			//            correctFixedLine(tokens,line);
 		}
-		//System.out.println(toFix);
 	}
 
 	/**
-	 *
+	 * Check errors in spacing
+	 * 
 	 * @param i Integer pointer of the token of the string
 	 * @param temp temporary String holder of the string inputted line
 	 */
@@ -162,11 +155,11 @@ public class IRRISegGen {
 	}
 
 	/**
-	 *
+	 * Checks for pattern/s not recognized, unrecognized codes
 	 * @param i is the integer pointer of the token of the string
 	 * @param temp a temporary variable to hold the string line
 	 */
-	public void checkErrorPattern(int i, String temp) {   //ERROR TRAPPING: pattern/s not recognized, unrecognized codes
+	public void checkErrorPattern(int i, String temp) {  
 		temp = line;
 		Pattern p11 = Pattern.compile("(\\d+)|(IR\\s\\d+)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN|SDO)\\s\\d+)|(\\d{0,4})B|R|AC|(C\\d+)|(\\d+MP)");
 		Matcher m11 = p11.matcher(tokens[i]);
@@ -178,7 +171,11 @@ public class IRRISegGen {
 		}
 	}
 
-	public void checkErrorPattern() {   //ERROR TRAPPING: pattern/s not recognized, unrecognized codes
+	/**
+	 * Checks for unrecognized patterns through all tokens
+	 * ERROR TRAPPING: pattern/s not recognized, unrecognized codes
+	 */
+	public void checkErrorPattern() {  
 		for (int i = 0; i < tokens.length; i++) {
 			String temp = line;
 			Pattern p11 = Pattern.compile("(\\d+)|(IR\\s\\d+)|((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN|SDO)\\s\\d+)|(\\d{0,4})B|R|AC|(C\\d+)|(\\d+MP)");
@@ -191,7 +188,12 @@ public class IRRISegGen {
 		}
 	}
 
-	public void correctLine(String[] tokens,String line) {   // method to check if the String s in the correct format
+	/**
+	 * Checks if the String s in the correct format
+	 * @param tokens parsed germplasm name
+	 * @param line germplasm name
+	 */
+	public void correctLine(String[] tokens,String line) { 
 		Pattern p12 = Pattern.compile(A_IR + A_SPACE + A_PLANT_NO + "(" + A_DASH + "(((" + A_LOC + A_SPACE + A_SEL_NO + ")|" + A_SEL_NO + ")|" + A_BM + "|" + A_MP + ")){1,5}");
 		//Pattern p2 = Pattern.compile("IR\\s\\d+(-((((UBN|AJY|SRN|CPA|KKN|PMI|SKN|SRN)\\s\\d+)|\\d+)|((\\d{0,4}B)|R|AC|(C\\d+))|(\\d+MP))){1,5}");
 		Matcher m = p12.matcher(line);
@@ -200,132 +202,6 @@ public class IRRISegGen {
 			//tokens = t.tokenize(line);
 			//t.stringTokens(tokens);
 			listErrors=line + "\t;string pattern not recognized ";
-		}
-	}
-
-	void toFix(String[] tokens,String line) {
-		String answer;
-		do {
-			Scanner user_input = new Scanner(System.in);
-			//System.out.print("\n>>Fix String? (Y/N) ");
-			answer = user_input.nextLine();
-
-			if (answer.equalsIgnoreCase("Y")) {
-				// System.out.println(line + "#");
-				tokens = t.tokenize(line);
-				String temp = line;
-				if (line.contains("WA")) {
-					Pattern p = Pattern.compile("(.+)(\\s+WA(.+))");  // to divide the line into two groups
-					Matcher m = p.matcher(line);
-					if (m.find()) {
-						//printGroup(m);
-						tokens = t.tokenize(m.group(1));    // from IRRI selection
-						for (int i = 0; i < tokens.length; i++) {
-							fixString();
-						}
-						//System.out.println("processed.");
-						//System.out.println(">>line: " + line);
-						//printGroup(m);
-						tokens = t.tokenize(line);    // WARDA
-						Matcher m1 = p.matcher(line);
-						if (m1.find()) {
-							for (int i = 0; i < tokens.length; i++) {
-								temp = new WARDA().checkErrorPattern(m.group(1) + "-", m.group(2), tokens[i]);
-								//System.out.println(">>here: " + temp);
-							}
-						}
-
-					}
-				} else {
-					//fixString();
-					System.out.println("processed.");
-					tokens = t.tokenize(line);
-					checkErrorPattern();
-				}
-			} else if (answer.equalsIgnoreCase("N")) {
-				System.exit(1);
-			}
-		} while (answer.equalsIgnoreCase("Y") == false);
-
-	}
-
-	private void fixString() {  //method to fix all the errors found in the String
-		String tempToken;
-		//System.out.println("toFix():"+line);
-		/*for (int i = 0; i <tokens.length; i++) {
-            System.out.println(tokens[i]);
-        }*/
-		for (int i = 0; i < tokens.length; i++) {
-			Matcher m2 = p2.matcher(tokens[i]);
-			if (m2.find()) {
-				//System.out.println("no space between the location number and the selection number");
-				tempToken = tokens[i];
-				tokens[i] = tokens[i].replace(m2.group(0), m2.group(1) + " " + m2.group(2));
-				line = line.replace(tempToken, tokens[i]);
-				tokens = t.tokenize(line);
-			}
-
-			Matcher m = p.matcher(tokens[i]);
-			if (m.find()) {
-				//System.out.println("no space between IR and plant number");
-				tempToken = tokens[i];
-				tokens[i] = tokens[i].replace(m.group(1), m.group(1) + " ");
-				line = line.replace(tempToken, tokens[i]);
-				tokens = t.tokenize(line);
-			}
-
-			Matcher m3 = p3.matcher(tokens[i]);
-			if (m3.find()) {
-				//System.out.println("space/s between the bulk number and the bulk code");
-				tempToken = tokens[i];
-				tokens[i] = tokens[i].replace(m3.group(1) + m3.group(2) + m3.group(3), m3.group(1) + m3.group(3));
-				line = line.replace(tempToken, tokens[i]);
-				tokens = t.tokenize(line);
-			}
-
-			Matcher m4 = p4.matcher(tokens[i]);
-			if (m4.find()) {
-				//System.out.println("space/s between the mapping population and the plant number");
-				tempToken = tokens[i];
-				tokens[i] = tokens[i].replace(m4.group(1) + m4.group(2) + m4.group(3), m4.group(1) + m4.group(3));
-				line = line.replace(tempToken, tokens[i]);
-				tokens = t.tokenize(line);
-			}
-
-			Matcher m5 = p5.matcher(tokens[i]);
-			if (m5.find()) {
-				//System.out.println("space/s between the composite population code and the plant number");
-				tempToken = tokens[i];
-				tokens[i] = tokens[i].replace(m5.group(1) + m5.group(2) + m5.group(3), m5.group(1) + m5.group(3));
-				line = line.replace(tempToken, tokens[i]);
-				tokens = t.tokenize(line);
-			}
-
-			Matcher m1 = p1.matcher(tokens[i]);
-			if (m1.find()) {
-				//System.out.println("space/s at the start of the string");
-				tempToken = tokens[i];
-				tokens[i] = tokens[i].replace(m1.group(0), m1.group(2));
-				line = line.replace("-" + tempToken, "-" + tokens[i]);
-				tokens = t.tokenize(line);
-			}
-
-			Matcher m6 = p6.matcher(tokens[i]);
-			if (m6.find()) {
-				//System.out.println("space/s at the end of the string ");
-				tempToken = tokens[i];
-				tokens[i] = tokens[i].replace(m6.group(0), m6.group(1) + m6.group(3));
-				line = line.replace(tempToken, tokens[i]);
-				tokens = t.tokenize(line);
-			}
-		}
-	}
-
-	public static void printGroup(Matcher m) {
-		System.out.println("Group count: " + m.groupCount());
-		int i;
-		for (i = 0; i <= m.groupCount(); i++) {
-			System.out.println(i + " : " + m.group(i));
 		}
 	}
 

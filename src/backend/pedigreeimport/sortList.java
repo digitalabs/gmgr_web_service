@@ -3,7 +3,7 @@ package backend.pedigreeimport;
 import java.util.*;
 import java.io.*;
 
-public class sortList{
+public class SortList{
 
 	public List<String> algo(List<String> obj) throws IOException{
 		int j=0;

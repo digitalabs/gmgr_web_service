@@ -31,8 +31,8 @@ import restjersey.gmgr.Config;
 import backend.pedigreeimport.*;
 import backend.pedigreeviewer.*;
 
-/**
- * @author ncarumba
+/**Model is includes all entry points of the web service call
+ * @author Nikki G. Carumba
  *
  */
 
@@ -126,31 +126,6 @@ public class Model {
 		return Response.status(200).entity(output).build();
 
 	}
-
-	/*
-	 * @Path("/updateMethod")
-	 * 
-	 * @POST
-	 * 
-	 * @Consumes(MediaType.APPLICATION_JSON)
-	 * 
-	 * @Produces(MediaType.APPLICATION_JSON) public Response
-	 * changeMethod(JSONObject data) throws JSONException,
-	 * FileNotFoundException, IOException, MiddlewareQueryException,
-	 * ParseException {
-	 * 
-	 * List<List<String>> createdGID =new ArrayList<List<String>>(); createdGID=
-	 * (List<List<String>>) data.get("createdGID"); int
-	 * mid=Integer.valueOf((String) data.get("mid")); int
-	 * gid=Integer.valueOf((String) data.get("gid"));
-	 * 
-	 * String id=(String) data.get("id"); ManagerFactory factory = new
-	 * Config().configDB(); GermplasmDataManager manager =
-	 * factory.getGermplasmDataManager(); data=new
-	 * TestAssign().updateMethod(manager, createdGID, mid, gid, id);
-	 * manager=null; createdGID.clear(); factory.close(); return
-	 * Response.status(200).entity(data).build(); }
-	 */
 
 	/**
 	 * Entry point in choosing a GID for the female or male parent JSON Object
@@ -363,7 +338,7 @@ public class Model {
 			error = (String) parse_array.get("error");
 
 		} else {	// no cross operators
-			error = new Main().checkString(newName);	
+			error = new NomenclatureRules().checkString(newName);	
 		}
 		
 		newString.add("N/A");	// GID of the cross
@@ -461,8 +436,6 @@ public class Model {
 	public Response standardize(JSONObject list)
 	throws MiddlewareQueryException, IOException {
 		
-		System.out.println("*******S T A R T I N G Standardization");
-		
 		JSONObject json_array = (JSONObject) list;
 		List<List<String>> output = new ArrayList<List<String>>();
 		List<String> row_object = new ArrayList<String>();
@@ -484,20 +457,14 @@ public class Model {
 
 			row.add("N/A"); // 0
 			row.add(row_object.get(1)); // 1
-			// System.out.print("N/A,");
-			// System.out.print(row_object.get(1) + ",");
 
 			for (int i = 2; i < row_object.size(); i++) {
-				// for (int j = 1; j < 3; j++) {
 				if (i == 5 || i == 9) {
 
 					gid = "";
-					// object.get(count);
-					// count++;
 					correctedTerm = row_object.get(i).toString();
-					System.out.println("" + correctedTerm);
+					
 					row.add("" + k);	//2
-					// System.out.print(k+ ",");
 					k++;
 					JSONObject parse = new JSONObject();
 
@@ -512,35 +479,30 @@ public class Model {
 						correctedTerm = correctedList.get(0);
 
 					} else {
-						error = new Main().checkString(row_object.get(i)
+						error = new NomenclatureRules().checkString(row_object.get(i)
 								.toString());
 					}
 
 					if (error.equals("")) {
-						// //System.out.print("in standardized format");
-
+					
 						if (row_object.get(i).toString().contains("/")
 								|| row_object.get(i).toString().contains("*")) {
-							// System.out.println("tokens: "+ gid);
-
+					
 							for (int n = 1; n < correctedList.size(); n++) {
 								gid = gid + "#" + correctedList.get(n);
 							}
-							// System.out.println("tokens: "+ gid);
 						} else {
 							Pattern p = Pattern.compile("IR");
 							Matcher m1 = p.matcher(line);
 
 							if (m1.lookingAt()) {
-								String[] tokens = new Tokenize()
-								.tokenize(row_object.get(i).toString());
+								String[] tokens = new Tokenize().tokenize(row_object.get(i).toString());
 								gid = new Tokenize().stringTokens(tokens);
 							} else {
 								gid = "";
 							}
 
 						}
-						System.out.println(""+object.get(m));
 						if (i == 5){
 							//[0]GID, [1]nval, [2]fid, [3]fremarks, [4]fgid, [5]female, [6]mid, [7]mremarks, [8]mgid, [9]male, [10]crossdate
 							object.get(m).set(3,"in standardized format");
@@ -551,7 +513,6 @@ public class Model {
 						}
 						row.add("in standardized format"); // remarks
 						row.add(gid); // GID
-						// System.out.print(gid); // GID
 
 					} else {
 						if (row_object.get(i).toString().contains("/")
@@ -563,11 +524,9 @@ public class Model {
 							correctedTerm = new FixString()
 							.checkString(correctedTerm);
 
-							error = new Main().checkString(correctedTerm);
+							error = new NomenclatureRules().checkString(correctedTerm);
 						}
-						// System.out.print("ERROR:" + error + "|"); // remarks
 						if (error.equals("")) {
-							// System.out.println("in standardized format,"); //
 							// remarks
 							if (row_object.get(i).toString().contains("/")
 									|| row_object.get(i).toString()
@@ -575,10 +534,7 @@ public class Model {
 								System.out.println("tokens: " + gid);
 								for (int n = 1; n < correctedList.size(); n++) {
 									gid = gid + "#" + correctedList.get(n);
-
-									System.out.println("tokens: " + gid);
 								}
-								System.out.println("tokens: " + gid);
 								correctedTerm = correctedList.get(0);
 							} else {
 								if (i == 5){
@@ -607,39 +563,27 @@ public class Model {
 								object.get(m).set(8,gid);
 							}
 							row.add(gid); // GID
-							// System.out.print("\"" + gid + "\"" + ","); // GID
 						} else {
-							// //System.out.print("not in standardized format");
-
 							row.add(error); // remarks
 							row.add("N/A"); // GID
 						}
 					}
-					// if (j == 1 || j==2) {
 					if (i == 5){
 						object.get(m).set(5,correctedTerm);
 					}else{
 						object.get(m).set(9,correctedTerm);
 					}
 					row.add(correctedTerm); // pedigree term
-					System.out.print("#####" + correctedTerm); // pedigree term
-					// }
-					// //System.out.print("count: "+count);
 					gid = "";
 				}
-				// System.out.println(""+row_object.get(i));
 				if (i == 10) {
-					row.add(row_object.get(i).toString()); // cross' date of
-					// creation
+					row.add(row_object.get(i).toString()); // cross' date of creation
 				}
 
 			}
 
 			output.add(row);
 		}
-
-		System.out.println("yeah: " + output);
-		// System.out.println("\t\t\t ***END Method Standardize***");
 
 		return Response.status(201).entity(output).build();
 	}
@@ -666,7 +610,7 @@ public class Model {
 		List<String> gu_obj = (List<String>) json_array.get("list");
 		System.out.println("list: " + gu_obj);
 
-		gu_obj = new sortList().algo(gu_obj);
+		gu_obj = new SortList().algo(gu_obj);
 
 		List<List<String>> output = new ArrayList<List<String>>();
 		int k = 0;
@@ -717,7 +661,7 @@ public class Model {
 						error = (String) parse_array.get("error");
 
 					} else {
-						error = new Main()
+						error = new NomenclatureRules()
 						.checkString(gu_obj.get(j).toString());
 					}
 					row.add("" + k); // id

@@ -16,7 +16,7 @@ public class Tokenize {
 	List<String> listGID = new ArrayList<String>();
 
 	/**
-	 *
+	 * Split germplasm name into tokens
 	 * @param line 
 	 * @return  String tokens[] resulting from the split line
 	 */
@@ -53,54 +53,8 @@ public class Tokenize {
 			s="";
 			count--;
 		}
-		//System.out.println("st: "+st);
 		
-		/*
-		s = "";
-		st = "";
-		
-		for (int i = 0; i < tokens.length;) {
-			if (i == 0) {
-				s = s + tokens[i];
-			} else {
-				s = s + "-" + tokens[i];
-			}
-			i++;
-
-			if(i==(tokens.length)){
-				st = st + s;
-			}else{
-				st = st + s + "#";
-			}
-		}
-		*/
 		return st;
 
 	}
-	public void tokens(String tokens[]) throws MiddlewareQueryException, IOException {
-		FileWriter writer = new FileWriter("c:\\createdGID.csv");
-		String s = "", st = "",f1="";
-		s = "";
-		for (int i = 0; i < tokens.length;) {
-			if (i == 0) {
-				s = s + tokens[i];
-				f1=s;	//f1 generation
-				//createGID(s);
-			} else {
-				s = s + "-" + tokens[i];
-				//int gid=createGID(s);
-				//writer.append(""+gid+", \n");
-			}
-			i++;
-
-			//Germplasm germplasm = manager.getGermplasmByGID(new Integer(50533));
-			//System.out.println(germplasm);
-			st = st + s + "\n";
-		}
-		writer.flush();
-		writer.close();
-		//System.out.println(st);
-
-	}
-
 }

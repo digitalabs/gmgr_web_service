@@ -23,42 +23,6 @@ import org.json.simple.JSONObject;
  */
 public class CrossOp {
 
-
-	/*
-	//static String line;
-	public static void main(String[] args) throws MiddlewareQueryException, IOException  {
-		String line;
-		//line = "IR5//IR44*2/IR2";
-		//line="IR7-7*3";
-		//line="IR7-7-3*4/IR8-3";
-		//line="IR 2//IR7-7-3*3/IR8-3";
-		//line="IR 88888-21-2-UBN 2-2//IR7-7-1*3/IR06H101A///IR 3-1";
-		//String line = aline;
-		//line="IR64////IR44-4-4-4//3*IR2///IR 7";
-
-		//line="IR 88888-21-2-UBN 2-2*2/IR 7//IR06H101A";
-		//BC to male
-		//line="IR7-7/4*IR06H101A";
-		//line="IR 2//IR7-7/3*IR06H101A";
-		//line="IR 2///IR7-7/3*IR06H101A//IR 5";
-		//line="IR 5////IR7-7//3*IR06H101A///IR 5";
-		//line="3*IR06H101A";
-		line="IR 64/4*IR 88888-21-2-UBN 2-2//IR06H101A";
-		line="IR 64//IR 44-4/3*IR 2";
-
-		//line="IR05U121/4*IR06H101S";
-
-		//System.out.println(line);
-		line="IR 88888*5/IR 11111";
-		line="IR 100/6*IR 111";
-		int max =0;
-		max=maxCross(max,line);
-		List<String> list=new ArrayList<String>();
-		//method(line, max,true);
-		method2(line, list);
-	}
-	 */
-
 	public JSONObject main(String line, Boolean standardize) throws MiddlewareQueryException, IOException{
 		int max =0;
 		max=maxCross(max,line);
@@ -943,30 +907,7 @@ public class CrossOp {
 				}
 			}
 
-
-			////System.out.println("2: "+list);
-			//System.out.println("PEDLIST: "+pedList);
-			//System.out.println("LIST------");
-			/*
-			for(int j=0; j<list.size();j++){
-				//System.out.println("::"+list.get(j));
-			}
-			//System.out.println("\n Crosses------");
-			for(int j=0; j<crosses.size();j++){
-				//System.out.println("::"+crosses.get(j));
-			}
-			//System.out.println("\n Backcrosses------");
-			for(int j=0; j<backcrosses.size();j++){
-				//System.out.println("::"+backcrosses.get(j));
-			}
-
-			//System.out.println("\n parents------");
-			for(int j=0; j<parents.size();j++){
-				//System.out.println("::"+parents.get(j));
-			}
-			 */
-
-		}		//System.out.println("LIST: "+list);
+		}		
 
 		JSONObject result=new JSONObject();
 		result.put("list", list);
@@ -982,7 +923,7 @@ public class CrossOp {
 	}
 
 	/**
-	 *
+	 * GET the number of dosage in the backcross
 	 * @param max integer maximum number of forward slashes or crosses in the
 	 * string
 	 * @return max integer maximum number of forward slashes or crosses in the
