@@ -320,7 +320,7 @@ public class FixString {
 	 * Checks for an error in the pattern after fixing the spacing
 	 * @param tokens parsed germplasm name
 	 * @param line germplasm name to be standardized
-	 * @return
+	 * @return errorPatternList
 	 */
 	public String checkErrorPattern(String[] tokens, String line) {
 		//ERROR TRAPPING: pattern/s not recognized, unrecognized codes
