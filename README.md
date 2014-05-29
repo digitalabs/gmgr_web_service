@@ -3,13 +3,12 @@ ___________
 		
   **OVERVIEW**
   
-  The Genealogy Manager (**_GMGR_**) application accesses the Integrated Breeding Program Databases 
-  (_IBP_) through the Middleware API, which consists of managers corresponding to 
-  different systems. In order to reuse the methods of the IBP middleware, RESTful
-  web services in java were created using the Jersey toolkit, an open source framework
+  The Genealogy Manager (**_GMGR_**) application accesses the Integrated Breeding Program Databases for Rice 
+  (_IBP_) through the Middleware API. RESTful
+  web services in java were created for the identified methods using the Jersey toolkit, an open source framework
   for developing RESTful Web Services in Java. 
   
-  In a Representational State Transfer (_REST_) architechtural style, data and functionality are 
+  In a Representational State Transfer (_REST_) architectural style, data and functionality are 
   considered resources, and these resources are accessed using Uniform Resource Identifiers (_URIs_), 
   typically links on the web.
   
@@ -31,16 +30,10 @@ ___________
     application installer and install the application, and under the folder installer, the _WAR_ file 
 	can be found. 
   
-  - Once the application is proplerly installed and configured, the web service files will be installed 
+  - Once the application is properly installed and configured, the web service files will be installed 
     * for Windows machine - _Port No. **8080**_
 	* for Other OS - _Port No. **5810**_
       
-  **CONTACTS**
-  
-  - For more information, please contact the developers:  
-    * Joanie C. Antonio <j.antonio@irri.org>,
-    * Nikki G. Carumba <n.carumba@irri.org>,
-    * Kelly John D. Mahipus <k.mahipus@irri.org>
 		
   **LICENSES**
 
