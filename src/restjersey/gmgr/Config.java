@@ -1,6 +1,5 @@
 package restjersey.gmgr;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.generationcp.middleware.manager.DatabaseConnectionParameters;

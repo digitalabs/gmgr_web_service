@@ -4,11 +4,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *Entry point of the IRRI Nomenclature rules
+ *Entry point of the Nomenclature rules
  * @author Nikki G.Carumba
  */
 public class NomenclatureRules {
 
+	/**
+	 * Checking For IRRI lines
+	 * @param line
+	 * @return
+	 */
 	public String checkString(String line) {
 
 		String list = "";
