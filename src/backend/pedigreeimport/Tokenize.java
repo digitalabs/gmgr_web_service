@@ -8,12 +8,10 @@ import java.util.List;
 import org.generationcp.middleware.exceptions.MiddlewareQueryException;
 
 /**
- *
- * @author NCarumba
+ * Handles parsing of germplasm names into tokens
+ * @author Nikki G. Carumba
  */
 public class Tokenize {
-
-	List<String> listGID = new ArrayList<String>();
 
 	/**
 	 * Split germplasm name into tokens
