@@ -20,38 +20,60 @@ import org.generationcp.middleware.pojos.UserDefinedField;
 import org.generationcp.middleware.util.Debug;
 import org.json.simple.JSONObject;
 
+/*
+ * Class for the methods used in the Pedigree Viewer
+ * SearchGid Class
+ * 
+ * 
+ * @developer Kelly John D. Mahipus  <k.mahipus@irri.org>
+ * 
+ */
+
 public class SearchGid {
 	private static int counter = 0;
 	private int cnt;
 	private static List<Integer> counterArray = new ArrayList<Integer>();
 	
+        /*
+         * 
+         * Main method
+         * Entry point receiving the GID to be searched
+         * 
+         * Uses the middleware method generatePedigreeTree
+         * to generate the pedigree of the selected Germplasm
+         * 
+         * @returns the Pedigree of a Germplasm
+         * @throws NumberFormatException
+         * @throws MiddlewareQueryException
+         * @throws IOException
+         * 
+         * 
+         */
 	public JSONObject main(ManagerFactory factory,JSONObject json_array, JSONObject outputTree) throws NumberFormatException, MiddlewareQueryException, IOException{
 		GermplasmDataManager man = factory.getGermplasmDataManager();
-		List<Name> names = new ArrayList<Name>();// null;//man.getNamesByGID(node.getGermplasm().getGid(),
-													// null, null);
+                
+                //Variable initialization
+		List<Name> names = new ArrayList<Name>();					
 		Location loc2 = new Location();
-		List<Attribute> attributes = new ArrayList<Attribute>();// man.getAttributesByGID(node.getGermplasm().getGid());
-		Method meth = new Method();// man.getMethodByID(node.getGermplasm().getMethodId());
-		Location loc = new Location();// man.getLocationByID(node.getGermplasm().getLocationId());
-		Bibref bibref = new Bibref();// man.getBibliographicReferenceByID(node.getGermplasm().getReferenceId());
+		List<Attribute> attributes = new ArrayList<Attribute>();
+		Method meth = new Method();
+		Location loc = new Location();
+		Bibref bibref = new Bibref();
+		Integer cid = 0;
+		Country cnty = new Country();
 
-		Integer cid = 0;// loc.getCntryid();
-		Country cnty = new Country();// man.getCountryById(cid);a
-
-		// JSONObject json_array = (JSONObject) data;
 		String gid = (String) json_array.get("GID");
 		String level = (String) json_array.get("LEVEL");
 		String sel = (String) json_array.get("SEL");
-		
-
 		String outputString = "";
 
-		// ManagerFactory factory = new Config().configDB();
 		System.out.println("gid: " + gid);
 		System.out.println("level: " + level);
 		System.out.println("sel: " + sel);
 		cnt = counter++;
 		Boolean bool;
+                
+                //Determines whether to include or not selection history
 		if (Integer.parseInt(sel) == 1) {
 			bool = true;
 		} else
@@ -59,11 +81,12 @@ public class SearchGid {
 
 		if (cnt % 2 == 1) {
 
-			PedigreeDataManager pedigreeManager = factory
-					.getPedigreeDataManager();
+			PedigreeDataManager pedigreeManager = factory.getPedigreeDataManager();
 
 			Debug.println(10, "GID = " + Integer.parseInt(gid) + ", level = "
 					+ Integer.parseInt(level) + ":");
+                        
+                        //Invoke generatePedigreeTree method
 			GermplasmPedigreeTree tree = pedigreeManager.generatePedigreeTree(
 					Integer.parseInt(gid), Integer.parseInt(level), bool);
 
@@ -71,6 +94,7 @@ public class SearchGid {
 				counterArray.add(0);
 			}
 
+                        //call the printNode method to recursively get every germplasm in the pedigree
 			if (tree != null) {
 				outputString = outputString + "{";
 				System.out.println("{");
@@ -89,7 +113,8 @@ public class SearchGid {
 		if (outputString.equals("")) {
 			found = "1";
 		}
-
+                
+                //Pedigree is stored in a JSON file
 		outputTree.put("tree", outputString);
 		outputTree.put("found", found);
 
@@ -108,6 +133,17 @@ public class SearchGid {
 		return outputTree;
 	}
 
+        /*
+         * 
+         * Recursive method for getting all attributes of every 
+         * Germplasm that belongs to the searched Germplasm (root) up to
+         * the specified level.
+         * 
+         * @returns all Germplasm belonging to the pedigree
+         * with their corresponding attributes
+         * 
+         * 
+         */
 	public String printNode(String outputString,GermplasmPedigreeTreeNode node, int level, List <Name> names, Location loc2, List <Attribute> attributes, int cid, Country cnty, GermplasmDataManager man, Method meth, Bibref bibref, Location loc) throws IOException, MiddlewareQueryException {
 		
 		StringBuffer tabs = new StringBuffer();
@@ -128,16 +164,16 @@ public class SearchGid {
 		cid = loc.getCntryid();
 		cnty = man.getCountryById(cid);
 		 
+        //tabs for proper indention of JSON file
         for (int ctr = 1; ctr < level; ctr++) {
             tabs.append("\t");
         }
         
         counterArray.set(level-1, 0);
         String name = node.getGermplasm().getPreferredName() != null ? node.getGermplasm().getPreferredName().getNval() : null;
-        
         String name2 = node.getGermplasm().getPreferredName() != null ? node.getGermplasm().getPreferredName().getNval() : null;
         
-        if(!node.getLinkedNodes().isEmpty()){
+        if(!node.getLinkedNodes().isEmpty()){ //check if germplasm has pedigree line
         	Debug.println(0, tabs.toString() +"\"gid\" : \""+ node.getGermplasm().getGid() + "\",\n" + tabs.toString()+ "\"name\" : \""+ name +"\",\n" +tabs.toString()+ "\"layer\": \""+ (level-1) + "\",");
         	
         	if(name != null){
@@ -146,13 +182,14 @@ public class SearchGid {
 	            	name2 = name.substring(0, Math.min(name.length(),6)) + "...";
 	            }
         	}
-        	
 			String cn = "---";
 			if(cnty != null)
         	{
         		cn = cnty.getIsoabbr();
         	}
-			
+		
+                //appends the germplasm and its attributes in the JSON file
+                //here, format the JSON that is recognized by D3
         	outputString = outputString + "\n "+ tabs.toString() + tabs.toString() +"\"gid\" : \"" + node.getGermplasm().getGid() +"\",\n"
                     + tabs.toString() +"    \"name\" : \"" + name +"\",\n"
                     + tabs.toString() +"    \"name2\" : \"" + name2 +"\",\n"
