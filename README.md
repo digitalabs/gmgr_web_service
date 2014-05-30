@@ -35,12 +35,6 @@ ______________
     * for Windows machine - _Port No. **8080**_
 	* for Other OS - _Port No. **5810**_
       
-  **CONTACTS**
-  
-  - For more information, please contact the developers:  
-    * Joanie C. Antonio <j.antonio@irri.org>,
-    * Nikki G. Carumba <n.carumba@irri.org>,
-    * Kelly John D. Mahipus <k.mahipus@irri.org>
 		
   **LICENSES**
 
