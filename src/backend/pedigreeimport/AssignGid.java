@@ -8352,6 +8352,14 @@ public class AssignGid {
 		createdGID_local.add(row);
 	}
 
+	/**
+	 * @param pedigree
+	 * @param parent
+	 * @param id
+	 * @param germplasm
+	 * @param tag
+	 * @throws MiddlewareQueryException
+	 */
 	private void printSuccess(String pedigree, String parent, String id,
 			Germplasm germplasm, String tag) throws MiddlewareQueryException {
 		List<String> row = new ArrayList<String>();
@@ -8390,65 +8398,7 @@ public class AssignGid {
 		// ////System.out.println("output: "+createdGID_local);
 		// row.clear();
 	}
-
-	/**
-	 * Gets the germplasm pojo given the gpid1
-	 * @param gpid1 given gpid1
-	 * @param germplasmList list of all germplasm of the same name
-	 * @return germplasm
-	 */
-	public Germplasm getGermplasmByGpid(int gpid1, List<Germplasm> germplasmList) {
-		for (int i = 0; i < germplasmList.size(); i++) {
-			if (germplasmList.get(i).getGpid1() == gpid1
-					|| germplasmList.get(i).getGid() == gpid1
-					&& germplasmList.get(i).getLocationId() == locationID) {
-				return germplasmList.get(i);
-			}
-		}
-		return null;
-	}
-
-	public List<Germplasm> getGermplasm(Database db, String pedigree, int count)
-			throws MiddlewareQueryException, IOException {
-
-		List<Germplasm> germplasm = new ArrayList<Germplasm>();
-
-		germplasm = manager.getGermplasmByName(pedigree, 0, count,
-				GetGermplasmByNameModes.NORMAL, Operation.EQUAL, 0, null, db);
-
-		return germplasm;
-	}
-
-	/**
-	 * Gets All instances of the germplasm name
-	 * @param pedigree germplasm name
-	 * @param count_LOCAL count of instance in the local database
-	 * @param count_CENTRAL count of instance in the local database
-	 * @return germplasm list of all germplasm of the same name
-	 * @throws MiddlewareQueryException
-	 * @throws IOException
-	 */
-	public List<Germplasm> getGermplasmList(String pedigree, int count_LOCAL,
-			int count_CENTRAL) throws MiddlewareQueryException, IOException {
-
-		List<Germplasm> germplasm = new ArrayList<Germplasm>();
-
-		germplasm = manager.getGermplasmByName(pedigree, 0, count_LOCAL,
-				GetGermplasmByNameModes.NORMAL, Operation.EQUAL, 0, null,
-				Database.LOCAL);
-		List<Germplasm> germplasm2 = new ArrayList<Germplasm>();
-		germplasm2 = manager.getGermplasmByName(pedigree, 0, count_CENTRAL,
-				GetGermplasmByNameModes.NORMAL, Operation.EQUAL, 0, null,
-				Database.CENTRAL);
-
-		for (int i = 0; i < germplasm2.size(); i++) {
-			germplasm.add(germplasm2.get(i));
-
-		}
-		germplasm2.clear();
-		return germplasm;
-	}
-
+	
 	/**
 	 * Stores the pedigree line into an array
 	 * @param array holder of the pedigree line
@@ -8698,39 +8648,15 @@ public class AssignGid {
 
 	}
 
-	/* GET/SEARCH FROM FILE METHODS */
+	/* GET/SEARCH METHODS */
 
-	public Germplasm isExisting(String pedigree)
-			throws MiddlewareQueryException {
-		Germplasm g = new Germplasm();
-		Location location = manager.getLocationByID(locationID);
-
-		long count = manager.countGermplasmByLocationName(location.getLname(),
-				Operation.EQUAL, Database.LOCAL);
-		count += manager.countGermplasmByLocationName(location.getLname(),
-				Operation.EQUAL, Database.CENTRAL);
-
-		List<Germplasm> germplasm = manager.getGermplasmByLocationName(
-				location.getLname(), 0, (int) count, Operation.EQUAL,
-				Database.LOCAL);
-		List<Germplasm> germplasm2 = new ArrayList<Germplasm>();
-		germplasm2 = manager.getGermplasmByLocationName(location.getLname(), 0,
-				(int) count, Operation.EQUAL, Database.CENTRAL);
-		for (int i = 0; i < germplasm2.size(); i++) {
-			germplasm.add(germplasm2.get(i));
-		}
-
-		// clearing memory
-		germplasm2.clear();
-
-		// //System.out.println("size: "+germplasm.size());
-		if (germplasm.isEmpty()) {
-			return g;
-		} else {
-			return germplasm.get(0);
-		}
-	}
-
+	/**
+	 * Get the germplasm pojo of the germplasm name given the female GID anf male GID
+	 * @param fgid female GID
+	 * @param mgid male GID
+	 * @return germplasm pojo of the germplasm name
+	 * @throws MiddlewareQueryException
+	 */
 	public Germplasm isExisting(int fgid, int mgid)
 			throws MiddlewareQueryException {
 		Germplasm g = new Germplasm();
@@ -8802,6 +8728,13 @@ public class AssignGid {
 		return gid;
 	}
 
+	/**
+	 * Checks if a germplasm name has already been assigned a GID
+	 * @param id id of the germplasm name to be searched
+	 * @param parent germplasm name to be searched
+	 * @return boolean true if germplasm has assigned GID
+	 * @throws IOException
+	 */
 	public boolean has_GID(String id, String parent) throws IOException {
 
 		for (int i = 0; i < createdGID_local.size(); i++) {
@@ -8817,6 +8750,73 @@ public class AssignGid {
 
 		return true;
 	}
+	/**
+	 * Gets the germplasm pojo given the gpid1
+	 * @param gpid1 given gpid1
+	 * @param germplasmList list of all germplasm of the same name
+	 * @return germplasm
+	 */
+	public Germplasm getGermplasmByGpid(int gpid1, List<Germplasm> germplasmList) {
+		for (int i = 0; i < germplasmList.size(); i++) {
+			if (germplasmList.get(i).getGpid1() == gpid1
+					|| germplasmList.get(i).getGid() == gpid1
+					&& germplasmList.get(i).getLocationId() == locationID) {
+				return germplasmList.get(i);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the list of germplasm pojos having the same given germplasm name in the given databade
+	 * @param db database instance of local or central database
+	 * @param pedigree germplasm name
+	 * @param count count of all having the same germplasm name in the db
+	 * @return germplasm list of all germplasm pojo having the same germplasm name
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 */
+	public List<Germplasm> getGermplasm(Database db, String pedigree, int count)
+			throws MiddlewareQueryException, IOException {
+
+		List<Germplasm> germplasm = new ArrayList<Germplasm>();
+
+		germplasm = manager.getGermplasmByName(pedigree, 0, count,
+				GetGermplasmByNameModes.NORMAL, Operation.EQUAL, 0, null, db);
+
+		return germplasm;
+	}
+
+	/**
+	 * Gets All instances of the germplasm name
+	 * @param pedigree germplasm name
+	 * @param count_LOCAL count of instance in the local database
+	 * @param count_CENTRAL count of instance in the local database
+	 * @return germplasm list of all germplasm of the same name
+	 * @throws MiddlewareQueryException
+	 * @throws IOException
+	 */
+	public List<Germplasm> getGermplasmList(String pedigree, int count_LOCAL,
+			int count_CENTRAL) throws MiddlewareQueryException, IOException {
+
+		List<Germplasm> germplasm = new ArrayList<Germplasm>();
+
+		germplasm = manager.getGermplasmByName(pedigree, 0, count_LOCAL,
+				GetGermplasmByNameModes.NORMAL, Operation.EQUAL, 0, null,
+				Database.LOCAL);
+		List<Germplasm> germplasm2 = new ArrayList<Germplasm>();
+		germplasm2 = manager.getGermplasmByName(pedigree, 0, count_CENTRAL,
+				GetGermplasmByNameModes.NORMAL, Operation.EQUAL, 0, null,
+				Database.CENTRAL);
+
+		for (int i = 0; i < germplasm2.size(); i++) {
+			germplasm.add(germplasm2.get(i));
+
+		}
+		germplasm2.clear();
+		return germplasm;
+	}
+
 
 	/* END GET/SEARCH FROM FILE METHODS */
 
@@ -8910,6 +8910,12 @@ public class AssignGid {
 	 * @throws MiddlewareQueryException
 	 * @throws InterruptedException
 	 */
+	/*
+	 * private List<List<String>> updateCreatedGID(String gid, String id,
+			String pedigree, String newGID, List<List<String>> createdGID)
+			throws NumberFormatException, MiddlewareQueryException {
+
+	 * */
 	public List<List<String>> updateFile_createdGID(String gid, String id,
 			String pedigree, String newGID, String parent) throws IOException,
 			MiddlewareQueryException, InterruptedException {
